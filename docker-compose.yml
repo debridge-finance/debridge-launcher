@@ -1,0 +1,60 @@
+version: "3.6"
+services:
+  chainlink-bsc:
+    container_name: chainlink-bsc
+    image: smartcontract/chainlink:0.10.2
+    entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
+    restart: always
+    env_file:
+      - chainlink-bsc.env
+    ports:
+      - 6689:6688
+    secrets:
+      - node_password
+      - apicredentials
+      - keystore
+    depends_on:
+      - postgres
+    networks:
+      - chainlink
+  chainlink-eth:
+    container_name: chainlink-eth
+    image: smartcontract/chainlink:0.10.2
+    entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
+    restart: always
+    env_file:
+      - chainlink-eth.env
+    ports:
+      - 6688:6688
+    secrets:
+      - node_password
+      - apicredentials
+      - keystore
+    depends_on:
+      - postgres
+    networks:
+      - chainlink
+  postgres:
+    image: postgres
+    restart: on-failure
+    env_file:
+      - postgres.env
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./pg-init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - chainlink
+volumes:
+  pgdata:
+networks:
+  chainlink:
+    name: chainlink
+secrets:
+  node_password:
+    file: ./password.txt
+  apicredentials:
+    file: ./apicredentials
+  keystore:
+    file: ./secrets/0x0b341A3fD55d4cc8aDb856859Bd426231a21a0d3.json
