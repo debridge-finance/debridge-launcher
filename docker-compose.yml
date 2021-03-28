@@ -57,4 +57,4 @@ secrets:
   apicredentials:
     file: ./apicredentials
   keystore:
-    file: ./secrets/0x0b341A3fD55d4cc8aDb856859Bd426231a21a0d3.json
+    file: ./secrets/keystore.json
