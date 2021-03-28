@@ -6,6 +6,7 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 2. Put keystore file to `secrets/keystore.json`.
 3. Store the password that decrypts the key from `keystore` in `password.txt`
 4. Run: `docker-compose up`.
+5. Run script to create the initiators. The output should be used to configure the initiator permossions.
 
 The oracles will be started for BSC and Ethereum.
 
