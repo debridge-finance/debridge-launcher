@@ -17,6 +17,8 @@ services:
       - postgres
     networks:
       - chainlink
+    volumes:
+      - ./chainlink-bsc:/chainlink
   chainlink-eth:
     container_name: chainlink-eth
     image: smartcontract/chainlink:0.10.2
@@ -34,6 +36,8 @@ services:
       - postgres
     networks:
       - chainlink
+    volumes:
+      - ./chainlink-eth:/chainlink
   postgres:
     image: postgres
     restart: on-failure
@@ -48,6 +52,7 @@ services:
       - chainlink
 volumes:
   pgdata:
+  chainlink:
 networks:
   chainlink:
     name: chainlink

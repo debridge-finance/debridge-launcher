@@ -5,8 +5,19 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 1. Set api credential in `apicredential` file.
 2. Put keystore file to `secrets/keystore.json`.
 3. Store the password that decrypts the key from `keystore` in `password.txt`
-4. Run: `docker-compose up`.
-5. Run script to create the initiators. The output should be used to configure the initiator permossions.
+4. Set the addresses of the aggregators in the `chainlink-*/burn-jobs.json` and `chainlink-*/mint-jobs.json`.
+5. Run: `docker-compose up`.
+6. Run script to create the initiators. The output should be used to configure the initiator permossions:
+
+```
+sh chainlink-init-scripts/setup-initiators.sh
+```
+
+7. Run scripts to add the debridge jobs:
+
+```
+sh chainlink-init-scripts/add-jobs.sh
+```
 
 The oracles will be started for BSC and Ethereum.
 

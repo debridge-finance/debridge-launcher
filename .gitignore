@@ -1,3 +1,7 @@
 secrets/*
+chainlink-*/*
+!chainlink-*/mint-job.json
+!chainlink-*/burn-job.json
+!chainlink-init-scripts/*.sh
 password.txt
 apicredentials
