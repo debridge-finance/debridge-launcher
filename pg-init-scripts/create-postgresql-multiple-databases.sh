@@ -49,7 +49,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 			chainTo                 integer,
 			debridgeId              char(66),
 			receiverAddr            char(42),
-			amount                  integer,
+			amount                  varchar(100),
 			status                  integer,
 			constraint chainFrom
 				foreign key(chainFrom)
