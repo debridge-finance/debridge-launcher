@@ -6,20 +6,54 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 2. Put keystore file to `secrets/keystore.json`.
 3. Store the password that decrypts the key from `keystore` in `password.txt`
 4. Set the addresses of the aggregators in the `chainlink-*/burn-jobs.json` and `chainlink-*/mint-jobs.json`.
-5. Run: `docker-compose up`.
-6. Run script to create the initiators. The output should be used to configure the initiator permossions:
+5. Run: `docker-compose up`. The oracles will be started for BSC and Ethereum.
+6. Run script to create the initiators. The output should be used to configure the initiator permissions:
 
 ```
 sh chainlink-init-scripts/setup-initiators.sh
 ```
 
-7. Run scripts to add the debridge jobs:
+8. Run initiator.
+
+9. Run scripts to add the debridge jobs:
 
 ```
 sh chainlink-init-scripts/add-jobs.sh
 ```
 
-The oracles will be started for BSC and Ethereum.
+10. Connect to the external initiator database:
+
+```
+docker exec -it chainlink-launcher_postgres_1 psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER -d ei
+```
+
+11. Write the credentials and jobs to the database to be accessed by the initiator in the followed format using the output of the previous commands:
+
+```
+        insert into chain_config (
+          chainId,
+          cookie,
+          eiChainlinkurl,
+          eiIcAccesskey,
+          eiIcSecret,
+          eiCiAccesskey,
+          eiCiSecret,
+          mintJobId,
+          burntJobId,
+          network
+        ) values(
+          $chainId,
+          '',
+          $eiChainlinkurl,
+          $eiIcAccesskey,
+          $eiIcSecret,
+          $eiCiAccesskey,
+          $eiCiSecret,
+          $mintJobId,
+          $burntJobId,
+          $network
+        ) on conflict do nothing;
+```
 
 # Add new chain support
 
