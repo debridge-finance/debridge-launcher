@@ -7,52 +7,11 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 3. Store the password that decrypts the key from `keystore` in `password.txt`
 4. Set the addresses of the aggregators in the `chainlink-*/burn-jobs.json` and `chainlink-*/mint-jobs.json`.
 5. Run: `docker-compose up`. The oracles will be started for BSC and Ethereum.
-6. Run script to create the initiators. The output should be used to configure the initiator permissions:
+6. Run the initiator.
+7. Run script to create the initiators and prepare the jobs and store main configurations for ei to the database:
 
 ```
-sh chainlink-init-scripts/setup-initiators.sh
-```
-
-8. Run initiator.
-
-9. Run scripts to add the debridge jobs:
-
-```
-sh chainlink-init-scripts/add-jobs.sh
-```
-
-10. Connect to the external initiator database:
-
-```
-docker exec -it chainlink-launcher_postgres_1 psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER -d ei
-```
-
-11. Write the credentials and jobs to the database to be accessed by the initiator in the followed format using the output of the previous commands:
-
-```
-        insert into chain_config (
-          chainId,
-          cookie,
-          eiChainlinkurl,
-          eiIcAccesskey,
-          eiIcSecret,
-          eiCiAccesskey,
-          eiCiSecret,
-          mintJobId,
-          burntJobId,
-          network
-        ) values(
-          $chainId,
-          '',
-          $eiChainlinkurl,
-          $eiIcAccesskey,
-          $eiIcSecret,
-          $eiCiAccesskey,
-          $eiCiSecret,
-          $mintJobId,
-          $burntJobId,
-          $network
-        ) on conflict do nothing;
+sh chainlink-init-scripts/setup-initiators-and-jobs.sh
 ```
 
 # Add new chain support
@@ -111,3 +70,30 @@ docker volume rm pgdata
 See **Initialization scripts** section in [docs](https://hub.docker.com/_/postgres).
 
 4. Run the command `docker-compose up`.
+
+5. Extend `setup-initiators-and-jobs.sh`. Add to the end of the file:
+
+```
+echo "Add initiator for $NETWORK"
+network=[[NETWORK_NAME]]
+chain_id=[[NETWORK_CHAIN_ID]]
+cl_url=[[CHAINLINK_NODE_URL]]
+add_initiator $network
+
+echo "Add jobs for $NETWORK"
+add_jobs $network
+
+echo "Prepare table for $NETWORK ie"
+create_ei_table $chain_id $cl_url $network
+
+echo "Add record for $NETWORK ie"
+add_record $network
+```
+
+# Miscellenious
+
+Connect to the database:
+
+```
+docker exec -it chainlink-launcher_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d $DATABASE_NAME
+```
