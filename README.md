@@ -6,6 +6,13 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 2. Put keystore file to `secrets/keystore.json`.
 3. Store the password that decrypts the key from `keystore` in `password.txt`
 4. Set the addresses of the aggregators in the `chainlink-*/burn-jobs.json` and `chainlink-*/mint-jobs.json`.
+5. Configure postgres.env:
+
+```
+BSC_DEBRIDGE_ADDRESS=... white debridge address on Binance Smart Chain
+ETH_DEBRIDGE_ADDRESS=... wheite debridge address on Ethereum
+```
+
 5. Run: `docker-compose up`. The oracles will be started for BSC and Ethereum.
 6. Run the initiator.
 7. Run script to create the initiators and prepare the jobs and store main configurations for ei to the database:

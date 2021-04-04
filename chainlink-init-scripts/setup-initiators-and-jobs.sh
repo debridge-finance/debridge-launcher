@@ -5,7 +5,8 @@ set -u
 add_record() {
     local network=$1
     file_out=$PWD/chainlink-$network/tables
-    docker exec chainlink-launcher_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d ei < $file_out
+    dir_name=${PWD##*/}
+    docker exec ${dir_name}_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d ei < $file_out
 }
 
 create_ei_table() {
@@ -48,7 +49,7 @@ EOM
 add_initiator() {
     local network=$1
     docker exec chainlink-$network chainlink admin login --file /run/secrets/apicredentials
-    docker exec chainlink-$network chainlink --json initiators create sasa http://135.181.82.228:8080/jobs > $PWD/chainlink-$network/eicreds.json
+    docker exec chainlink-$network chainlink --json initiators create debridge http://135.181.82.228:8080/jobs > $PWD/chainlink-$network/eicreds.json
 }
 add_jobs() {
     local network=$1
