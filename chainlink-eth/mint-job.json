@@ -3,7 +3,8 @@
     {
       "type": "external",
       "params": {
-        "name": "debridge"
+        "name": "debridge",
+        "body": {}
       }
     }
   ],
