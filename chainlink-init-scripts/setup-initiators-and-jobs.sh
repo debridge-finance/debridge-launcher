@@ -5,8 +5,10 @@ set -u
 add_record() {
     local network=$1
     file_out=$PWD/chainlink-$network/tables
+    file_on_ps=/var/lib/postgresql/data/$network-tables
     dir_name=${PWD##*/}
-    docker exec ${dir_name}_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d ei < $file_out
+    cp $file_out $PWD/pgdata/$network-tables
+    docker exec ${dir_name}_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d ei -a -f $file_on_ps 
 }
 
 create_ei_table() {
@@ -34,12 +36,12 @@ insert into chain_config (
     '',
     '$cl_url',
 EOM
-    cat $file_in | grep incomingAccessKey | sed -E 's/.*"incomingAccessKey": "?([^,"]*)"?.*/    '\''\1'\''/'  >> $file_out
-    cat $file_in | grep incomingSecret | sed -E 's/.*"incomingSecret": "?([^,"]*)"?.*/    '\''\1'\''/'  >> $file_out
-    cat $file_in | grep outgoingToken | sed -E 's/.*"outgoingToken": "?([^,"]*)"?.*/    '\''\1'\''/'  >> $file_out
-    cat $file_in | grep outgoingSecret | sed -E 's/.*"outgoingSecret": "?([^,"]*)"?.*/    '\''\1'\''/'  >> $file_out
-    cat $mint_file | grep '"id"' | sed -E 's/.*"id": "?([^,"]*)"?.*/    '\''\1'\''/'  >> $file_out
-    cat $burn_file | grep '"id"' | sed -E 's/.*"id": "?([^,"]*)"?.*/    '\''\1'\''/'  >> $file_out
+    cat $file_in | grep incomingAccessKey | sed -E 's/.*"incomingAccessKey": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
+    cat $file_in | grep incomingSecret | sed -E 's/.*"incomingSecret": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
+    cat $file_in | grep outgoingToken | sed -E 's/.*"outgoingToken": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
+    cat $file_in | grep outgoingSecret | sed -E 's/.*"outgoingSecret": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
+    cat $mint_file | grep '"id"' | sed -E 's/.*"id": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
+    cat $burn_file | grep '"id"' | sed -E 's/.*"id": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
     cat >> $file_out <<- EOM
     '$network'
     ) on conflict do nothing;

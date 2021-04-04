@@ -46,12 +46,11 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - chainlink
 volumes:
-  pgdata:
   chainlink:
 networks:
   chainlink:

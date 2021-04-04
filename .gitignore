@@ -5,3 +5,4 @@ chainlink-*/*
 !chainlink-init-scripts/*.sh
 password.txt
 apicredentials
+pgdata/

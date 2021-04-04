@@ -102,5 +102,5 @@ add_record $network
 Connect to the database:
 
 ```
-docker exec -it chainlink-launcher_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d $DATABASE_NAME
+docker exec -it debridge-launcher_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d $DATABASE_NAME
 ```
