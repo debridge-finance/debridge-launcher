@@ -19,13 +19,32 @@ services:
       - chainlink
     volumes:
       - ./chainlink-bsc:/chainlink
-  chainlink-eth:
-    container_name: chainlink-eth
+  # chainlink-eth:
+  #   container_name: chainlink-eth
+  #   image: smartcontract/chainlink:0.10.2
+  #   entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
+  #   restart: always
+  #   env_file:
+  #     - chainlink-eth.env
+  #   ports:
+  #     - 6688:6688
+  #   secrets:
+  #     - node_password
+  #     - apicredentials
+  #     - keystore
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - chainlink
+  #   volumes:
+  #     - ./chainlink-eth:/chainlink
+  chainlink-heco:
+    container_name: chainlink-heco
     image: smartcontract/chainlink:0.10.2
     entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
     restart: always
     env_file:
-      - chainlink-eth.env
+      - chainlink-heco.env
     ports:
       - 6688:6688
     secrets:
@@ -37,7 +56,7 @@ services:
     networks:
       - chainlink
     volumes:
-      - ./chainlink-eth:/chainlink
+      - ./chainlink-heco:/chainlink
   postgres:
     image: postgres
     restart: on-failure

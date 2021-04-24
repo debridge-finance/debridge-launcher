@@ -3,7 +3,8 @@
     {
       "type": "external",
       "params": {
-        "name": "debridge"
+        "name": "debridge",
+        "body": {}
       }
     }
   ],
@@ -11,8 +12,8 @@
     {
       "type": "ethtx",
       "params": {
-        "address": "AGGREGATOR_ADDRESS",
-        "functionSelector": "0x0b29b943"
+        "address": "0x11c2A3Ae719f837Ae2FC074C48dd1A7db8DA4aCb",
+        "functionSelector": "0xd9caa3d2"
       }
     }
   ]

@@ -16,11 +16,10 @@ create_ei_table() {
     local cl_url=$2
     local network=$3
     local file_in=$PWD/chainlink-$network/eicreds.json
-    local mint_file=$PWD/chainlink-$network/mint-job-info.json
-    local burn_file=$PWD/chainlink-$network/burn-job-info.json
+    local submit_file=$PWD/chainlink-$network/submit-job-info.json
     local file_out=$PWD/chainlink-$network/tables
     cat > $file_out <<- EOM
-insert into chain_config (
+insert into chainlink_config (
     chainId,
     cookie,
     eiChainlinkurl,
@@ -28,8 +27,7 @@ insert into chain_config (
     eiIcSecret,
     eiCiAccesskey,
     eiCiSecret,
-    mintJobId,
-    burntJobId,
+    submitJobId,
     network
     ) values(
     $chain_id,
@@ -40,8 +38,7 @@ EOM
     cat $file_in | grep incomingSecret | sed -E 's/.*"incomingSecret": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
     cat $file_in | grep outgoingToken | sed -E 's/.*"outgoingToken": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
     cat $file_in | grep outgoingSecret | sed -E 's/.*"outgoingSecret": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
-    cat $mint_file | grep '"id"' | sed -E 's/.*"id": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
-    cat $burn_file | grep '"id"' | sed -E 's/.*"id": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
+    cat $submit_file | grep '"id"' | sed -E 's/.*"id": "?([^,"]*)"?.*/    '\''\1'\'\,'/'  >> $file_out
     cat >> $file_out <<- EOM
     '$network'
     ) on conflict do nothing;
@@ -51,19 +48,17 @@ EOM
 add_initiator() {
     local network=$1
     docker exec chainlink-$network chainlink admin login --file /run/secrets/apicredentials
-    docker exec chainlink-$network chainlink --json initiators create debridge http://135.181.82.228:8080/jobs > $PWD/chainlink-$network/eicreds.json
+    docker exec chainlink-$network chainlink --json initiators create debridge > $PWD/chainlink-$network/eicreds.json
 }
 add_jobs() {
     local network=$1
     docker exec chainlink-$network chainlink admin login --file /run/secrets/apicredentials
-    docker exec chainlink-$network chainlink  --json job_specs create /chainlink/mint-job.json > $PWD/chainlink-$network/mint-job-info.json 
-    docker exec chainlink-$network chainlink  --json job_specs create /chainlink/burn-job.json > $PWD/chainlink-$network/burn-job-info.json
+    docker exec chainlink-$network chainlink  --json job_specs create /chainlink/submit-job.json > $PWD/chainlink-$network/submit-job-info.json 
 }
-
 
 echo "Add initiator for Binance Smart Chain"
 network="bsc"
-chain_id=56
+chain_id=97
 cl_url="http://localhost:6689"
 add_initiator $network
 
@@ -76,17 +71,17 @@ create_ei_table $chain_id $cl_url $network
 echo "Add record for Binance Smart Chain ie" 
 add_record $network
 
-echo "Add initiator for Ethereum"
-network="eth"
-chain_id=42
+echo "Add initiator for Heco"
+network="heco"
+chain_id=256
 cl_url="http://localhost:6688"
 add_initiator $network
 
-echo "Add jobs for Ethereum"
+echo "Add jobs for Heco"
 add_jobs $network
 
-echo "Prepare table for Ethereum ie" 
+echo "Prepare table for Heco ie" 
 create_ei_table $chain_id $cl_url $network
 
-echo "Add record for Ethereum ie" 
+echo "Add record for Heco ie" 
 add_record $network

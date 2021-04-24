@@ -12,8 +12,8 @@
     {
       "type": "ethtx",
       "params": {
-        "address": "AGGREGATOR_ADDRESS",
-        "functionSelector": "0x0b29b943"
+        "address": "0xebb2713802D592928a73b7996a273663cCef1E06",
+        "functionSelector": "0xd9caa3d2"
       }
     }
   ]

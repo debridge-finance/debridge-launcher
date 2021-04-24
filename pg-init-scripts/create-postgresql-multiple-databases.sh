@@ -37,8 +37,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 			eiIcSecret              char(64),
 			eiCiAccesskey           char(64),
 			eiCiSecret              char(64),
-			mintJobId               char(32),
-			burntJobId              char(32),
+			submitJobId             char(32),
 			network                 varchar(10)
 			);
 			create table if not exists $SUBMISSIONS_DATABASE (
@@ -53,10 +52,11 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 			status                  integer,
 			constraint chainFrom
 				foreign key(chainFrom)
-				references $SUPPORTED_CHAINS_DATABASE(chainId),
-			constraint chainTo
-				foreign key(chainTo)
-				references $CHAINLINK_CONFIG_DATABASE(chainId)
+				references $SUPPORTED_CHAINS_DATABASE(chainId)
+			);
+			create table if not exists $AGGREGATOR_DATABASE (
+			chainTo			         integer primary key,
+			aggregatorChain          integer
 			);
 EOSQL
 	echo "Tables created"
@@ -70,11 +70,11 @@ EOSQL
                 debridgeAddr,
                 interval
                 ) values(
-                56,
+                42,
                 0,
-                'bsc',
-                $BSC_PROVIDER,
-                $BSC_DEBRIDGE_ADDRESS,
+                'eth',
+                $ETH_PROVIDER,
+                $ETH_DEBRIDGE_ADDRESS,
                 60000
                 ) on conflict do nothing;
         insert into $SUPPORTED_CHAINS_DATABASE (
@@ -85,11 +85,47 @@ EOSQL
                 debridgeAddr,
                 interval
                 ) values(
-                42,
+                256,
                 0,
-                'eth',
-                $ETH_PROVIDER,
-                $ETH_DEBRIDGE_ADDRESS,
+                'heco',
+                $HECO_PROVIDER,
+                $HECO_DEBRIDGE_ADDRESS,
+                60000
+                ) on conflict do nothing;
+		insert into $AGGREGATOR_DATABASE (
+                chainTo,
+                aggregatorChain
+                ) values(
+                97,
+                97
+                ) on conflict do nothing;
+        insert into $AGGREGATOR_DATABASE (
+                chainTo,
+                aggregatorChain
+                ) values(
+                42,
+                97
+                ) on conflict do nothing;
+        insert into $AGGREGATOR_DATABASE (
+                chainTo,
+                aggregatorChain
+                ) values(
+                256,
+                256
+                ) on conflict do nothing;
+        insert into $SUPPORTED_CHAINS_DATABASE (
+                chainId,
+                latestBlock,
+                network,
+                provider,
+                debridgeAddr,
+                interval
+                ) values(
+                97,
+                0,
+                'bsc',
+                $BSC_PROVIDER,
+                $BSC_DEBRIDGE_ADDRESS,
                 60000
                 ) on conflict do nothing;
 EOSQL
