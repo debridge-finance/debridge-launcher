@@ -12,7 +12,7 @@
     {
       "type": "ethtx",
       "params": {
-        "address": "0x11c2A3Ae719f837Ae2FC074C48dd1A7db8DA4aCb",
+        "address": "0x25E5a8DB7e1BC6Aae623f4dc959fb224f26cDAB5",
         "functionSelector": "0xd9caa3d2"
       }
     }
