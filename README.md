@@ -3,7 +3,7 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 # Usage
 
 1. Set api credential in `apicredential` file.
-2. Put keystore file to `secrets/keystore.json`.
+2. Put keystore file to `secrets/keystore.json`. (convert private key to keystore.json: https://iotexscan.io/wallet or other similar resources)
 3. Store the password that decrypts the key from `keystore` in `password.txt`
 4. Set the addresses of the aggregators in the `chainlink-*/burn-jobs.json` and `chainlink-*/mint-jobs.json`.
 5. Configure postgres.env:
@@ -95,6 +95,35 @@ create_ei_table $chain_id $cl_url $network
 
 echo "Add record for $NETWORK ie"
 add_record $network
+```
+
+6. If you want to run initiator:
+- create initiator/.env file
+- build docker images:
+
+```
+sudo docker build ./initiator -t initiator
+```
+
+- add the container to the `docker-compose.yml` 
+
+```
+  initiator:
+    image: initiator
+    container_name: initiator
+    restart: on-failure
+    env_file:
+      - initiator/.env
+    depends_on:
+      - postgres
+    networks:
+      - chainlink
+```
+
+- do restart:
+
+```
+docker-compose restart
 ```
 
 # Miscellenious
