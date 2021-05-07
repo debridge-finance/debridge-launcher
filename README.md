@@ -18,7 +18,7 @@ ETH_DEBRIDGE_ADDRESS=... wheite debridge address on Ethereum
 7. Run script to create the initiators and prepare the jobs and store main configurations for ei to the database:
 
 ```
-sh chainlink-init-scripts/setup-initiators-and-jobs.sh
+bash chainlink-init-scripts/setup-initiators-and-jobs.sh
 ```
 
 # Add new chain support
