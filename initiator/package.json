@@ -1,0 +1,29 @@
+{
+  "name": "debridge-initiator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "example-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KStasi/debridge-initiator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KStasi/debridge-initiator/issues"
+  },
+  "homepage": "https://github.com/KStasi/debridge-initiator#readme",
+  "dependencies": {
+    "abi-decoder": "^2.4.0",
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "dotenv-flow": "^3.2.0",
+    "express": "^4.17.1",
+    "pg": "^8.5.1",
+    "request": "^2.88.2",
+    "web3": "^1.3.4"
+  }
+}
