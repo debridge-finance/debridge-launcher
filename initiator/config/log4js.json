@@ -1,0 +1,32 @@
+{
+  "appenders": {
+    "access": {
+      "type": "dateFile",
+      "filename": "log/app.log",
+      "pattern": ".yyyy-MM-dd-hh",
+      "compress": true
+    },
+    "errorFile": {
+      "type": "file",
+      "filename": "log/errors.log"
+    },
+    "errors": {
+      "type": "logLevelFilter",
+      "level": "ERROR",
+      "appender": "errorFile"
+    },
+    "out": {
+      "type": "stdout"
+    }
+  },
+  "categories": {
+    "default": {
+      "appenders": [ "access", "errors", "out" ],
+      "level": "DEBUG"
+    },
+    "http": {
+      "appenders": [ "access" ],
+      "level": "DEBUG"
+    }
+  }
+}
