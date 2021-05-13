@@ -1,9 +1,9 @@
-var log4js = require('log4js');
+const log4js = require('log4js');
 const axios = require("axios");
 const emailAddress = process.env.EMAIL_ADDRESS;
 const password = process.env.PASSWORD;
 
-var log = log4js.getLogger("Chainlink");
+const log = log4js.getLogger("Chainlink");
 
 class Chainlink {
     /* set chainlink cookies */

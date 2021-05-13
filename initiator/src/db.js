@@ -1,10 +1,10 @@
-var log4js = require('log4js');
+const log4js = require('log4js');
 const { Pool } = require("pg");
 const chainConfigDatabase = process.env.CHAINLINK_CONFIG_DATABASE;
 const supportedChainsDatabase = process.env.SUPPORTED_CHAINS_DATABASE;
 const submissionsDatabase = process.env.SUBMISSIONS_DATABASE;
 const aggregatorDatabase = process.env.AGGREGATOR_DATABASE;
-var log = log4js.getLogger("Db");
+const log = log4js.getLogger("Db");
 
 class Db {
     constructor() {

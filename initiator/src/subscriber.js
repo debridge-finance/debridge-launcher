@@ -1,4 +1,4 @@
-var log4js = require('log4js');
+const log4js = require('log4js');
 const Web3 = require("web3");
 const whiteDebridgeAbi = require("../assets/WhiteFullDebridge.json").abi;
 const { Db } = require("./db");
@@ -11,7 +11,7 @@ const SubmisionStatus = {
     REVERTED: 3,
 };
 
-var log = log4js.getLogger("subscriber");
+const log = log4js.getLogger("subscriber");
 
 
 class Subscriber {
@@ -30,7 +30,7 @@ class Subscriber {
 
     /* call the chainlink node and run a job */
     async subscribe() {
-        const supportedChains = await this.db.getSupportedChains();
+        const supportedChains = await this.db.getSupportedChains();        
         for (let supportedChain of supportedChains) {
             //const web3 = new Web3(supportedChain.provider);
             //const registerInstance = new web3.eth.Contract(
@@ -61,7 +61,7 @@ class Subscriber {
             }, 30000);
         }
 
-        log.info(`setInterval 86400 for setAllChainlinkCookies`);
+        log.info(`setInterval 864000 for setAllChainlinkCookies`);
         setInterval(async () => {
             try {
                 await this.setAllChainlinkCookies();
@@ -69,7 +69,7 @@ class Subscriber {
             catch (e) {
                 log.error(e);
             }
-        }, 86400);
+        }, 864000);
     }
 
     /* collect new events */
@@ -93,6 +93,7 @@ class Subscriber {
             "Sent",
             { fromBlock, toBlock },
             async (error, events) => {
+                //TODO: check error
                 await this.processNewTransfers(events, supportedChain.chainid);
             }
         );
