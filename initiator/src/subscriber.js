@@ -89,21 +89,28 @@ class Subscriber {
         log.info(`checkNewEvents ${supportedChain.network} ${fromBlock}-${toBlock}`);
 
         /* get events */
-        registerInstance.getPastEvents(
+        const sentEvents =  await registerInstance.getPastEvents(
             "Sent",
-            { fromBlock, toBlock },
-            async (error, events) => {
-                //TODO: check error
-                await this.processNewTransfers(events, supportedChain.chainid);
-            }
+            { fromBlock, toBlock }//,
+            //async (error, events) => {
+            //    if (error) {
+            //        log.error(error);
+            //    }
+            //    await this.processNewTransfers(events, supportedChain.chainid);
+            //}
         );
-        registerInstance.getPastEvents(
+        const burntEvents = await registerInstance.getPastEvents(
             "Burnt",
-            { fromBlock, toBlock },
-            async (error, events) => {
-                await this.processNewTransfers(events, supportedChain.chainid);
-            }
+            { fromBlock, toBlock }//,
+            //async (error, events) => {
+            //    if (error) {
+            //        log.error(error);
+            //    }
+                //await this.processNewTransfers(events, supportedChain.chainid);
+            //}
         );
+        await this.processNewTransfers(sentEvents, supportedChain.chainid);
+        await this.processNewTransfers(burntEvents, supportedChain.chainid);
 
         /* update lattest viewed block */
         supportedChain.latestblock = toBlock;
@@ -129,8 +136,11 @@ class Subscriber {
             /* call chainlink node */
             const submissionId = e.returnValues.submissionId;
             const submission = await this.db.getSubmission(submissionId);
-            if (submission) continue;
-            this.callChainlinkNode(
+            if (submission) {
+                log.debug(`Submission already found in db submissionId: ${submissionId}`);
+                continue;
+            }
+            await this.callChainlinkNode(
                 chainConfig.submitjobid,
                 chainConfig,
                 submissionId,
