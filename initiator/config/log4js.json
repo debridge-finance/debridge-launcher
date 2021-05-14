@@ -1,10 +1,12 @@
 {
   "appenders": {
     "access": {
-      "type": "dateFile",
+      "type": "file",
       "filename": "log/app.log",
-      "pattern": ".yyyy-MM-dd-hh",
-      "compress": true
+      "maxLogSize": 1073741824,
+      "backups": 5,
+      "compress": true,
+      "encoding": "utf-8"
     },
     "errorFile": {
       "type": "file",
