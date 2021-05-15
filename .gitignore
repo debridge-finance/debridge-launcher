@@ -5,3 +5,7 @@ chainlink-*/*
 password.txt
 apicredentials
 pgdata/
+
+.vs/
+node_modules/
+/initiator/log
