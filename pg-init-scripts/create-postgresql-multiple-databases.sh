@@ -2,12 +2,11 @@
 
 set -e
 set -u
-source ./postgres.env
 
 function create_user_and_database() {
 	local database=$1
 	echo "  Creating user and database '$database'"
-	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/?sslmode=disable <<-EOSQL
+	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/?sslmode=disable <<-EOSQL
 	    CREATE USER $database;
 	    CREATE DATABASE $database;
 	    GRANT ALL PRIVILEGES ON DATABASE $database TO $database;
@@ -21,7 +20,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	done
 	echo "Multiple databases created"
 	echo "Adding tables"
-	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/$EI_DATABASE?sslmode=disable <<-EOSQL
+	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable <<-EOSQL
 			create table if not exists $SUPPORTED_CHAINS_DATABASE (
 			chainId                 integer primary key,
 			network                 varchar(10),
@@ -62,7 +61,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 EOSQL
 	echo "Tables created"
 	echo "Adding chains configurations"
-	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/$EI_DATABASE?sslmode=disable <<-EOSQL
+	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable <<-EOSQL
         insert into $SUPPORTED_CHAINS_DATABASE (
                 chainId,
                 latestBlock,
