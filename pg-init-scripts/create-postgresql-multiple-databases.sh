@@ -73,8 +73,8 @@ EOSQL
                 42,
                 0,
                 'eth',
-                $ETH_PROVIDER,
-                $ETH_DEBRIDGE_ADDRESS,
+                '$ETH_PROVIDER',
+                '$ETH_DEBRIDGE_ADDRESS',
                 60000
                 ) on conflict do nothing;
         insert into $SUPPORTED_CHAINS_DATABASE (
@@ -88,8 +88,8 @@ EOSQL
                 256,
                 0,
                 'heco',
-                $HECO_PROVIDER,
-                $HECO_DEBRIDGE_ADDRESS,
+                '$HECO_PROVIDER',
+                '$HECO_DEBRIDGE_ADDRESS',
                 60000
                 ) on conflict do nothing;
 		insert into $AGGREGATOR_DATABASE (
@@ -124,8 +124,8 @@ EOSQL
                 97,
                 0,
                 'bsc',
-                $BSC_PROVIDER,
-                $BSC_DEBRIDGE_ADDRESS,
+                '$BSC_PROVIDER',
+                '$BSC_DEBRIDGE_ADDRESS',
                 60000
                 ) on conflict do nothing;
 EOSQL
