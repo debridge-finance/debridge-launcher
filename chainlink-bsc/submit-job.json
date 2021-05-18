@@ -11,7 +11,7 @@
     {
       "type": "ethtx",
       "params": {
-        "address": "0x8881C44d790364fE06C92cA3FB9EfA69592DccAA",
+        "address": "0x57ba1C122d2676bEA04524463F4860F0C7F5D265",
         "functionSelector": "0xd9caa3d2"
       }
     }
