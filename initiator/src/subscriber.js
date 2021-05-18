@@ -110,18 +110,24 @@ class Subscriber {
                 //await this.processNewTransfers(events, supportedChain.chainid);
             //}
         );
-        await this.processNewTransfers(sentEvents, supportedChain.chainid);
-        await this.processNewTransfers(burntEvents, supportedChain.chainid);
+
+        const isOk1 = await this.processNewTransfers(sentEvents, supportedChain.chainid);
+        const isOk2 = await this.processNewTransfers(burntEvents, supportedChain.chainid);
 
         /* update lattest viewed block */
         //supportedChain.latestblock = toBlock;
-        await this.db.updateSupportedChainBlock(supportedChain.chainid, toBlock);
+        if (isOk1 && isOk2) {
+            await this.db.updateSupportedChainBlock(supportedChain.chainid, toBlock);
+        }
+        else {
+            log.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
+        }
     }
 
     /* proccess new events */
     async processNewTransfers(events, chainIdFrom) {
-        if (!events) return;
-
+        if (!events) return true;
+        const isOk = true;
         for (let e of events) {
             log.info(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${e.returnValues.submissionId}`);
             log.debug(e);
@@ -132,7 +138,11 @@ class Subscriber {
             const chainConfig = await this.db.getChainConfig(
                 aggregatorInfo.aggregatorchain
             );
-            if (!chainConfig) continue;
+            if (!chainConfig) {
+                log.error(`Not found chainConfig: ${aggregatorInfo.aggregatorchain}`);
+                isOk = false;
+                continue;
+            }
 
             /* call chainlink node */
             const submissionId = e.returnValues.submissionId;
@@ -149,6 +159,7 @@ class Subscriber {
                 chainIdFrom
             );
         }
+        return isOk;
     }
 
     /* set chainlink cookies */
