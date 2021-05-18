@@ -41,7 +41,7 @@ class Subscriber {
             log.info(`setInterval ${supportedChain.interval} for checkNewEvents ${supportedChain.network}`);
             setInterval(async () => {
                 try {
-                    await this.checkNewEvents(supportedChain);
+                    await this.checkNewEvents(supportedChain.chainid);
                 }
                 catch (e) {
                     log.error(e);
@@ -73,8 +73,9 @@ class Subscriber {
     }
 
     /* collect new events */
-    async checkNewEvents(supportedChain) {
-        log.debug(`checkNewEvents ${supportedChain.network}`);
+    async checkNewEvents(chainId) {
+        log.debug(`checkNewEvents ${chainId}`);
+        const supportedChain = await this.db.getSupportedChain(chainId);        
 
         const web3 = new Web3(supportedChain.provider);
         const registerInstance = new web3.eth.Contract(
@@ -113,7 +114,7 @@ class Subscriber {
         await this.processNewTransfers(burntEvents, supportedChain.chainid);
 
         /* update lattest viewed block */
-        supportedChain.latestblock = toBlock;
+        //supportedChain.latestblock = toBlock;
         await this.db.updateSupportedChainBlock(supportedChain.chainid, toBlock);
     }
 

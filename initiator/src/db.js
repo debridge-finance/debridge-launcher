@@ -159,6 +159,13 @@ class Db {
         return result.rows;
     }
 
+    async getSupportedChain(chainId) {
+        const result = await this.pgClient.query(
+            `select * from ${supportedChainsDatabase} where chainid = ${chainId};`
+        );
+        return result.rows.length > 0 ? result.rows[0] : null;
+    }
+
     async getSubmissionsByStatus(status) {
         const result = await this.pgClient.query(
             `select * from ${submissionsDatabase} where status = ${status};`
