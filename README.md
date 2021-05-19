@@ -99,16 +99,11 @@ add_record $network
 
 6. If you want to run initiator:
 - create initiator/.env file
-- build docker images:
-
-```
-sudo docker build ./initiator -t initiator
-```
-
-- add the container to the `docker-compose.yml` 
+- add initiator to the `docker-compose.yml` 
 
 ```
   initiator:
+    build: ./initiator
     image: initiator
     container_name: initiator
     restart: on-failure
@@ -116,6 +111,8 @@ sudo docker build ./initiator -t initiator
       - initiator/.env
     depends_on:
       - postgres
+      - chainlink-heco
+      - chainlink-bsc
     networks:
       - chainlink
 ```
@@ -123,7 +120,7 @@ sudo docker build ./initiator -t initiator
 - do restart:
 
 ```
-docker-compose restart
+docker-compose stop; docker-compose up --build -d
 ```
 
 # Miscellenious
