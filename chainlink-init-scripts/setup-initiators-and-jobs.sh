@@ -8,7 +8,8 @@ add_record() {
     file_on_ps=/var/lib/postgresql/data/$network-tables
     dir_name=${PWD##*/}
     cp $file_out $PWD/pgdata/$network-tables
-    docker exec ${dir_name}_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d ei -a -f $file_on_ps 
+    source ./postgres.env
+    docker exec ${dir_name}_postgres_1 psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable -a -f $file_on_ps 
 }
 
 create_ei_table() {
@@ -59,7 +60,7 @@ add_jobs() {
 echo "Add initiator for Binance Smart Chain"
 network="bsc"
 chain_id=97
-cl_url="http://localhost:6689"
+cl_url="http://chainlink-bsc:6688"
 add_initiator $network
 
 echo "Add jobs for Binance Smart Chain"
@@ -74,7 +75,7 @@ add_record $network
 echo "Add initiator for Heco"
 network="heco"
 chain_id=256
-cl_url="http://localhost:6688"
+cl_url="http://chainlink-heco:6688"
 add_initiator $network
 
 echo "Add jobs for Heco"
