@@ -86,6 +86,10 @@ class Subscriber {
         //console.log(await web3.eth.getBlockNumber());
         const toBlock = (await web3.eth.getBlockNumber()) - minConfirmations;
         const fromBlock = supportedChain.latestblock;
+
+        if (fromBlock == 0) {
+            fromBlock = toBlock - 1;
+        }
         if (fromBlock >= toBlock) return;
         log.info(`checkNewEvents ${supportedChain.network} ${fromBlock}-${toBlock}`);
 
