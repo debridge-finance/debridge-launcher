@@ -25,6 +25,12 @@ const server = app.listen(process.env.PORT || 8080, '127.0.0.1', async function 
     //console.log("App now running on port", port);
     log.info(`App now running on port ${port} with pid ${process.pid}`);
 
-    const subscriber = new Subscriber();
-    await subscriber.init();
+    try {
+        const subscriber = new Subscriber();
+        await subscriber.init();
+    }
+    catch (e) {
+        log.error(e);
+        process.exit(1)
+    }
 });
