@@ -4,9 +4,9 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 1. Install full testnet nodes
   - Kovan
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
-  - HECO 
-2. Set ETH_URL (websocket) in files chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
-3. Set providers (HTTP/HTTPS) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file postgres.env
+  - [HECO] (https://docs.hecochain.com/#/dev/install) 
+2. Set ETH_URL (node Websocket Endpoint) in files chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
+3. Set providers (node RPC Endpoint) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file postgres.env
 4. Change default (postgreschainlink) postgress password. Files: initiator/.env, chainlink-heco.env, chainlink-bsc.env, chainlink-eth.env
 5. Create file apicredentials with chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env 
 6. Put keystore file to `secrets/keystore.json`.
