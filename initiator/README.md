@@ -10,8 +10,8 @@ CHAINLINK_CONFIG_DATABASE=...- postgres database with chainlink related configur
 SUPPORTED_CHAINS_DATABASE...- postgres database with listened networks confirgurations
 SUBMISSIONS_DATABASE...- postgres database with submissions the oracle reacted on
 MIN_CONFIRMATIONS...- minimal transaction confirmations required to react on the submission event
-EMAIL_ADDRESS...- api credential to access the chainlink node
-PASSWORD...- api credential to access the chainlink node
+CHAINLINK_EMAIL...- api credential to access the chainlink node
+CHAINLINK_PASSWORD...- api credential to access the chainlink node
 ```
 1. Build images(see main readme).
 
