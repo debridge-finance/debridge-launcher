@@ -69,19 +69,19 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - chainlink
-  #initiator:
-  #  build: ./initiator
-  #  image: initiator
-  #  container_name: initiator
-  #  restart: on-failure
-  #  env_file:
-  #    - initiator/.env
-  #  depends_on:
-  #    - postgres
-  #    - chainlink-heco
-  #    - chainlink-bsc
-  #  networks:
-  #    - chainlink
+  initiator:
+    build: ./initiator
+    image: initiator
+    container_name: initiator
+    restart: on-failure
+    env_file:
+      - initiator/.env
+    depends_on:
+      - postgres
+      - chainlink-heco
+      - chainlink-bsc
+    networks:
+      - chainlink
 
 volumes:
   chainlink:
