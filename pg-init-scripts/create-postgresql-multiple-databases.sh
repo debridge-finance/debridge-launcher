@@ -21,7 +21,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	echo "Multiple databases created"
 	echo "Adding tables"
 	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable <<-EOSQL
-			create table if not exists $SUPPORTED_CHAINS_DATABASE (
+			create table if not exists supported_chains (
 			chainId                 integer primary key,
 			network                 varchar(10),
 			debridgeAddr            char(42),
@@ -29,7 +29,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 			provider                varchar(200),
 			interval                integer
 			);
-			create table if not exists $CHAINLINK_CONFIG_DATABASE (
+			create table if not exists chainlink_config (
 			chainId                 integer primary key,
 			cookie                  varchar(1000),
 			eiChainlinkurl          varchar(100),
@@ -40,7 +40,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 			submitJobId             char(32),
 			network                 varchar(10)
 			);
-			create table if not exists $SUBMISSIONS_DATABASE (
+			create table if not exists submissions (
 			submissionId            char(66) primary key,
 			txHash                  char(66),
 			runId                   varchar(64),
@@ -52,9 +52,9 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 			status                  integer,
 			constraint chainFrom
 				foreign key(chainFrom)
-				references $SUPPORTED_CHAINS_DATABASE(chainId)
+				references supported_chains(chainId)
 			);
-			create table if not exists $AGGREGATOR_DATABASE (
+			create table if not exists aggregator_chains (
 			chainTo			         integer primary key,
 			aggregatorChain          integer
 			);
@@ -62,7 +62,7 @@ EOSQL
 	echo "Tables created"
 	echo "Adding chains configurations"
 	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable <<-EOSQL
-        insert into $SUPPORTED_CHAINS_DATABASE (
+        insert into supported_chains (
                 chainId,
                 latestBlock,
                 network,
@@ -77,7 +77,7 @@ EOSQL
                 '$ETH_DEBRIDGE_ADDRESS',
                 60000
                 ) on conflict do nothing;
-        insert into $SUPPORTED_CHAINS_DATABASE (
+        insert into supported_chains (
                 chainId,
                 latestBlock,
                 network,
@@ -92,28 +92,28 @@ EOSQL
                 '$HECO_DEBRIDGE_ADDRESS',
                 60000
                 ) on conflict do nothing;
-		insert into $AGGREGATOR_DATABASE (
+		insert into aggregator_chains (
                 chainTo,
                 aggregatorChain
                 ) values(
                 97,
                 97
                 ) on conflict do nothing;
-        insert into $AGGREGATOR_DATABASE (
+        insert into aggregator_chains (
                 chainTo,
                 aggregatorChain
                 ) values(
                 42,
                 97
                 ) on conflict do nothing;
-        insert into $AGGREGATOR_DATABASE (
+        insert into aggregator_chains (
                 chainTo,
                 aggregatorChain
                 ) values(
                 256,
                 256
                 ) on conflict do nothing;
-        insert into $SUPPORTED_CHAINS_DATABASE (
+        insert into supported_chains (
                 chainId,
                 latestBlock,
                 network,

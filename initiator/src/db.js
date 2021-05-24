@@ -1,9 +1,9 @@
 const log4js = require('log4js');
 const { Pool } = require("pg");
-const chainConfigDatabase = process.env.CHAINLINK_CONFIG_DATABASE;
-const supportedChainsDatabase = process.env.SUPPORTED_CHAINS_DATABASE;
-const submissionsDatabase = process.env.SUBMISSIONS_DATABASE;
-const aggregatorDatabase = process.env.AGGREGATOR_DATABASE;
+const chainConfigTable = 'chainlink_config';
+const supportedChainsTable = 'supported_chains';
+const submissionsTable = 'submissions';
+const aggregatorTable = 'aggregator_chains';
 const log = log4js.getLogger("Db");
 
 class Db {
@@ -19,11 +19,11 @@ class Db {
 
     async createTables() {
         log.info('createTables');
-        // await this.pgClient.query(`drop table if exists ${submissionsDatabase} ;`);
+        // await this.pgClient.query(`drop table if exists ${submissionsTable} ;`);
         // await this.pgClient.query(
-        //   `drop table if exists ${supportedChainsDatabase} ;`
+        //   `drop table if exists ${supportedChainsTable} ;`
         // );
-        // await this.pgClient.query(`drop table if exists ${chainConfigDatabase} ;`);
+        // await this.pgClient.query(`drop table if exists ${chainConfigTable} ;`);
     }
 
     async createChainConfig(
@@ -39,7 +39,7 @@ class Db {
         network
     ) {
         log.info(`createChainConfig chainId: ${chainId}; cookie: ${cookie}; network: ${network}`);
-        await this.pgClient.query(`insert into ${chainConfigDatabase} (
+        await this.pgClient.query(`insert into ${chainConfigTable} (
           chainId,
           cookie,
           eiChainlinkurl,
@@ -73,7 +73,7 @@ class Db {
         interval
     ) {
         log.info(`createSupportedChain chainId: ${chainId}; latestBlock: ${latestBlock}; network: ${network}; provider: ${provider}; debridgeAddr: ${debridgeAddr}; interval: ${interval};`);
-        await this.pgClient.query(`insert into ${supportedChainsDatabase} (
+        await this.pgClient.query(`insert into ${supportedChainsTable} (
           chainId,
           latestBlock,
           network,
@@ -102,7 +102,7 @@ class Db {
         status
     ) {
         log.info(`createSubmission submissionId ${submissionId}; txHash: ${txHash}; runId: ${runId}`);
-        await this.pgClient.query(`insert into ${submissionsDatabase} (
+        await this.pgClient.query(`insert into ${submissionsTable} (
           submissionId,
           txHash,
           runId,
@@ -127,91 +127,91 @@ class Db {
 
     async getChainConfigs() {
         const result = await this.pgClient.query(
-            `select * from ${chainConfigDatabase};`
+            `select * from ${chainConfigTable};`
         );
         return result.rows;
     }
 
     async getChainConfig(chainId) {
         const result = await this.pgClient.query(
-            `select * from ${chainConfigDatabase} where chainId = ${chainId};`
+            `select * from ${chainConfigTable} where chainId = ${chainId};`
         );
         return result.rows.length > 0 ? result.rows[0] : null;
     }
 
     async getAggregatorConfig(chainId) {
         const result = await this.pgClient.query(
-            `select * from ${aggregatorDatabase} where chainTo = ${chainId};`
+            `select * from ${aggregatorTable} where chainTo = ${chainId};`
         );
         return result.rows.length > 0 ? result.rows[0] : null;
     }
 
     async getChainToForAggregator(aggregatorchain) {
         const result = await this.pgClient.query(
-            `select * from ${aggregatorDatabase} where aggregatorchain = ${aggregatorchain};`
+            `select * from ${aggregatorTable} where aggregatorchain = ${aggregatorchain};`
         );
         return result.rows;
     }
     async getSupportedChains() {
         const result = await this.pgClient.query(
-            `select * from ${supportedChainsDatabase};`
+            `select * from ${supportedChainsTable};`
         );
         return result.rows;
     }
 
     async getSupportedChain(chainId) {
         const result = await this.pgClient.query(
-            `select * from ${supportedChainsDatabase} where chainid = ${chainId};`
+            `select * from ${supportedChainsTable} where chainid = ${chainId};`
         );
         return result.rows.length > 0 ? result.rows[0] : null;
     }
 
     async getSubmissionsByStatus(status) {
         const result = await this.pgClient.query(
-            `select * from ${submissionsDatabase} where status = ${status};`
+            `select * from ${submissionsTable} where status = ${status};`
         );
         return result.rows;
     }
 
     async getSubmissionsByStatusAndChainTo(status, chainsTo) {
-        //log.debug(`select * from ${submissionsDatabase} where status = ${status} and chainto in (${chainsTo});`);
+        //log.debug(`select * from ${submissionsTable} where status = ${status} and chainto in (${chainsTo});`);
         const result = await this.pgClient.query(
-            `select * from ${submissionsDatabase} where status = ${status} and chainto in (${chainsTo});`
+            `select * from ${submissionsTable} where status = ${status} and chainto in (${chainsTo});`
         );
         return result.rows;
     }
 
     async getSubmission(submissionId) {
         const result = await this.pgClient
-            .query(`select * from ${submissionsDatabase} 
+            .query(`select * from ${submissionsTable} 
         where submissionId = '${submissionId}';`);
         return result.rows.length > 0 ? result.rows[0] : null;
     }
 
     async updateSupportedChainBlock(chainId, latestBlock) {
         log.info(`updateSupportedChainBlock chainId: ${chainId}; latestBlock: ${latestBlock}`);
-        await this.pgClient.query(`update ${supportedChainsDatabase} set 
+        await this.pgClient.query(`update ${supportedChainsTable} set 
         latestBlock = ${latestBlock}
         where chainId = ${chainId};`);
     }
 
     async updateSubmissionStatus(submissionId, status) {
         log.info(`updateSubmissionStatus submissionId: ${submissionId}; status: ${status}`);
-        await this.pgClient.query(`update ${submissionsDatabase} set 
+        await this.pgClient.query(`update ${submissionsTable} set 
         status = ${status}
         where submissionId = '${submissionId}';`);
     }
 
     async updateSubmissionTxHash(submissionId, txHash) {
         log.info(`updateSubmissionTxHash submissionId: ${submissionId}; txHash: ${txHash}`);
-        await this.pgClient.query(`update ${submissionsDatabase} set 
+        await this.pgClient.query(`update ${submissionsTable} set 
         txHash = ${txHash}
         where submissionId = '${submissionId}';`);
     }
 
     async updateChainConfigCokie(chainId, cookie) {
         log.info(`updateChainConfigCokie chainId: ${chainId}; cookie: ${cookie}`);
-        await this.pgClient.query(`update ${chainConfigDatabase} set 
+        await this.pgClient.query(`update ${chainConfigTable} set 
         cookie = '${cookie}'
         where chainId = ${chainId};`);
     }
