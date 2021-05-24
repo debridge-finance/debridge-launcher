@@ -11,7 +11,7 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 5. Create file apicredentials with chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env 
 6. Put keystore file to `secrets/keystore.json`.
 7. Store the password that decrypts the key from `keystore` in `password.txt`
-8. Make your oracle-operator address to be whitelisted be deBridge governance
+8. Make your oracle-operator address to be whitelisted by deBridge governance
 9. Run the command `docker-compose up --build -d`.
 10. Run the script to create the initiators and prepare the jobs and store main configurations in the database:
 ```
