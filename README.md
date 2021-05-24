@@ -1,25 +1,24 @@
 This repo allows to setup the oracles for few chains quickly with the same credentials.
 
-# Usage
-
-1. Set api credential in `apicredential` file.
-2. Put keystore file to `secrets/keystore.json`. (convert private key to keystore.json: https://iotexscan.io/wallet or other similar resources)
-3. Store the password that decrypts the key from `keystore` in `password.txt`
-4. Set the addresses of the aggregators in the `chainlink-*/burn-jobs.json` and `chainlink-*/mint-jobs.json`.
-5. Configure postgres.env:
-
-```
-BSC_DEBRIDGE_ADDRESS=... white debridge address on Binance Smart Chain
-ETH_DEBRIDGE_ADDRESS=... wheite debridge address on Ethereum
-```
-
-5. Run: `docker-compose up`. The oracles will be started for BSC and Ethereum.
-6. Run the initiator.
-7. Run script to create the initiators and prepare the jobs and store main configurations for ei to the database:
-
+# Fast Testnet start 
+1. Install full testnet nodes
+  - Kovan
+  - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
+  - HECO 
+2. Set ETH_URL (websocket) in files chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
+3. Set providers (HTTP/HTTPS) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file postgres.env
+4. Change default (postgreschainlink) postgress password. Files: initiator/.env, chainlink-heco.env, chainlink-bsc.env, chainlink-eth.env
+5. Create file apicredentials with chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env 
+6. Put keystore file to `secrets/keystore.json`.
+7. Store the password that decrypts the key from `keystore` in `password.txt`
+8. Send to government your address to add new oracle in contracts.
+9. Run the command `docker-compose up --build -d`.
+10. Run script to create the initiators and prepare the jobs and store main configurations for ei to the database:
 ```
 bash chainlink-init-scripts/setup-initiators-and-jobs.sh
 ```
+11. Run the command `docker-compose restart initiator`.
+
 
 # Add new chain support
 
@@ -97,31 +96,6 @@ echo "Add record for $NETWORK ie"
 add_record $network
 ```
 
-6. If you want to run initiator:
-- create initiator/.env file
-- add initiator to the `docker-compose.yml` 
-
-```
-  initiator:
-    build: ./initiator
-    image: initiator
-    container_name: initiator
-    restart: on-failure
-    env_file:
-      - initiator/.env
-    depends_on:
-      - postgres
-      - chainlink-heco
-      - chainlink-bsc
-    networks:
-      - chainlink
-```
-
-- do restart:
-
-```
-docker-compose stop; docker-compose up --build -d
-```
 
 # Miscellenious
 
