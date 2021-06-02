@@ -5,11 +5,8 @@ set -u
 add_record() {
     local network=$1
     file_out=$PWD/chainlink-$network/tables
-    file_on_ps=/var/lib/postgresql/data/$network-tables
-    dir_name=${PWD##*/}
-    cp $file_out $PWD/pgdata/$network-tables
     source ./postgres.env
-    docker exec ${dir_name}_postgres_1 psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable -a -f $file_on_ps 
+    psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$EI_DATABASE?sslmode=disable -a -f $file_out 
 }
 
 create_ei_table() {

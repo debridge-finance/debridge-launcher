@@ -6,6 +6,7 @@ services:
     entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
     restart: always
     env_file:
+      - postgres.env
       - chainlink-bsc.env
     ports:
       - 6689:6688
@@ -25,6 +26,7 @@ services:
   #   entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
   #   restart: always
   #   env_file:
+  #     - postgres.env
   #     - chainlink-eth.env
   #   ports:
   #     - 6688:6688
@@ -44,6 +46,7 @@ services:
     entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
     restart: always
     env_file:
+      - postgres.env
       - chainlink-heco.env
     ports:
       - 6688:6688
@@ -75,6 +78,7 @@ services:
     container_name: initiator
     restart: on-failure
     env_file:
+      - postgres.env
       - initiator/.env
     depends_on:
       - postgres
