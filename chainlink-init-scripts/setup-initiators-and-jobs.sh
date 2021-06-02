@@ -45,13 +45,15 @@ EOM
 
 add_initiator() {
     local network=$1
-    docker exec chainlink-$network chainlink admin login --file /run/secrets/apicredentials
-    docker exec chainlink-$network chainlink --json initiators create debridge > $PWD/chainlink-$network/eicreds.json
+    local container_name=$(docker-compose ps | grep $network | awk '{print $1}')
+    docker exec $container_name chainlink admin login --file /run/secrets/apicredentials
+    docker exec $container_name chainlink --json initiators create debridge > $PWD/chainlink-$network/eicreds.json
 }
 add_jobs() {
     local network=$1
-    docker exec chainlink-$network chainlink admin login --file /run/secrets/apicredentials
-    docker exec chainlink-$network chainlink  --json job_specs create /chainlink/submit-job.json > $PWD/chainlink-$network/submit-job-info.json 
+    local container_name=$(docker-compose ps | grep $network | awk '{print $1}')
+    docker exec $container_name chainlink admin login --file /run/secrets/apicredentials
+    docker exec $container_name chainlink  --json job_specs create /chainlink/submit-job.json > $PWD/chainlink-$network/submit-job-info.json 
 }
 
 echo "Add initiator for Binance Smart Chain"
