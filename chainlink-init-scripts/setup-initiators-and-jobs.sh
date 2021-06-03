@@ -5,11 +5,8 @@ set -u
 add_record() {
     local network=$1
     file_out=$PWD/chainlink-$network/tables
-    file_on_ps=/var/lib/postgresql/data/$network-tables
-    dir_name=${PWD##*/}
-    cp $file_out $PWD/pgdata/$network-tables
     source ./postgres.env
-    docker exec ${dir_name}_postgres_1 psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable -a -f $file_on_ps 
+    psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$EI_DATABASE?sslmode=disable -a -f $file_out 
 }
 
 create_ei_table() {
@@ -48,13 +45,15 @@ EOM
 
 add_initiator() {
     local network=$1
-    docker exec chainlink-$network chainlink admin login --file /run/secrets/apicredentials
-    docker exec chainlink-$network chainlink --json initiators create debridge > $PWD/chainlink-$network/eicreds.json
+    local container_name=$(docker-compose ps | grep $network | awk '{print $1}')
+    docker exec $container_name chainlink admin login --file /run/secrets/apicredentials
+    docker exec $container_name chainlink --json initiators create debridge > $PWD/chainlink-$network/eicreds.json
 }
 add_jobs() {
     local network=$1
-    docker exec chainlink-$network chainlink admin login --file /run/secrets/apicredentials
-    docker exec chainlink-$network chainlink  --json job_specs create /chainlink/submit-job.json > $PWD/chainlink-$network/submit-job-info.json 
+    local container_name=$(docker-compose ps | grep $network | awk '{print $1}')
+    docker exec $container_name chainlink admin login --file /run/secrets/apicredentials
+    docker exec $container_name chainlink  --json job_specs create /chainlink/submit-job.json > $PWD/chainlink-$network/submit-job-info.json 
 }
 
 echo "Add initiator for Binance Smart Chain"
