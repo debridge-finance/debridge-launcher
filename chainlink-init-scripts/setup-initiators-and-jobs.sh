@@ -5,8 +5,15 @@ set -u
 add_record() {
     local network=$1
     file_out=$PWD/chainlink-$network/tables
-    source ./postgres.env
-    psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$EI_DATABASE?sslmode=disable -a -f $file_out 
+    source ./.env
+    container_name=$(docker-compose ps | grep postgres${DOCKER_ID} | awk '{print $1}')
+    if [ $(echo $container_name | wc -c) -ne 1 ]
+    then
+       postgres_ip=$(docker inspect $container_name | grep IPAddress | tail -n 1 | awk -F\" '{print $(NF-1)}')
+       psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$postgres_ip:$POSTGRES_PORT/$EI_DATABASE?sslmode=disable -a -f $file_out
+    else
+       psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$EI_DATABASE?sslmode=disable -a -f $file_out 
+    fi
 }
 
 create_ei_table() {
@@ -59,7 +66,8 @@ add_jobs() {
 echo "Add initiator for Binance Smart Chain"
 network="bsc"
 chain_id=97
-cl_url="http://chainlink-bsc:6688"
+container_name=$(docker-compose ps | grep bsc | awk '{print $1}')
+cl_url="http://$container_name:6688"
 add_initiator $network
 
 echo "Add jobs for Binance Smart Chain"
@@ -74,7 +82,8 @@ add_record $network
 echo "Add initiator for Heco"
 network="heco"
 chain_id=256
-cl_url="http://chainlink-heco:6688"
+container_name=$(docker-compose ps | grep bsc | awk '{print $1}')
+cl_url="http://$container_name:6688"
 add_initiator $network
 
 echo "Add jobs for Heco"
