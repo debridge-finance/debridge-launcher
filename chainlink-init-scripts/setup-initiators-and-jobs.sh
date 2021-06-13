@@ -82,7 +82,7 @@ add_record $network
 echo "Add initiator for Heco"
 network="heco"
 chain_id=256
-container_name=$(docker-compose ps | grep bsc | awk '{print $1}')
+container_name=$(docker-compose ps | grep heco | awk '{print $1}')
 cl_url="http://$container_name:6688"
 add_initiator $network
 
