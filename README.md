@@ -7,7 +7,7 @@ This repo allows to setup the oracles for few chains quickly with the same crede
   - [HECO](https://docs.hecochain.com/#/dev/install) 
 2. Set ETH_URL (node Websocket Endpoint) in files chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
 3. Set providers (node RPC Endpoint) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file .env
-4. Change default (postgreschainlink) postgress password. Files: initiator/.env, chainlink-heco.env, chainlink-bsc.env, chainlink-eth.env
+4. Change default (postgreschainlink) postgress password in .env
 5. Create file apicredentials with chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env 
 6. Put keystore file to `secrets/keystore.json`.
 7. Store the password that decrypts the key from `keystore` in `password.txt`
@@ -18,8 +18,10 @@ This repo allows to setup the oracles for few chains quickly with the same crede
 bash chainlink-init-scripts/setup-initiators-and-jobs.sh
 ```
 11. Run the command `docker-compose restart initiator`.
-
-
+12. If you want to start multiple instances on one server or one postgresql you can do this:
+  - checkout or copy repo to new directory
+  - change DOCKER_ID variable in .env
+  - start as previously described
 # Add new chain support
 
 1. Create and configure chainlink-[{CHAIN_TICKER}].env. At least the followed params should be added:
@@ -33,7 +35,6 @@ SECURE_COOKIES
 GAS_UPDATER_ENABLED
 ALLOW_ORIGINS
 ETH_URL
-DATABASE_URL
 CHAINLINK_BASEURL
 FEATURE_EXTERNAL_INITIATORS
 CHAINLINK_DEV
@@ -47,14 +48,14 @@ For more details, see the [docs](https://docs.chain.link/docs/configuration-vari
 
 ```
   chainlink-[{CHAIN_TICKER}]:
-    container_name: chainlink-[{CHAIN_TICKER}]
+    container_name: chainlink-[{CHAIN_TICKER}]${DOCKER_ID}
     image: smartcontract/chainlink:0.10.2
     entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
     restart: always
     env_file:
       - chainlink-[{CHAIN_TICKER}].env
-    ports:
-      - [{PORT}]:6688
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${HECO_DATABASE}?sslmode=disable
     secrets:
       - node_password
       - apicredentials
@@ -83,7 +84,8 @@ See **Initialization scripts** section in [docs](https://hub.docker.com/_/postgr
 echo "Add initiator for $NETWORK"
 network=[[NETWORK_NAME]]
 chain_id=[[NETWORK_CHAIN_ID]]
-cl_url=[[CHAINLINK_NODE_URL]]
+container_name=$(docker-compose ps | grep [[NETWORK_NAME]] | awk '{print $1}')
+cl_url="http://$container_name:6688"
 add_initiator $network
 
 echo "Add jobs for $NETWORK"
@@ -99,8 +101,18 @@ add_record $network
 
 # Miscellenious
 
-Connect to the database:
+Connect to the database(if you use docker-compose):
 
 ```
-docker exec -it debridge-launcher_postgres_1 psql -v ON_ERROR_STOP=1 --username postgres -d $DATABASE_NAME
+docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v ON_ERROR_STOP=1 --username postgres -d $DATABASE_NAME
 ```
+
+
+# Mandatory for monitoring
+
+1. Basic monitoring of the server/virtual machine(cpu, memory, disk space).
+2. Availability check(may be connectivity):
+  - all of full nodes(heco, bsc, etc). It is also good to check the synchronization status
+  - database
+  - initiator and chainlinks
+3. Strongly recommend to check `docker-compose logs` for ERROR.
