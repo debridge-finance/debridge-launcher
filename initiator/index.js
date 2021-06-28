@@ -20,7 +20,7 @@ app.post("/jobs", function (req, res) {
 });
 
 
-const server = app.listen(process.env.PORT || 8080, '127.0.0.1', async function () {
+const server = app.listen(process.env.PORT || 8080, process.env.ADDRESS || '127.0.0.1', async function () {
     const port = server.address().port;
     //console.log("App now running on port", port);
     log.info(`App now running on port ${port} with pid ${process.pid}`);
