@@ -9,6 +9,12 @@ PGPORT=...- postgres port
 MIN_CONFIRMATIONS...- minimal transaction confirmations required to react on the submission event
 CHAINLINK_EMAIL...- api credential to access the chainlink node
 CHAINLINK_PASSWORD...- api credential to access the chainlink node
+//Next to override credential for the specific node (optional parameters)
+CHAINLINK_EMAIL_BSC=...- api credential to access the chainlink node BSC
+CHAINLINK_PASSWORD_BSC=...- api credential to access the chainlink node BSC
+CHAINLINK_EMAIL_HECO=...- api credential to access the chainlink node HECO
+CHAINLINK_PASSWORD_HECO=...- api credential to access the chainlink node HECO
+
 ```
 1. Build images(see main readme).
 

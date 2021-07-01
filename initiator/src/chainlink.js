@@ -1,18 +1,38 @@
 const log4js = require('log4js');
 const axios = require("axios");
-const emailAddress = process.env.CHAINLINK_EMAIL;
-const password = process.env.CHAINLINK_PASSWORD;
+
+const chainlinkCredentials = {
+    base: {
+        email: process.env.CHAINLINK_EMAIL,
+        password: process.env.CHAINLINK_PASSWORD
+    },
+    bsc: {
+        email: process.env.CHAINLINK_EMAIL_BSC,
+        password: process.env.CHAINLINK_PASSWORD_BSC
+    },
+    heco: {
+        email: process.env.CHAINLINK_EMAIL_HECO,
+        password: process.env.CHAINLINK_PASSWORD_HECO
+    }
+}
 
 const log = log4js.getLogger("Chainlink");
 
 class Chainlink {
     /* set chainlink cookies */
-    async getChainlinkCookies(eiChainlinkUrl) {
+    async getChainlinkCookies(eiChainlinkUrl, network) {
         const sessionUrl = "/sessions";
         const headers = {
             "content-type": "application/json",
         };
-        const body = { email: emailAddress, password: password };
+        let body = chainlinkCredentials[network];// { email: emailAddress, password: password };
+
+        //Set default if undefined
+        if (!body || !body.email) {
+            body = chainlinkCredentials.base;
+            log.debug(`get base chainlinkCredentials: ${body.email}`);
+        }
+
         const response = await axios.post(eiChainlinkUrl + sessionUrl, body, {
             headers,
         });

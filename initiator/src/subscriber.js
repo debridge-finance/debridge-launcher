@@ -226,7 +226,8 @@ class Subscriber {
         for (const chainConfig of chainConfigs) {
             log.debug(`setAllChainlinkCookies ${chainConfig.network}`);
             const cookies = await this.chainlink.getChainlinkCookies(
-                chainConfig.eichainlinkurl
+                chainConfig.eichainlinkurl,
+                chainConfig.network
             );
             await this.db.updateChainConfigCokie(chainConfig.chainid, cookies);
         }
