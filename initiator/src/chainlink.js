@@ -1,20 +1,9 @@
 const log4js = require('log4js');
 const axios = require("axios");
+const credentials = require('../config/credentials.json');
 
-const chainlinkCredentials = {
-    base: {
-        email: process.env.CHAINLINK_EMAIL,
-        password: process.env.CHAINLINK_PASSWORD
-    },
-    bsc: {
-        email: process.env.CHAINLINK_EMAIL_BSC,
-        password: process.env.CHAINLINK_PASSWORD_BSC
-    },
-    heco: {
-        email: process.env.CHAINLINK_EMAIL_HECO,
-        password: process.env.CHAINLINK_PASSWORD_HECO
-    }
-}
+const emailAddress = process.env.CHAINLINK_EMAIL;
+const password = process.env.CHAINLINK_PASSWORD;
 
 const log = log4js.getLogger("Chainlink");
 
@@ -25,12 +14,13 @@ class Chainlink {
         const headers = {
             "content-type": "application/json",
         };
-        let body = chainlinkCredentials[network];// { email: emailAddress, password: password };
+        let body = { email: emailAddress, password: password };
 
-        //Set default if undefined
-        if (!body || !body.email) {
-            body = chainlinkCredentials.base;
-            log.debug(`get base chainlinkCredentials: ${body.email}`);
+        // get for the specific node if found
+        let chainlinkCredentials = credentials[network];
+        if (chainlinkCredentials !== undefined) {
+            body = chainlinkCredentials;
+            log.debug(`override base chainlinkCredentials: ${body.email}`);
         }
 
         const response = await axios.post(eiChainlinkUrl + sessionUrl, body, {
