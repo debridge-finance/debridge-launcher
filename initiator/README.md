@@ -1,16 +1,27 @@
 0. Configure .env:
 
 ```
-PGUSER=...- postgres user name
-PGHOST=...- postgres host
-PGPASSWORD=...- postgres password
-PGDATABASE=...- postgres database
-PGPORT=...- postgres port
 MIN_CONFIRMATIONS...- minimal transaction confirmations required to react on the submission event
 CHAINLINK_EMAIL...- api credential to access the chainlink node
 CHAINLINK_PASSWORD...- api credential to access the chainlink node
 ```
-1. Build images(see main readme).
+
+1. Configure config/credentials.json to override credentials for specific chainlink node (optionals):
+
+```
+{
+  "bsc": {
+    "email": "debridge@gmail.com",
+    "password": "H6gtgFPlnR"
+  },
+  "heco": {
+    "email": "debridge@gmail.com",
+    "password": "H6gtgFPlnR"
+  }
+}
+```
+
+2. Build images(see main readme).
 
 # How it works
 
