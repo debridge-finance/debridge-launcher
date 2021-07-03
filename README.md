@@ -29,7 +29,6 @@ bash chainlink-init-scripts/setup-initiators-and-jobs.sh
 2. create several secrets in docker-compose.conf
 3. change start arguments(entrypoint) and secrets of docker-compose chainlink config
 4. create initiator/config/credentials.json with custom credentials(please see example initiator/config/credentials_example.json)
-5. change apicredentials to custom secret file in chainlink-init-scripts/setup-initiators-and-jobs.sh
 
 # Add new chain support
 
