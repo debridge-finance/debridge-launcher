@@ -1,5 +1,17 @@
 This repo allows to setup the oracles for few chains quickly with the same credentials.
 
+
+# Install packages on the chainlink server 
+
+  1. docker 
+    - https://docs.docker.com/engine/install/ubuntu/
+  2. docker-compose 
+    - https://docs.docker.com/compose/install/
+  3. nodejs 
+    - https://github.com/nodesource/distributions/blob/master/README.md
+  4. psql
+    ``` sudo apt-get install postgresql-client```
+
 # Fast Testnet start 
 1. Install full testnet nodes
   - Kovan
