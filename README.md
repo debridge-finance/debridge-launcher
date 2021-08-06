@@ -41,7 +41,7 @@ In order to set up a node on the DeBridge network, we need to:
 ```
 6. Put the keystore file under `secrets/keystore.json`.
 7. Store the password that decrypts the key from `keystore` in the `password.txt` file.
-8. Make your oracle-operator address to be whitelisted by deBridge governance
+8. Make your oracle-operator address to be whitelisted by deBridge governance (contact the DeBridge team for that)
 9. Run the command `docker-compose up --build -d`.
 10. Run the script to create the initiators and prepare the jobs and store main configurations in the database:
 ```
