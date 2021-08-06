@@ -1,7 +1,7 @@
 This repo allows to setup the oracles for few chains quickly with the same credentials.
+In order to set up a node on the DeBridge network, we need to:
 
-
-# Install packages on the chainlink server 
+# 1) Install prerequisite packages on your VM: 
 
   1. docker 
     - https://docs.docker.com/engine/install/ubuntu/
@@ -9,20 +9,39 @@ This repo allows to setup the oracles for few chains quickly with the same crede
     - https://docs.docker.com/compose/install/
   3. nodejs 
     - https://github.com/nodesource/distributions/blob/master/README.md
-  4. psql
+  5. psql
     ``` sudo apt-get install postgresql-client```
 
-# Fast Testnet start 
+# 2) Set up the Chainlink environment:
 1. Install full testnet nodes
-  - Kovan
+  - Kovan 
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
-  - [HECO](https://docs.hecochain.com/#/dev/install) 
-2. Set ETH_URL (node Websocket Endpoint) in files chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
-3. Set providers (node RPC Endpoint) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file .env
-4. Change default (postgreschainlink) postgress password in .env
-5. Create file apicredentials with chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env 
-6. Put keystore file to `secrets/keystore.json`.
-7. Store the password that decrypts the key from `keystore` in `password.txt`
+  - [HECO](https://docs.hecochain.com/#/dev/install)
+  Make sure that the nodes are fully synchronized and HTTP/WS ports are opened before proceeding. 
+2. Set ETH_URL (use the Websocket Endpoints) in each of the following files: chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
+3. Set providers (use the node RPC Endpoints) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file .env
+4. Change default (postgreschainlink) postgress password in .env (You can generate a random password by running this command: ``` date +%s | sha256sum | base64 | head -c 32 ; echo ```)
+5. Create the apicredentials file with your desired chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that, we need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env to match the information written in the apicredentials file.
+6. Now, we're going to need to create a keystore for our node, based on a private key.
+   - In order to generate a private key, there are multiple ways to do so, but this code snippet seems to be working just fine:
+``` 
+    const wallet = require('ethereumjs-wallet');
+    var addressData = wallet['default'].generate();
+    console.log("address: " + addressData.getAddressString());
+    console.log("privateKey: " + addressData.getPrivateKeyString()); 
+```
+  NOTE: You will need to install npm for this. (For Ubuntu machines, apt-get install npm will work)
+  - Now that we have our private key, we can move forward and generate our keystore based on it:
+    First of all, we need to install web3 using npm (npm install web3).
+    Next, use this code snippet inside node, where privateKey is the one generated above and password is an arbitrary string in order to generate your keystore:
+```
+   var Web3 = require('web3');
+   var web3 = new Web3('ws://test.com:8546');
+   var JsonWallet = web3.eth.accounts.encrypt(privateKey, password);
+   JSON.stringify(JsonWallet)
+```
+6. Put the keystore file under `secrets/keystore.json`.
+7. Store the password that decrypts the key from `keystore` in the `password.txt` file.
 8. Make your oracle-operator address to be whitelisted by deBridge governance
 9. Run the command `docker-compose up --build -d`.
 10. Run the script to create the initiators and prepare the jobs and store main configurations in the database:
@@ -119,7 +138,7 @@ add_record $network
 ```
 
 
-# Miscellenious
+# Miscellaneous
 
 Connect to the database(if you use docker-compose):
 
