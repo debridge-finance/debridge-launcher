@@ -19,7 +19,7 @@ In order to set up a node on the DeBridge network, we need to:
   - [HECO](https://docs.hecochain.com/#/dev/install)
 2. Set ETH_URL (use the Websocket Endpoints) in each of the following files: chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
 3. Set providers (use the node RPC Endpoints) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file .env
-4. Change default (postgreschainlink) postgress password in .env (You can generate a random password by running this command: ``` date +%s | sha256sum | base64 | head -c 32 ; echo ```)
+4. Change default (postgreschainlink) postgress password in .env.
 5. Create the apicredentials file with your desired chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that, we need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env to match the information written in the apicredentials file.
 6. Now, we're going to need to create a keystore for our node, based on a private key.
    - In order to generate a private key, there are multiple ways to do so, but this code snippet seems to be working just fine:
