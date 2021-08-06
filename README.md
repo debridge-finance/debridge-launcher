@@ -17,6 +17,7 @@ In order to set up a node on the DeBridge network, we need to:
   - Kovan 
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
   - [HECO](https://docs.hecochain.com/#/dev/install)
+  
   Make sure that the nodes are fully synchronized and HTTP/WS ports are opened before proceeding. 
 2. Set ETH_URL (use the Websocket Endpoints) in each of the following files: chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
 3. Set providers (use the node RPC Endpoints) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file .env
