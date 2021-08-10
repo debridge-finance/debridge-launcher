@@ -21,34 +21,22 @@ In order to set up a node on the DeBridge network, we need to:
 3. Set providers (use the node RPC Endpoints) ETH_PROVIDER, BSC_PROVIDER, ETH_PROVIDER in file .env
 4. Change default (postgreschainlink) postgress password in .env.
 5. Create the apicredentials file with your desired chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that, we need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env to match the information written in the apicredentials file.
-6. Now, we're going to need to create a keystore for our node, based on a private key.
-   - In order to generate a private key, there are multiple ways to do so, but this code snippet seems to be working just fine:
-``` 
-    const wallet = require('ethereumjs-wallet');
-    var addressData = wallet['default'].generate();
-    console.log("address: " + addressData.getAddressString());
-    console.log("privateKey: " + addressData.getPrivateKeyString()); 
-```
-  NOTE: You will need to install npm for this. (For Ubuntu machines, apt-get install npm will work)
-  - Now that we have our private key, we can move forward and generate our keystore based on it:
-    First of all, we need to install web3 using npm (npm install web3).
-    Next, use this code snippet inside node, where privateKey is the one generated above and password is an arbitrary string in order to generate your keystore:
-```
-   var Web3 = require('web3');
-   var web3 = new Web3('ws://test.com:8546');
-   var JsonWallet = web3.eth.accounts.encrypt(privateKey, password);
-   JSON.stringify(JsonWallet)
-```
-6. Put the keystore file under `secrets/keystore.json`.
-7. Store the password that decrypts the key from `keystore` in the `password.txt` file.
-8. Make your oracle-operator address to be whitelisted by deBridge governance (contact the DeBridge team for that)
-9. Run the command `docker-compose up --build -d`.
-10. Run the script to create the initiators and prepare the jobs and store main configurations in the database:
+6. Now, we're going to need to create a keystore for our node, based on a private key. We have script in folder `generate-keystore`. To start generate new keystore info
+  - npm i
+  - npm index.js
+  
+  Script will show new generated ethereum address, private key, password for keystore and keystore info. You need to copy pasword to `password.txt`, keystore info to /`secrets/keystore.json`
+  
+7. Put the keystore file under `secrets/keystore.json`.
+8. Store the password that decrypts the key from `keystore` in the `password.txt` file.
+9. Make your oracle-operator address to be whitelisted by deBridge governance (contact the DeBridge team for that)
+10. Run the command `docker-compose up --build -d`.
+11. Run the script to create the initiators and prepare the jobs and store main configurations in the database:
 ```
 bash chainlink-init-scripts/setup-initiators-and-jobs.sh
 ```
-11. Run the command `docker-compose restart initiator`.
-12. If you want to start multiple instances on one server or one postgresql you can do this:
+12. Run the command `docker-compose restart initiator`.
+13. If you want to start multiple instances on one server or one postgresql you can do this:
   - checkout or copy repo to new directory
   - change DOCKER_ID variable in .env
   - start as previously described
