@@ -1,0 +1,9 @@
+{
+  "name": "generate-keystore",
+  "version": "1.0.0",
+  "dependencies": {
+    "ethereumjs-wallet": "^1.0.1",
+    "generate-password": "^1.6.1",
+    "web3": "^1.5.1"
+  }
+}
