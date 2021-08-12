@@ -62,37 +62,7 @@ EOSQL
 	echo "Tables created"
 	echo "Adding chains configurations"
 	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/$EI_DATABASE?sslmode=disable <<-EOSQL
-        insert into supported_chains (
-                chainId,
-                latestBlock,
-                network,
-                provider,
-                debridgeAddr,
-                interval
-                ) values(
-                42,
-                0,
-                'eth',
-                '$ETH_PROVIDER',
-                '$ETH_DEBRIDGE_ADDRESS',
-                60000
-                ) on conflict do nothing;
-        insert into supported_chains (
-                chainId,
-                latestBlock,
-                network,
-                provider,
-                debridgeAddr,
-                interval
-                ) values(
-                256,
-                0,
-                'heco',
-                '$HECO_PROVIDER',
-                '$HECO_DEBRIDGE_ADDRESS',
-                60000
-                ) on conflict do nothing;
-		insert into aggregator_chains (
+	insert into aggregator_chains (
                 chainTo,
                 aggregatorChain
                 ) values(
@@ -112,21 +82,6 @@ EOSQL
                 ) values(
                 256,
                 256
-                ) on conflict do nothing;
-        insert into supported_chains (
-                chainId,
-                latestBlock,
-                network,
-                provider,
-                debridgeAddr,
-                interval
-                ) values(
-                97,
-                0,
-                'bsc',
-                '$BSC_PROVIDER',
-                '$BSC_DEBRIDGE_ADDRESS',
-                60000
                 ) on conflict do nothing;
 EOSQL
 	echo "Chain configurations added"
