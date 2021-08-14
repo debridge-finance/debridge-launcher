@@ -75,6 +75,8 @@ services:
     restart: on-failure
     env_file:
       - initiator/.env
+    volumes:
+      - ./initiator/config:/config
     environment:
       - PGUSER=${POSTGRES_USER}
       - PGHOST=${POSTGRES_HOST}

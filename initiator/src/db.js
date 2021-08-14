@@ -184,9 +184,9 @@ class Db {
         if (chainId == undefined) {
             return result.rows;
         } else {
-            for (let supportedChain in result.rows) {
-                if (supportedChain['chainid'] == chainId) {
-                    return supportedChain;
+            for (let index in result.rows) {
+                if (supportedChains[index]['chainid'] == chainId) {
+                    return supportedChains[index];
                 }
             }
         }
@@ -225,12 +225,12 @@ class Db {
     async updateSupportedChainKey(chainId, key, value) {
         log.info(`updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${value}`);
 	const supportedChains = await this.getSupportedChains();
-        for(let supportedChain in supportedChains) {
-            if(supportedChain['chainid'] == chainId){
-                if(supportedChain[key] != value){
+        for(let index in supportedChains) {
+            if(supportedChains[index]['chainid'] == chainId){
+                if(supportedChains[index][key] != value){
                     await this.pgClient.query(`update ${supportedChainsTable} set 
                     ${key} = ${value}
-                    where chainId = ${chainId};`);
+                    where chainId = '${chainId}';`);
                 }
             }
         }

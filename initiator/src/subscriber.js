@@ -118,7 +118,7 @@ class Subscriber {
         /* update lattest viewed block */
         //supportedChain.latestblock = toBlock;
         if (isOk1 && isOk2) {
-            await this.db.updateSupportedChainKey(supportedChain.chainid, "lastblock", toBlock);
+            await this.db.updateSupportedChainKey(supportedChain.chainid, "latestblock", toBlock);
         }
         else {
             log.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
