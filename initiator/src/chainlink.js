@@ -1,6 +1,6 @@
 const log4js = require('log4js');
 const axios = require("axios");
-const credentials = require('/config/credentials.json');
+const credentials = require('../config/credentials.json');
 
 const emailAddress = process.env.CHAINLINK_EMAIL;
 const password = process.env.CHAINLINK_PASSWORD;

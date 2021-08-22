@@ -22,12 +22,12 @@ class Db {
         log.info('createTables');
         for (let chain_name in chains_config) {
             const config_chain = chains_config[chain_name];
-            const db_chain = await this.getSupportedChains(config_chain['chainid']);
+            const db_chain = await this.getSupportedChain(config_chain['chainid']);
             if (db_chain == null) {
                 log.info(`createSupportedChain network: ${chain_name}`);
                 await this.createSupportedChain(
                     config_chain['chainid'],
-                    '0',
+                    0,
                     chain_name,
                     config_chain['provider'],
                     config_chain['debridgeaddr'],
@@ -35,7 +35,6 @@ class Db {
                 )
             } else {
                 for (let key in config_chain) {
-                    log.info(`updateSupportedChain network: ${chain_name} and key: ${key}`);
                     await this.updateSupportedChainKey(
                         config_chain['chainid'],
                         key,
@@ -177,20 +176,11 @@ class Db {
         );
         return result.rows;
     }
-    async getSupportedChains(chainId) {
+    async getSupportedChains() {
         const result = await this.pgClient.query(
             `select * from ${supportedChainsTable};`
         );
-        if (chainId == undefined) {
-            return result.rows;
-        } else {
-            for (let index in result.rows) {
-                if (supportedChains[index]['chainid'] == chainId) {
-                    return supportedChains[index];
-                }
-            }
-        }
-        return null;
+        return result.rows;
     }
 
     async getSupportedChain(chainId) {
@@ -223,15 +213,18 @@ class Db {
     }
 
     async updateSupportedChainKey(chainId, key, value) {
-        log.info(`updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${value}`);
-	const supportedChains = await this.getSupportedChains();
-        for(let index in supportedChains) {
-            if(supportedChains[index]['chainid'] == chainId){
-                if(supportedChains[index][key] != value){
-                    await this.pgClient.query(`update ${supportedChainsTable} set 
+	const supportedChain = await this.getSupportedChain(chainId);
+        if(supportedChain[key] != value){
+            log.info(`updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${value}`);
+            if(typeof value == 'number'){
+                await this.pgClient.query(`update ${supportedChainsTable} set 
                     ${key} = ${value}
-                    where chainId = '${chainId}';`);
-                }
+                    where chainId = ${chainId};`);
+            }
+            else{
+                await this.pgClient.query(`update ${supportedChainsTable} set
+                    ${key} = '${value}'
+                    where chainId = ${chainId};`);
             }
         }
     }
