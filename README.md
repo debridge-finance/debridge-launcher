@@ -23,7 +23,7 @@ In order to set up a node on the DeBridge network, we need to:
 5. Create the apicredentials file with your desired chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that, we need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env to match the information written in the apicredentials file.
 6. Now, we're going to need to create a keystore for our node, based on a private key. We have script in folder `generate-keystore`. To start generate new keystore info
   - npm i
-  - npm index.js
+  - node index.js
   
   Script will show new generated ethereum address, private key, password for keystore and keystore info. You need to copy pasword to `password.txt`, keystore info to /`secrets/keystore.json`
   
