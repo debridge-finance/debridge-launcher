@@ -128,7 +128,7 @@ class Subscriber {
     /* proccess new events */
     async processNewTransfers(events, chainIdFrom) {
         if (!events) return true;
-        const isOk = true;
+        let isOk = true;
         for (let e of events) {
             log.info(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${e.returnValues.submissionId}`);
             log.debug(e);
