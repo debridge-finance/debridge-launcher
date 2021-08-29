@@ -2,6 +2,7 @@ const log4js = require('log4js');
 const { Pool } = require("pg");
 const chainConfigTable = 'chainlink_config';
 const supportedChainsTable = 'supported_chains';
+const chains_config = require('../config/chains_config.json');
 const submissionsTable = 'submissions';
 const aggregatorTable = 'aggregator_chains';
 const log = log4js.getLogger("Db");
@@ -19,6 +20,29 @@ class Db {
 
     async createTables() {
         log.info('createTables');
+        for (let chain_name in chains_config) {
+            const config_chain = chains_config[chain_name];
+            const db_chain = await this.getSupportedChain(config_chain['chainid']);
+            if (db_chain == null) {
+                log.info(`createSupportedChain network: ${chain_name}`);
+                await this.createSupportedChain(
+                    config_chain['chainid'],
+                    0,
+                    chain_name,
+                    config_chain['provider'],
+                    config_chain['debridgeaddr'],
+                    config_chain['interval']
+                )
+            } else {
+                for (let key in config_chain) {
+                    await this.updateSupportedChainKey(
+                        config_chain['chainid'],
+                        key,
+                        config_chain[key]
+                    );
+                }
+            }
+	}
         // await this.pgClient.query(`drop table if exists ${submissionsTable} ;`);
         // await this.pgClient.query(
         //   `drop table if exists ${supportedChainsTable} ;`
@@ -188,11 +212,21 @@ class Db {
         return result.rows.length > 0 ? result.rows[0] : null;
     }
 
-    async updateSupportedChainBlock(chainId, latestBlock) {
-        log.info(`updateSupportedChainBlock chainId: ${chainId}; latestBlock: ${latestBlock}`);
-        await this.pgClient.query(`update ${supportedChainsTable} set 
-        latestBlock = ${latestBlock}
-        where chainId = ${chainId};`);
+    async updateSupportedChainKey(chainId, key, value) {
+	const supportedChain = await this.getSupportedChain(chainId);
+        if(supportedChain[key] != value){
+            log.info(`updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${value}`);
+            if(typeof value == 'number'){
+                await this.pgClient.query(`update ${supportedChainsTable} set 
+                    ${key} = ${value}
+                    where chainId = ${chainId};`);
+            }
+            else{
+                await this.pgClient.query(`update ${supportedChainsTable} set
+                    ${key} = '${value}'
+                    where chainId = ${chainId};`);
+            }
+        }
     }
 
     async updateSubmissionStatus(submissionId, status) {

@@ -118,7 +118,7 @@ class Subscriber {
         /* update lattest viewed block */
         //supportedChain.latestblock = toBlock;
         if (isOk1 && isOk2) {
-            await this.db.updateSupportedChainBlock(supportedChain.chainid, toBlock);
+            await this.db.updateSupportedChainKey(supportedChain.chainid, "latestblock", toBlock);
         }
         else {
             log.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
@@ -128,7 +128,7 @@ class Subscriber {
     /* proccess new events */
     async processNewTransfers(events, chainIdFrom) {
         if (!events) return true;
-        const isOk = true;
+        let isOk = true;
         for (let e of events) {
             log.info(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${e.returnValues.submissionId}`);
             log.debug(e);
