@@ -9,3 +9,4 @@ pgdata/
 .vs/
 node_modules/
 /initiator/log
+dist/
