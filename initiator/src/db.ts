@@ -1,16 +1,18 @@
-const log4js = require('log4js');
-const { Pool } = require("pg");
+import log4js from "log4js";
+import { Pool, PoolClient } from "pg";
 const chainConfigTable = 'chainlink_config';
 const supportedChainsTable = 'supported_chains';
-const chains_config = require('../config/chains_config.json');
+import chains_config from "./config/chains_config.json";
 const submissionsTable = 'submissions';
 const aggregatorTable = 'aggregator_chains';
 const log = log4js.getLogger("Db");
 
 class Db {
+    pool: Pool;
+    pgClient: PoolClient;
+
     constructor() {
         this.pool = new Pool();
-        this.pgClient;
     }
 
     async connectDb() {
@@ -251,4 +253,6 @@ class Db {
     }
 }
 
-module.exports.Db = Db;
+export {
+    Db
+};

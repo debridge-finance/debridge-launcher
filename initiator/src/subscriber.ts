@@ -1,9 +1,9 @@
-const log4js = require('log4js');
-const Web3 = require("web3");
-const whiteDebridgeAbi = require("../assets/WhiteFullDebridge.json").abi;
-const { Db } = require("./db");
-const { Chainlink } = require("./chainlink");
-const minConfirmations = process.env.MIN_CONFIRMATIONS;
+import log4js from "log4js";
+import Web3 from "web3";
+import { abi as whiteDebridgeAbi}  from "../assets/WhiteFullDebridge.json";
+import { Db } from "./db";
+import { Chainlink } from "./chainlink";
+const minConfirmations = parseInt(process.env.MIN_CONFIRMATIONS);
 const SubmisionStatus = {
     CREATED: 0,
     BROADCASTED: 1,
@@ -15,6 +15,9 @@ const log = log4js.getLogger("subscriber");
 
 
 class Subscriber {
+    db: Db;
+    chainlink: Chainlink;
+
     constructor() {
         this.db = new Db();
         this.chainlink = new Chainlink();
@@ -79,7 +82,7 @@ class Subscriber {
 
         const web3 = new Web3(supportedChain.provider);
         const registerInstance = new web3.eth.Contract(
-            whiteDebridgeAbi,
+            whiteDebridgeAbi as any,
             supportedChain.debridgeaddr
         );
         /* get blocks range */
@@ -234,4 +237,6 @@ class Subscriber {
     }
 }
 
-module.exports.Subscriber = Subscriber;
+export {
+    Subscriber
+}

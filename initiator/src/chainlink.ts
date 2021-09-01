@@ -1,6 +1,6 @@
-const log4js = require('log4js');
-const axios = require("axios");
-const credentials = require('../config/credentials.json');
+import log4js from "log4js";
+import axios from "axios";
+import credentials from "./config/credentials.json";
 
 const emailAddress = process.env.CHAINLINK_EMAIL;
 const password = process.env.CHAINLINK_PASSWORD;
@@ -77,4 +77,6 @@ class Chainlink {
     }
 }
 
-module.exports.Chainlink = Chainlink;
+export {
+    Chainlink
+};

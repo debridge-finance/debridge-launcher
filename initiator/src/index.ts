@@ -1,11 +1,12 @@
-require("dotenv-flow").config();
-const express = require("express");
-const bodyParser = require("body-parser");
+import dotenvFlow from "dotenv-flow";
+dotenvFlow.config();
+import express from "express";
+import bodyParser from "body-parser";
 const app = express();
-const { Subscriber } = require("./src/subscriber");
+import { Subscriber } from "./subscriber";
 
-const log4js = require('log4js');
-log4js.configure('./config/log4js.json');
+import log4js from "log4js";
+log4js.configure('./src/config/log4js.json');
 const log = log4js.getLogger("startup");
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,10 +20,8 @@ app.post("/jobs", function (req, res) {
     res.sendStatus(200);
 });
 
-
-const server = app.listen(process.env.PORT || 8080, process.env.ADDRESS || '127.0.0.1', async function () {
-    const port = server.address().port;
-    //console.log("App now running on port", port);
+const port = process.env.PORT || 8080;
+const server = app.listen(port, async function () {
     log.info(`App now running on port ${port} with pid ${process.pid}`);
 
     try {
