@@ -110,10 +110,10 @@ class Db {
     return submissions;
   }
 
-  async getSubmission(submissionId: string): Promise<Submissions[]> {
+  async getSubmission(submissionId: string): Promise<Submissions> {
     const submissionsRepository = getRepository(this.submissions);
-    const submissions: Submissions[] = await submissionsRepository.find({ where: { submissionId } });
-    return submissions;
+    const submission: Submissions = await submissionsRepository.findOne({ where: { submissionId } });
+    return submission;
   }
 
   async updateSupportedChainKey(chainId: number, key: string, value: any) {
