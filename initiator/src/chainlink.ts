@@ -32,7 +32,7 @@ class Chainlink {
   }
 
   /* set chainlink cookies */
-  async getChainlinkRun(eiChainlinkUrl: string, runId: number, cookie: string) {
+  async getChainlinkRun(eiChainlinkUrl: string, runId: string, cookie: string) {
     const getRunUrl = '/v2/runs/' + runId;
     const headers = {
       'content-type': 'application/json',
@@ -52,7 +52,7 @@ class Chainlink {
   }
 
   /* post chainlink run */
-  async postChainlinkRun(jobId: number, data: any, eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string) {
+  async postChainlinkRun(jobId: string, data: any, eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string) {
     const postJobUrl = '/v2/specs/' + jobId + '/runs';
     const headers = {
       'content-type': 'application/json',
