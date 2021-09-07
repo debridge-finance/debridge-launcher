@@ -22,14 +22,6 @@ export class SupportedChainsEntity implements SupportedChains {
 
   @Column()
   interval: number;
-
-  @Column()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Column()
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
 
 @Entity()
@@ -64,14 +56,6 @@ export class ChainlinkConfigEntity implements ChainlinkConfig {
 
   @Column()
   network: string;
-
-  @Column()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Column()
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
 
 @Entity()
@@ -103,14 +87,6 @@ export class SubmissionsEntity implements Submissions {
 
   @Column()
   status: number;
-
-  @Column()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Column()
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
 
 @Entity()
@@ -121,12 +97,4 @@ export class AggregatorChainsEntity implements AggregatorChains {
 
   @Column()
   aggregatorChain: number;
-
-  @Column()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Column()
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

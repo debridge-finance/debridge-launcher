@@ -1,20 +1,20 @@
 {
   "bsc": {
-    "chainid": 97,
-    "debridgeaddr": "0xA7ACfCB8b2D7d35Ce06ef2cD706fD703fE1Ea0ed",
+    "chainId": 97,
+    "debridgeAddr": "0xA7ACfCB8b2D7d35Ce06ef2cD706fD703fE1Ea0ed",
     "provider": "https://data-seed-prebsc-1-s1.binance.org:8545/",
-    "interval": "60000"
+    "interval": 60000
   },
   "eth": {
-    "chainid": 42,
-    "debridgeaddr": "0x8Ca37C8b57f3dC93EaF2be9Ee479dc947bddDC12",
+    "chainId": 42,
+    "debridgeAddr": "0x8Ca37C8b57f3dC93EaF2be9Ee479dc947bddDC12",
     "provider": "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-    "interval": "60000"
+    "interval": 60000
   },
   "heco": {
-    "chainid": 256,
-    "debridgeaddr": "0xBEA7Cd31f6FB78F73b5D933fad275BC2FF6ac561",
+    "chainId": 256,
+    "debridgeAddr": "0xBEA7Cd31f6FB78F73b5D933fad275BC2FF6ac561",
     "provider": "https://http-testnet.hecochain.com",
-    "interval": "60000"
+    "interval": 60000
   }
 }

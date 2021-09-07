@@ -37,9 +37,7 @@ class Db {
           interval: config_chain['interval'],
         });
       } else {
-        for (const key in config_chain) {
-          await this.updateSupportedChainKey(config_chain['chainid'], key, config_chain[key]);
-        }
+        await this.updateSupportedChain(config_chain['chainid'], config_chain);
       }
     }
   }
@@ -112,7 +110,7 @@ class Db {
     return submissions;
   }
 
-  async getSubmission(submissionId: string) {
+  async getSubmission(submissionId: string): Promise<Submissions[]> {
     const submissionsRepository = getRepository(this.submissions);
     const submissions: Submissions[] = await submissionsRepository.find({ where: { submissionId } });
     return submissions;
@@ -125,6 +123,12 @@ class Db {
       this.log.info(`updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${value}`);
       await supportedChainsRepository.update(chainId, { ...supportedChain, [key]: value });
     }
+  }
+
+  async updateSupportedChain(chainId: number, values: any) {
+    const supportedChainsRepository = getRepository(this.supportedChains);
+    const supportedChain = await this.getSupportedChain(chainId);
+    await supportedChainsRepository.update(chainId, { ...supportedChain, ...values });
   }
 
   async updateSubmissionStatus(submissionId: string, status: number) {

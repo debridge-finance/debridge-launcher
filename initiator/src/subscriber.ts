@@ -1,6 +1,6 @@
 import log4js from 'log4js';
 import Web3 from 'web3';
-import { abi as whiteDebridgeAbi } from '../assets/WhiteFullDebridge.json';
+import { abi as whiteDebridgeAbi } from './assets/WhiteFullDebridge.json';
 import { Db } from './db';
 import { Chainlink } from './chainlink';
 import { EventData } from 'web3-eth-contract';
