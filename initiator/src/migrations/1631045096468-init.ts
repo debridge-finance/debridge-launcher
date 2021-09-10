@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
-import { AggregatorChainsEntity, ChainlinkConfigEntity, SubmissionsEntity, SupportedChainsEntity } from '@entity/tables.entity';
+import { AggregatorChainsEntity, ChainlinkConfigEntity, SubmissionsEntity, SupportedChainEntity } from '@entity/tables.entity';
 
 export class init1631045096468 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const connection = queryRunner.connection;
-    await queryRunner.createTable(Table.create(connection.getMetadata(SupportedChainsEntity), connection.driver));
+    await queryRunner.createTable(Table.create(connection.getMetadata(SupportedChainEntity), connection.driver));
     await queryRunner.createTable(Table.create(connection.getMetadata(AggregatorChainsEntity), connection.driver));
     await queryRunner.createTable(Table.create(connection.getMetadata(ChainlinkConfigEntity), connection.driver));
     await queryRunner.createTable(Table.create(connection.getMetadata(SubmissionsEntity), connection.driver));

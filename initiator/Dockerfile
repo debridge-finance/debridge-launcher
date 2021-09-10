@@ -1,8 +1,10 @@
-FROM ubuntu:20.04
+FROM node:15-alpine
+WORKDIR /app
 
-ARG DEBIAN_FRONTEND=noninteractive
-COPY . /
-RUN apt-get update; apt-get install npm -y
-RUN npm i
+COPY package*.json ./
+RUN npm install
 
-CMD node index.js 
+COPY . .
+RUN npm run build
+
+CMD node dist/index.js
