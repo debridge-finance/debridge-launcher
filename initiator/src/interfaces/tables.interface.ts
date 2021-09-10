@@ -1,4 +1,4 @@
-export interface SupportedChains {
+export interface SupportedChain {
   chainId: number;
   network: string;
   debridgeAddr: string;

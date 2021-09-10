@@ -1,13 +1,13 @@
 import log4js from 'log4js';
 import { createConnection, getRepository, In } from 'typeorm';
 import { dbConnection } from '@databases';
-import chains_config from './config/chains_config.json';
-import { SupportedChainsEntity, ChainlinkConfigEntity, SubmissionsEntity, AggregatorChainsEntity } from './entity/tables.entity';
-import { AggregatorChains, ChainlinkConfig, Submissions, SupportedChains } from './interfaces/tables.interface';
+import { SupportedChainEntity, ChainlinkConfigEntity, SubmissionsEntity, AggregatorChainsEntity } from './entity/tables.entity';
+import { AggregatorChains, ChainlinkConfig, Submissions, SupportedChain } from './interfaces/tables.interface';
+import chainConfigs from './config/chains.json';
 
 class Db {
   log: log4js.Logger;
-  public supportedChains = SupportedChainsEntity;
+  public supportedChains = SupportedChainEntity;
   public chainlinkConfig = ChainlinkConfigEntity;
   public submissions = SubmissionsEntity;
   public aggregatorChains = AggregatorChainsEntity;
@@ -23,23 +23,18 @@ class Db {
 
   async createTables() {
     this.log.info('createTables');
-    for (const chain_name in chains_config) {
-      const config_chain = chains_config[chain_name];
-      const db_chain = await this.getSupportedChain(config_chain['chainid']);
-      if (!db_chain) {
-        this.log.info(`createSupportedChain network: ${chain_name}`);
+    chainConfigs.forEach(async (config: SupportedChain) => {
+      const isTableExist = await this.getSupportedChain(config.chainId);
+      if (!isTableExist) {
+        this.log.info(`createSupportedChain network: ${config.network}`);
         await this.createSupportedChain({
-          chainId: config_chain['chainid'],
+          ...config,
           latestBlock: 0,
-          network: chain_name,
-          provider: config_chain['provider'],
-          debridgeAddr: config_chain['debridgeaddr'],
-          interval: config_chain['interval'],
         });
       } else {
-        await this.updateSupportedChain(config_chain['chainid'], config_chain);
+        await this.updateSupportedChain(config.chainId, config);
       }
-    }
+    });
   }
 
   async createChainConfig(chainConfig: ChainlinkConfig) {
@@ -48,7 +43,7 @@ class Db {
     await chainConfigRepository.save(chainConfig);
   }
 
-  async createSupportedChain(supportedChain: SupportedChains) {
+  async createSupportedChain(supportedChain: SupportedChain) {
     this.log.info(
       `createSupportedChain chainId: ${supportedChain.chainId}; latestBlock: ${supportedChain.latestBlock}; network: ${supportedChain.network}; provider: ${supportedChain.provider}; debridgeAddr: ${supportedChain.debridgeAddr}; interval: ${supportedChain.interval};`,
     );
@@ -86,15 +81,15 @@ class Db {
     return aggConfig;
   }
 
-  async getSupportedChains(): Promise<SupportedChains[]> {
+  async getSupportedChains(): Promise<SupportedChain[]> {
     const supportedChainsRepository = getRepository(this.supportedChains);
-    const supportedChains: SupportedChains[] = await supportedChainsRepository.find();
+    const supportedChains: SupportedChain[] = await supportedChainsRepository.find();
     return supportedChains;
   }
 
-  async getSupportedChain(chainId: number): Promise<SupportedChains> {
+  async getSupportedChain(chainId: number): Promise<SupportedChain> {
     const supportedChainsRepository = getRepository(this.supportedChains);
-    const supportedChains: SupportedChains = await supportedChainsRepository.findOne({ where: { chainId } });
+    const supportedChains: SupportedChain = await supportedChainsRepository.findOne({ where: { chainId } });
     return supportedChains;
   }
 

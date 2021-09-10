@@ -1,11 +1,11 @@
 import { IsNotEmpty } from 'class-validator';
-import { Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { SupportedChains, ChainlinkConfig, Submissions, AggregatorChains } from '@interfaces/tables.interface';
+import { Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn, PrimaryColumn } from 'typeorm';
+import { SupportedChain, ChainlinkConfig, Submissions, AggregatorChains } from '@interfaces/tables.interface';
 
-@Entity()
+@Entity('supported_chains')
 @Unique(['chainId'])
-export class SupportedChainsEntity implements SupportedChains {
-  @PrimaryGeneratedColumn()
+export class SupportedChainEntity implements SupportedChain {
+  @PrimaryColumn()
   chainId: number;
 
   @Column()
@@ -24,10 +24,10 @@ export class SupportedChainsEntity implements SupportedChains {
   interval: number;
 }
 
-@Entity()
+@Entity('chainlink_config')
 @Unique(['chainId'])
 export class ChainlinkConfigEntity implements ChainlinkConfig {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   chainId: number;
 
   @Column()
@@ -58,7 +58,7 @@ export class ChainlinkConfigEntity implements ChainlinkConfig {
   network: string;
 }
 
-@Entity()
+@Entity('submissions')
 @Unique(['submissionId'])
 export class SubmissionsEntity implements Submissions {
   @PrimaryGeneratedColumn()
@@ -89,10 +89,10 @@ export class SubmissionsEntity implements Submissions {
   status: number;
 }
 
-@Entity()
+@Entity('aggregator_chains')
 @Unique(['chainTo'])
 export class AggregatorChainsEntity implements AggregatorChains {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   chainTo: number;
 
   @Column()

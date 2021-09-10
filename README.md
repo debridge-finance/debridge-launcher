@@ -1,32 +1,32 @@
 This repo allows to setup the oracles for few chains quickly with the same credentials.
 In order to set up a node on the DeBridge network, we need to:
 
-# 1) Install prerequisite packages on your VM: 
+# 1) Install prerequisite packages on your VM:
 
-  1. docker 
+  1. docker
     - https://docs.docker.com/engine/install/ubuntu/
-  2. docker-compose 
+  2. docker-compose
     - https://docs.docker.com/compose/install/
-  3. nodejs 
+  3. nodejs
     - https://github.com/nodesource/distributions/blob/master/README.md
   5. psql
     ``` sudo apt-get install postgresql-client```
 
 # 2) Set up the Chainlink environment:
 1. Install full testnet nodes
-  - Kovan 
+  - Kovan
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
   - [HECO](https://docs.hecochain.com/#/dev/install)
 2. Set ETH_URL (use the Websocket Endpoints) in each of the following files: chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
-3. Set support chainlink configs(chainid, debridgeaddr, provider, interval) to ./initiator/config/chains_config.json 
+3. Set support chainlink configs(chainid, debridgeaddr, provider, interval) to ./initiator/src/config/chains.json
 4. Change default (postgreschainlink) postgress password in .env.
 5. Create the apicredentials file with your desired chainlink email and password. [example](https://github.com/debridge-finance/debridge-launcher/blob/master/apicredentials.example) [docs](https://docs.chain.link/docs/miscellaneous/#use-password-and-api-files-on-startup). After that, we need to change CHAINLINK_EMAIL, CHAINLINK_PASSWORD in initiator/.env to match the information written in the apicredentials file.
 6. Now, we're going to need to create a keystore for our node, based on a private key. We have script in folder `generate-keystore`. To start generate new keystore info
   - npm i
   - node index.js
-  
+
   Script will show new generated ethereum address, private key, password for keystore and keystore info. You need to copy pasword to `password.txt`, keystore info to /`secrets/keystore.json`
-  
+
 7. Put the keystore file under `secrets/keystore.json`.
 8. Store the password that decrypts the key from `keystore` in the `password.txt` file.
 9. Make your oracle-operator address to be whitelisted by deBridge governance (contact the DeBridge team for that)
