@@ -1,12 +1,12 @@
 process.env['NODE_CONFIG_DIR'] = __dirname + '/config';
 
-import dotenvFlow from 'dotenv-flow';
-dotenvFlow.config();
+import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { Subscriber } from './subscriber';
 import log4js from 'log4js';
 log4js.configure('./src/config/log4js.json');
+dotenv.config();
 
 class App {
   public app: express.Application;
