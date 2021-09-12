@@ -11,11 +11,9 @@ export class ChainlinkHttpService extends ChainlinkService {
   private readonly emailAddress: string;
   private readonly password: string;
 
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) {
     super();
+    this.logger.verbose(`ChainlinkHttpService is initialized`);
     this.emailAddress = this.configService.get('CHAINLINK_EMAIL');
     this.password = this.configService.get('CHAINLINK_PASSWORD');
   }

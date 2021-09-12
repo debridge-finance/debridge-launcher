@@ -11,20 +11,15 @@ export class ChainlinkServiceMock extends ChainlinkService {
   private readonly emailAddress: string;
   private readonly password: string;
 
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) {
     super();
+    this.logger.verbose(`ChainlinkServiceMock is initialized`);
     this.emailAddress = this.configService.get('CHAINLINK_EMAIL');
     this.password = this.configService.get('CHAINLINK_PASSWORD');
   }
 
   /* set chainlink cookies */
-  async getChainlinkCookies(
-    eiChainlinkUrl: string,
-    network: string,
-  ): Promise<string> {
+  async getChainlinkCookies(eiChainlinkUrl: string, network: string): Promise<string> {
     const res = {
       explorer: '%7B%22status%22%3A%22disconnected%22%2C%22url%22%3A%22%22%7D',
       SameSite: 'Strict',
@@ -45,13 +40,7 @@ export class ChainlinkServiceMock extends ChainlinkService {
   }
 
   /* post chainlink run */
-  async postChainlinkRun(
-    jobId: string,
-    data: any,
-    eiChainlinkUrl: string,
-    eiIcAccessKey: string,
-    eiIcSecret: string,
-  ) {
+  async postChainlinkRun(jobId: string, data: any, eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string) {
     return uuidv4();
   }
 }

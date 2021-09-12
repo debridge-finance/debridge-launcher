@@ -10,6 +10,7 @@ import { SupportedChainEntity } from './entities/SupportedChainEntity';
 import { SubscriberService } from './SubsriberService';
 import { ChainlinkService } from './chainlink/ChainlinkService';
 import { ChainlinkServiceMock } from './chainlink/ChainlinkServiceMock';
+import { chainlinkFactory } from "./chainlink/ChainlinkFactory";
 
 @Module({
   imports: [
@@ -26,26 +27,16 @@ import { ChainlinkServiceMock } from './chainlink/ChainlinkServiceMock';
         password: configService.get('DATABASE_PASSWORD', 'password'),
         database: configService.get('DATABASE_SCHEMA', 'postgres'),
         synchronize: true,
-        entities: [
-          AggregatorChainEntity,
-          ChainlinkConfigEntity,
-          SubmissionEntity,
-          SupportedChainEntity,
-        ],
+        entities: [AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity],
       }),
     }),
-    TypeOrmModule.forFeature([
-      AggregatorChainEntity,
-      ChainlinkConfigEntity,
-      SubmissionEntity,
-      SupportedChainEntity,
-    ]),
+    TypeOrmModule.forFeature([AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity]),
   ],
   controllers: [AppController],
   providers: [
     {
       provide: ChainlinkService,
-      useClass: ChainlinkServiceMock,
+      useClass: chainlinkFactory(),
     },
     SubscriberService,
   ],
