@@ -10,7 +10,8 @@ import { SupportedChainEntity } from './entities/SupportedChainEntity';
 import { SubscriberService } from './SubsriberService';
 import { ChainlinkService } from './chainlink/ChainlinkService';
 import { ChainlinkServiceMock } from './chainlink/ChainlinkServiceMock';
-import { chainlinkFactory } from "./chainlink/ChainlinkFactory";
+import { chainlinkFactory } from './chainlink/ChainlinkFactory';
+import { ChainLinkConfigService } from './chainlink/ChainLinkConfigService';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { chainlinkFactory } from "./chainlink/ChainlinkFactory";
       useClass: chainlinkFactory(),
     },
     SubscriberService,
+    ChainLinkConfigService,
   ],
 })
 export class AppModule {}

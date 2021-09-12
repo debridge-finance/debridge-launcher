@@ -25,10 +25,13 @@ export class ChainlinkConfigEntity {
   eiCiSecret: string;
 
   @Column()
-  mintJobId: string;
+  submitJobId: string;
 
   @Column()
-  burntJobId: string;
+  submitManyJobId: string;
+
+  @Column()
+  confirmNewAssetJobId: string;
 
   @Column()
   network: string;

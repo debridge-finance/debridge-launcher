@@ -50,9 +50,7 @@ export class SubscriberService {
     if (!events) return true;
     let isOk = true;
     for (const e of events) {
-      this.logger.log(
-        `processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${e.returnValues.submissionId}`,
-      );
+      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${e.returnValues.submissionId}`);
       this.logger.debug(e);
       /* remove chainIdTo  selector */
       const chainIdTo = e.returnValues.chainIdTo;
@@ -64,9 +62,7 @@ export class SubscriberService {
         chainId: aggregatorInfo.aggregatorChain,
       });
       if (!chainConfig) {
-        this.logger.error(
-          `Not found chainConfig: ${aggregatorInfo.aggregatorChain}`,
-        );
+        this.logger.error(`Not found chainConfig: ${aggregatorInfo.aggregatorChain}`);
         isOk = false;
         continue;
       }
@@ -77,18 +73,10 @@ export class SubscriberService {
         submissionId,
       });
       if (submission) {
-        this.logger.verbose(
-          `Submission already found in db submissionId: ${submissionId}`,
-        );
+        this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
         continue;
       }
-      await this.callChainlinkNode(
-        chainConfig.mintJobId,
-        chainConfig,
-        submissionId,
-        e.returnValues,
-        chainIdFrom,
-      );
+      await this.callChainlinkNode(chainConfig.submitJobId, chainConfig, submissionId, e.returnValues, chainIdFrom);
     }
     return isOk;
   }
@@ -104,26 +92,16 @@ export class SubscriberService {
     const supportedChains = await this.aggregatorChainsRepository.find({
       aggregatorChain: chainConfig.chainId,
     });
-    this.logger.debug(
-      `checkConfirmations ${
-        chainConfig.network
-      } check submissions to network ${supportedChains.map(
-        (a) => a.chainIdTo,
-      )}`,
-    );
+    this.logger.debug(`checkConfirmations ${chainConfig.network} check submissions to network ${supportedChains.map(a => a.chainIdTo)}`);
     const createdSubmissions = await this.submissionsRepository.find({
       where: {
         status: SubmisionStatusEnum.CREATED,
-        chainTo: In(supportedChains.map((a) => a.chainIdTo)),
+        chainTo: In(supportedChains.map(a => a.chainIdTo)),
       },
     });
 
     for (const submission of createdSubmissions) {
-      const runInfo = await this.chainlinkService.getChainlinkRun(
-        chainConfig.eiChainlinkUrl,
-        submission.runId,
-        chainConfig.cookie,
-      );
+      const runInfo = await this.chainlinkService.getChainlinkRun(chainConfig.eiChainlinkUrl, submission.runId, chainConfig.cookie);
       if (!runInfo) continue;
       if (runInfo.status == 'completed') {
         await this.submissionsRepository.update(submission.submissionId, {
@@ -146,16 +124,8 @@ export class SubscriberService {
    * @param e
    * @param {number} chainIdFrom
    */
-  private async callChainlinkNode(
-    jobId: string,
-    chainConfig,
-    submissionId: string,
-    e,
-    chainIdFrom: number,
-  ) {
-    this.logger.log(
-      `callChainlinkNode jobId ${jobId}; submissionId: ${submissionId}`,
-    );
+  private async callChainlinkNode(jobId: string, chainConfig, submissionId: string, e, chainIdFrom: number) {
+    this.logger.log(`callChainlinkNode jobId ${jobId}; submissionId: ${submissionId}`);
     const runId = await this.chainlinkService.postChainlinkRun(
       jobId,
       submissionId,
@@ -182,10 +152,7 @@ export class SubscriberService {
     const chainConfigs = await this.chainlinkConfigRepository.find();
     for (const chainConfig of chainConfigs) {
       this.logger.debug(`setAllChainlinkCookies ${chainConfig.network}`);
-      const cookies = await this.chainlinkService.getChainlinkCookies(
-        chainConfig.eiChainlinkUrl,
-        chainConfig.network,
-      );
+      const cookies = await this.chainlinkService.getChainlinkCookies(chainConfig.eiChainlinkUrl, chainConfig.network);
 
       await this.chainlinkConfigRepository.update(chainConfig.chainId, {
         cookie: cookies,
@@ -203,25 +170,19 @@ export class SubscriberService {
     const supportedChain = await this.supportedChainRepository.findOne({
       chainId,
     });
-    const chainDetail = ChainsConfig.find((item) => {
+    const chainDetail = ChainsConfig.find(item => {
       return item.chainId === chainId;
     });
 
     const web3 = new Web3(chainDetail.provider);
-    const registerInstance = new web3.eth.Contract(
-      whiteDebridgeAbi as any,
-      chainDetail.debridgeAddr,
-    );
+    const registerInstance = new web3.eth.Contract(whiteDebridgeAbi as any, chainDetail.debridgeAddr);
     /* get blocks range */
     //console.log(await web3.eth.getBlockNumber());
     const toBlock = (await web3.eth.getBlockNumber()) - this.minConfirmations;
-    const fromBlock =
-      supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
+    const fromBlock = supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
 
     if (fromBlock >= toBlock) return;
-    this.logger.log(
-      `checkNewEvents ${supportedChain.network} ${fromBlock}-${toBlock}`,
-    );
+    this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${toBlock}`);
 
     /* get events */
     const sentEvents = await registerInstance.getPastEvents(
@@ -245,31 +206,21 @@ export class SubscriberService {
       //}
     );
 
-    const isOk1 = await this.processNewTransfers(
-      sentEvents,
-      supportedChain.chainId,
-    );
-    const isOk2 = await this.processNewTransfers(
-      burntEvents,
-      supportedChain.chainId,
-    );
+    const isOk1 = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+    const isOk2 = await this.processNewTransfers(burntEvents, supportedChain.chainId);
 
     /* update lattest viewed block */
     //supportedChain.latestBlock = toBlock;
     if (isOk1 && isOk2) {
       const key = 'latestBlock';
       if (supportedChain[key] != toBlock) {
-        this.logger.log(
-          `updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${toBlock}`,
-        );
+        this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${toBlock}`);
         await this.supportedChainRepository.update(chainId, {
           latestBlock: toBlock,
         });
       }
     } else {
-      this.logger.error(
-        `checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`,
-      );
+      this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
     }
   }
 
@@ -282,13 +233,11 @@ export class SubscriberService {
       //    supportedChain.debridgeaddr
       //);
 
-      const chainDetail = ChainsConfig.find((item) => {
+      const chainDetail = ChainsConfig.find(item => {
         return item.chainId === supportedChain.chainId;
       });
 
-      this.logger.log(
-        `setInterval ${chainDetail.interval} for checkNewEvents ${supportedChain.network}`,
-      );
+      this.logger.log(`setInterval ${chainDetail.interval} for checkNewEvents ${supportedChain.network}`);
       setInterval(async () => {
         try {
           await this.checkNewEvents(supportedChain.chainId);
@@ -299,11 +248,7 @@ export class SubscriberService {
     }
     const chainConfigs = await this.chainlinkConfigRepository.find();
     for (const chainConfig of chainConfigs) {
-      this.logger.log(
-        `setInterval ${this.configService.get(
-          'CHECK_CONFIRMATION_INTERVAL',
-        )} for checkConfirmations ${chainConfig.network}`,
-      );
+      this.logger.log(`setInterval ${this.configService.get('CHECK_CONFIRMATION_INTERVAL')} for checkConfirmations ${chainConfig.network}`);
       setInterval(async () => {
         try {
           await this.checkConfirmations(chainConfig);
@@ -313,11 +258,7 @@ export class SubscriberService {
       }, this.configService.get<number>('CHECK_CONFIRMATION_INTERVAL'));
     }
 
-    this.logger.log(
-      `setInterval ${this.configService.get(
-        'SET_CHAINLINK_COOKIES_INTERVAL',
-      )} for setAllChainlinkCookies`,
-    );
+    this.logger.log(`setInterval ${this.configService.get('SET_CHAINLINK_COOKIES_INTERVAL')} for setAllChainlinkCookies`);
     setInterval(async () => {
       try {
         await this.setAllChainlinkCookies();

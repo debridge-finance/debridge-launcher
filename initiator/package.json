@@ -28,6 +28,8 @@
     "@nestjs/platform-fastify": "8.0.6",
     "@nestjs/swagger": "5.0.9",
     "@nestjs/typeorm": "8.0.2",
+    "class-transformer": "0.4.0",
+    "class-validator": "0.13.1",
     "dotenv": "10.0.0",
     "fastify-swagger": "4.11.0",
     "pg": "8.7.1",
