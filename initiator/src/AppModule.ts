@@ -9,9 +9,12 @@ import { SubmissionEntity } from './entities/SubmissionEntity';
 import { SupportedChainEntity } from './entities/SupportedChainEntity';
 import { SubscriberService } from './SubsriberService';
 import { ChainlinkService } from './chainlink/ChainlinkService';
-import { ChainlinkServiceMock } from './chainlink/ChainlinkServiceMock';
 import { chainlinkFactory } from './chainlink/ChainlinkFactory';
 import { ChainLinkConfigService } from './chainlink/ChainLinkConfigService';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './auth/jwt.strategy';
+import { AuthService } from './auth/auth.service';
 
 @Module({
   imports: [
@@ -32,6 +35,10 @@ import { ChainLinkConfigService } from './chainlink/ChainLinkConfigService';
       }),
     }),
     TypeOrmModule.forFeature([AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+    }),
   ],
   controllers: [AppController],
   providers: [
@@ -41,6 +48,8 @@ import { ChainLinkConfigService } from './chainlink/ChainLinkConfigService';
     },
     SubscriberService,
     ChainLinkConfigService,
+    JwtStrategy,
+    AuthService,
   ],
 })
 export class AppModule {}

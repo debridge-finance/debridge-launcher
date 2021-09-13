@@ -10,7 +10,7 @@ async function bootstrap() {
     logger: true,
   });
 
-  const config = new DocumentBuilder().setTitle('Initiator').setVersion('1.0').build();
+  const config = new DocumentBuilder().setTitle('Initiator').setVersion('1.0').addBearerAuth().build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
