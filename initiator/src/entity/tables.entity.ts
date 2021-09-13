@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 import { Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn, PrimaryColumn } from 'typeorm';
-import { SupportedChain, ChainlinkConfig, Submissions, AggregatorChains } from '@interfaces/tables.interface';
+import { SupportedChain, ChainlinkPersistentConfig, Submissions, AggregatorChains } from '@interfaces/tables.interface';
 
 @Entity('supported_chains')
 @Unique(['chainId'])
@@ -26,7 +26,7 @@ export class SupportedChainEntity implements SupportedChain {
 
 @Entity('chainlink_config')
 @Unique(['chainId'])
-export class ChainlinkConfigEntity implements ChainlinkConfig {
+export class ChainlinkPersistentConfigEntity implements ChainlinkPersistentConfig {
   @PrimaryColumn()
   chainId: number;
 

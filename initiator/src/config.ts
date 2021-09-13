@@ -1,30 +1,28 @@
-import path from 'path';
 import dotenv from 'dotenv';
+import { Config } from './interfaces/config.interface';
 
 dotenv.config();
 
-const config = {
+const config: Config = {
+  app: {
+    port: parseInt(process.env.APP_PORT, 10) || 8080,
+  },
   db: {
     connection: {
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT, 10),
+      host: process.env.POSTGRES_HOST || 'localhost',
+      port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.EI_DATABASE,
     },
-    typeorm: {
-      type: 'postgres' as const,
-      synchronize: true,
-      logging: false,
-      migrationsRun: true,
-      entities: [path.join(__dirname, './entity/*.entity{.ts,.js}')],
-      migrations: [path.join(__dirname, './migrations/migration{.ts,.js}')],
-      subscribers: [path.join(__dirname, './**/*.subscriber{.ts,.js}')],
-      cli: {
-        entitiesDir: 'src/entity',
-        migrationsDir: 'src/migrations',
-        subscribersDir: 'src/subscriber',
-      },
+  },
+  subscriber: {
+    minConfirmations: parseInt(process.env.MIN_CONFIRMATIONS, 10),
+  },
+  chainlink: {
+    credentials: {
+      email: process.env.CHAINLINK_EMAIL,
+      password: process.env.CHAINLINK_PASSWORD,
     },
   },
 };

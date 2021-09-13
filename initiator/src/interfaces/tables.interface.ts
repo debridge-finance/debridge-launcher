@@ -7,7 +7,7 @@ export interface SupportedChain {
   interval: number;
 }
 
-export interface ChainlinkConfig {
+export interface ChainlinkPersistentConfig {
   chainId: number;
   cookie: string;
   eiChainlinkUrl: string;

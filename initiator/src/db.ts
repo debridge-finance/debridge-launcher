@@ -1,24 +1,49 @@
-import log4js from 'log4js';
+import path from 'path';
 import { createConnection, getRepository, In } from 'typeorm';
-import { dbConnection } from '@databases';
-import { SupportedChainEntity, ChainlinkConfigEntity, SubmissionsEntity, AggregatorChainsEntity } from './entity/tables.entity';
-import { AggregatorChains, ChainlinkConfig, Submissions, SupportedChain } from './interfaces/tables.interface';
+import { SupportedChainEntity, ChainlinkPersistentConfigEntity, SubmissionsEntity, AggregatorChainsEntity } from './entity/tables.entity';
+import { AggregatorChains, ChainlinkPersistentConfig, Submissions, SupportedChain } from './interfaces/tables.interface';
+import { DbConfig, DbEnv } from './interfaces/db.interface';
+import { Logger } from './interfaces/logger.interface';
+
 import chainConfigs from './config/chains.json';
 
+const typeOrmConfig = {
+  type: 'postgres' as const,
+  synchronize: true,
+  logging: false,
+  migrationsRun: true,
+  entities: [path.join(__dirname, './entity/*.entity{.ts,.js}')],
+  migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
+  subscribers: [path.join(__dirname, './**/*.subscriber{.ts,.js}')],
+  cli: {
+    entitiesDir: 'src/entity',
+    migrationsDir: 'src/migrations',
+    subscribersDir: 'src/subscriber',
+  },
+};
+
 class Db {
-  log: log4js.Logger;
   public supportedChains = SupportedChainEntity;
-  public chainlinkConfig = ChainlinkConfigEntity;
+  public chainlinkConfig = ChainlinkPersistentConfigEntity;
   public submissions = SubmissionsEntity;
   public aggregatorChains = AggregatorChainsEntity;
 
-  constructor() {
-    this.log = log4js.getLogger('Db');
+  private config: DbConfig;
+  private log: Logger;
+
+  constructor({ config, logger }: DbEnv) {
+    this.config = config;
+    this.log = logger;
   }
 
   async connectDb() {
     this.log.info('connectDb');
-    createConnection(dbConnection);
+    const connectionOptions = {
+      ...this.config.connection,
+      ...typeOrmConfig,
+    };
+
+    createConnection(connectionOptions);
   }
 
   async createTables() {
@@ -37,7 +62,7 @@ class Db {
     });
   }
 
-  async createChainConfig(chainConfig: ChainlinkConfig) {
+  async createChainConfig(chainConfig: ChainlinkPersistentConfig) {
     this.log.info(`createChainConfig chainId: ${chainConfig.chainId}; cookie: ${chainConfig.cookie}; network: ${chainConfig.network}`);
     const chainConfigRepository = getRepository(this.chainlinkConfig);
     await chainConfigRepository.save(chainConfig);
@@ -57,15 +82,15 @@ class Db {
     await submissionsRepository.save(submission);
   }
 
-  async getChainConfigs(): Promise<ChainlinkConfig[]> {
+  async getChainConfigs(): Promise<ChainlinkPersistentConfig[]> {
     const chainConfigRepository = getRepository(this.chainlinkConfig);
-    const chainConfigs: ChainlinkConfig[] = await chainConfigRepository.find();
+    const chainConfigs: ChainlinkPersistentConfig[] = await chainConfigRepository.find();
     return chainConfigs;
   }
 
-  async getChainConfig(chainId: number): Promise<ChainlinkConfig> {
+  async getChainConfig(chainId: number): Promise<ChainlinkPersistentConfig> {
     const chainConfigRepository = getRepository(this.chainlinkConfig);
-    const chainConfig: ChainlinkConfig = await chainConfigRepository.findOne({ where: { chainId } });
+    const chainConfig: ChainlinkPersistentConfig = await chainConfigRepository.findOne({ where: { chainId } });
     return chainConfig;
   }
 
