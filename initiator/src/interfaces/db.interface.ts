@@ -1,6 +1,16 @@
-export interface dbConfig {
-  host: string;
-  user: string;
-  password: string;
-  database: string;
+import { Logger } from './logger.interface';
+
+export interface DbConfig {
+  connection: {
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    database: string;
+  };
+}
+
+export interface DbEnv {
+  config: DbConfig;
+  logger: Logger;
 }

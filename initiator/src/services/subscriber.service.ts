@@ -1,11 +1,12 @@
-import log4js from 'log4js';
 import Web3 from 'web3';
-import { abi as whiteDebridgeAbi } from './assets/WhiteFullDebridge.json';
-import { Db } from './db';
-import { Chainlink } from './chainlink';
+import { Db } from '~/db';
+import { Chainlink } from './chainlink.service';
 import { EventData } from 'web3-eth-contract';
+import { Subscriber, SubscriberConfig, SubscriberEnv } from '~/interfaces/subscriber.interface';
+import { Logger } from '~/interfaces/logger.interface';
 
-const minConfirmations = parseInt(process.env.MIN_CONFIRMATIONS);
+import { abi as whiteDebridgeAbi } from '~/assets/WhiteFullDebridge.json';
+
 const SubmisionStatus = {
   CREATED: 0,
   BROADCASTED: 1,
@@ -13,15 +14,17 @@ const SubmisionStatus = {
   REVERTED: 3,
 };
 
-class Subscriber {
+export class SubscriberService implements Subscriber {
+  config: SubscriberConfig;
   db: Db;
   chainlink: Chainlink;
-  log: log4js.Logger;
+  log: Logger;
 
-  constructor() {
-    this.db = new Db();
-    this.chainlink = new Chainlink();
-    this.log = log4js.getLogger('subscriber');
+  constructor({ config, db, chainlink, logger }: SubscriberEnv) {
+    this.config = config;
+    this.db = db;
+    this.chainlink = chainlink;
+    this.log = logger;
   }
 
   async init() {
@@ -82,7 +85,7 @@ class Subscriber {
     const registerInstance = new web3.eth.Contract(whiteDebridgeAbi as any, supportedChain.debridgeAddr);
     /* get blocks range */
     //console.log(await web3.eth.getBlockNumber());
-    const toBlock = (await web3.eth.getBlockNumber()) - minConfirmations;
+    const toBlock = (await web3.eth.getBlockNumber()) - this.config.minConfirmations;
     const fromBlock = supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
 
     if (fromBlock >= toBlock) return;
@@ -207,5 +210,3 @@ class Subscriber {
     }
   }
 }
-
-export { Subscriber };

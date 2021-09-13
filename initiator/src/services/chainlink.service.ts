@@ -1,33 +1,39 @@
-import log4js from 'log4js';
 import axios from 'axios';
-import credentials from './config/credentials.json';
+import { ChainlinkConfig, ChainlinkEnv } from '~/interfaces/chainlink.interface';
+import { Logger } from '~/interfaces/logger.interface';
 
-const emailAddress = process.env.CHAINLINK_EMAIL;
-const password = process.env.CHAINLINK_PASSWORD;
-
-const log = log4js.getLogger('Chainlink');
+// TODO fetch all external configs in `config` module
+import credentials from '~/config/credentials.json';
 
 class Chainlink {
+  private config: ChainlinkConfig;
+  private log: Logger;
+
+  constructor({ config, logger }: ChainlinkEnv) {
+    this.config = config;
+    this.log = logger;
+  }
+
   /* set chainlink cookies */
   async getChainlinkCookies(eiChainlinkUrl: string, network: string): Promise<string> {
     const sessionUrl = '/sessions';
     const headers = {
       'content-type': 'application/json',
     };
-    let body = { email: emailAddress, password: password };
+    let body = this.config.credentials;
 
     // get for the specific node if found
     const chainlinkCredentials = credentials[network];
     if (chainlinkCredentials !== undefined) {
       body = chainlinkCredentials;
-      log.debug(`override base chainlinkCredentials: ${body.email}`);
+      this.log.debug(`override base chainlinkCredentials: ${body.email}`);
     }
 
     const response = await axios.post(eiChainlinkUrl + sessionUrl, body, {
       headers,
     });
     const cookies = response.headers['set-cookie'];
-    log.debug(cookies);
+    this.log.debug(cookies);
     return JSON.stringify(cookies);
   }
 
@@ -44,10 +50,10 @@ class Chainlink {
         headers,
       });
 
-      log.debug(response.data.data);
+      this.log.debug(response.data.data);
       return response.data.data.attributes;
     } catch (e) {
-      log.error(e);
+      this.log.error(e);
     }
   }
 
@@ -59,13 +65,13 @@ class Chainlink {
       'X-Chainlink-EA-AccessKey': eiIcAccessKey,
       'X-Chainlink-EA-Secret': eiIcSecret,
     };
-    log.debug('postChainlinkRun', data);
+    this.log.debug('postChainlinkRun', data);
     const body = { result: data };
 
     const response = await axios.post(eiChainlinkUrl + postJobUrl, body, {
       headers,
     });
-    log.debug('postChainlinkRun response', response.data.data);
+    this.log.debug('postChainlinkRun response', response.data.data);
     return response.data.data.id;
   }
 }
