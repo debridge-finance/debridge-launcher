@@ -1,23 +1,24 @@
-import { abi as whiteDebridgeAbi } from './assets/WhiteFullDebridge.json';
-import { EventData } from 'web3-eth-contract';
 import { Injectable, Logger } from '@nestjs/common';
+import { IAction } from './IAction';
 import { ConfigService } from '@nestjs/config';
-import { In, Repository } from 'typeorm';
-import { SupportedChainEntity } from './entities/SupportedChainEntity';
-import { AggregatorChainEntity } from './entities/AggregatorChainEntity';
-import { ChainlinkConfigEntity } from './entities/ChainlinkConfigEntity';
-import { SubmissionEntity } from './entities/SubmissionEntity';
-import { SubmisionStatusEnum } from './enums/SubmisionStatusEnum';
 import { InjectRepository } from '@nestjs/typeorm';
+import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
+import { In, Repository } from 'typeorm';
+import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
+import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
+import { SubmissionEntity } from '../../entities/SubmissionEntity';
+import { ChainlinkService } from '../../chainlink/ChainlinkService';
+import { EventData } from 'web3-eth-contract';
+import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
+import ChainsConfig from '../../config/chains_config.json';
 import Web3 from 'web3';
-import { ChainlinkService } from './chainlink/ChainlinkService';
-import ChainsConfig from './config/chains_config.json';
+import { abi as whiteDebridgeAbi } from '../../assets/WhiteFullDebridge.json';
 
 @Injectable()
-export class SubscriberService {
-  private readonly logger = new Logger(SubscriberService.name);
-  private readonly minConfirmations: number;
+export class AddNewEventsAction implements IAction {
+  private readonly logger = new Logger(AddNewEventsAction.name);
 
+  private readonly minConfirmations: number;
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(SupportedChainEntity)
@@ -31,13 +32,6 @@ export class SubscriberService {
     private readonly chainlinkService: ChainlinkService,
   ) {
     this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
-    this.init();
-  }
-
-  async init() {
-    this.logger.log('init');
-    await this.setAllChainlinkCookies();
-    await this.subscribe();
   }
 
   /**
@@ -82,41 +76,6 @@ export class SubscriberService {
   }
 
   /**
-   * Check confirmation
-   * @param {ChainlinkConfigEntity} chainConfig
-   */
-  async checkConfirmations(chainConfig: ChainlinkConfigEntity) {
-    //this.log.debug(`checkConfirmations ${chainConfig.network}`);
-
-    //get chainTo for current aggregator
-    const supportedChains = await this.aggregatorChainsRepository.find({
-      aggregatorChain: chainConfig.chainId,
-    });
-    this.logger.debug(`checkConfirmations ${chainConfig.network} check submissions to network ${supportedChains.map(a => a.chainIdTo)}`);
-    const createdSubmissions = await this.submissionsRepository.find({
-      where: {
-        status: SubmisionStatusEnum.CREATED,
-        chainTo: In(supportedChains.map(a => a.chainIdTo)),
-      },
-    });
-
-    for (const submission of createdSubmissions) {
-      const runInfo = await this.chainlinkService.getChainlinkRun(chainConfig.eiChainlinkUrl, submission.runId, chainConfig.cookie);
-      if (!runInfo) continue;
-      if (runInfo.status == 'completed') {
-        await this.submissionsRepository.update(submission.submissionId, {
-          status: SubmisionStatusEnum.CONFIRMED,
-        });
-      }
-      if (runInfo.status == 'errored') {
-        await this.submissionsRepository.update(submission.submissionId, {
-          status: SubmisionStatusEnum.REVERTED,
-        });
-      }
-    }
-  }
-
-  /**
    * CallChainLinkNode
    * @param {string} jobId
    * @param {string} chainConfig
@@ -143,29 +102,11 @@ export class SubscriberService {
       debridgeId: e.debridgeId,
       receiverAddr: e.receiver,
       amount: e.amount,
-      status: SubmisionStatusEnum.CREATED,
+      status: SubmisionStatusEnum.NEW,
     });
   }
 
-  private async setAllChainlinkCookies() {
-    this.logger.debug(`Start setAllChainlinkCookies`);
-    const chainConfigs = await this.chainlinkConfigRepository.find();
-    for (const chainConfig of chainConfigs) {
-      this.logger.debug(`setAllChainlinkCookies ${chainConfig.network}`);
-      const cookies = await this.chainlinkService.getChainlinkCookies(chainConfig.eiChainlinkUrl, chainConfig.network);
-
-      await this.chainlinkConfigRepository.update(chainConfig.chainId, {
-        cookie: cookies,
-      });
-    }
-  }
-
-  /**
-   * Check new events
-   * @param {number} chainId
-   * @private
-   */
-  private async checkNewEvents(chainId: number) {
+  async action(chainId: number): Promise<void> {
     this.logger.verbose(`checkNewEvents ${chainId}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       chainId,
@@ -222,49 +163,5 @@ export class SubscriberService {
     } else {
       this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
     }
-  }
-
-  async subscribe() {
-    const supportedChains = await this.supportedChainRepository.find();
-    for (const supportedChain of supportedChains) {
-      //const web3 = new Web3(supportedChain.provider);
-      //const registerInstance = new web3.eth.Contract(
-      //    whiteDebridgeAbi,
-      //    supportedChain.debridgeaddr
-      //);
-
-      const chainDetail = ChainsConfig.find(item => {
-        return item.chainId === supportedChain.chainId;
-      });
-
-      this.logger.log(`setInterval ${chainDetail.interval} for checkNewEvents ${supportedChain.network}`);
-      setInterval(async () => {
-        try {
-          await this.checkNewEvents(supportedChain.chainId);
-        } catch (e) {
-          this.logger.error(e);
-        }
-      }, chainDetail.interval);
-    }
-    const chainConfigs = await this.chainlinkConfigRepository.find();
-    for (const chainConfig of chainConfigs) {
-      this.logger.log(`setInterval ${this.configService.get('CHECK_CONFIRMATION_INTERVAL')} for checkConfirmations ${chainConfig.network}`);
-      setInterval(async () => {
-        try {
-          await this.checkConfirmations(chainConfig);
-        } catch (e) {
-          this.logger.error(e);
-        }
-      }, this.configService.get<number>('CHECK_CONFIRMATION_INTERVAL'));
-    }
-
-    this.logger.log(`setInterval ${this.configService.get('SET_CHAINLINK_COOKIES_INTERVAL')} for setAllChainlinkCookies`);
-    setInterval(async () => {
-      try {
-        await this.setAllChainlinkCookies();
-      } catch (e) {
-        this.logger.error(e);
-      }
-    }, this.configService.get<number>('SET_CHAINLINK_COOKIES_INTERVAL'));
   }
 }

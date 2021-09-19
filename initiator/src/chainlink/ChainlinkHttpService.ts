@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import * as credentials from '../config/credantial.json';
 import { ChainlinkService } from './ChainlinkService';
+import Web3 from 'web3';
 
 @Injectable()
 export class ChainlinkHttpService extends ChainlinkService {
@@ -19,10 +20,7 @@ export class ChainlinkHttpService extends ChainlinkService {
   }
 
   /* set chainlink cookies */
-  async getChainlinkCookies(
-    eiChainlinkUrl: string,
-    network: string,
-  ): Promise<string> {
+  async getChainlinkCookies(eiChainlinkUrl: string, network: string): Promise<string> {
     const sessionUrl = '/sessions';
     const headers = {
       'content-type': 'application/json',
@@ -72,13 +70,7 @@ export class ChainlinkHttpService extends ChainlinkService {
   }
 
   /* post chainlink run */
-  async postChainlinkRun(
-    jobId: string,
-    data: any,
-    eiChainlinkUrl: string,
-    eiIcAccessKey: string,
-    eiIcSecret: string,
-  ) {
+  async postChainlinkRun(jobId: string, data: any, eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string) {
     const postJobUrl = '/v2/specs/' + jobId + '/runs';
     const headers = {
       'content-type': 'application/json',
@@ -95,5 +87,38 @@ export class ChainlinkHttpService extends ChainlinkService {
       .toPromise();
     this.logger.verbose('postChainlinkRun response', response.data.data);
     return response.data.data.id;
+  }
+
+  async postBulkChainlinkRun(
+    jobId: string,
+    data: string[],
+    eiChainlinkUrl: string,
+    eiIcAccessKey: string,
+    eiIcSecret: string,
+    web3: Web3,
+  ): Promise<string> {
+    const postJobUrl = '/v2/specs/' + jobId + '/runs';
+    const headers = this.createPostHeaders(eiIcAccessKey, eiIcSecret);
+    this.logger.verbose('postChainlinkRun', data);
+
+    const result = web3.eth.abi.encodeParameter('bytes32[]', data);
+    const body = { result };
+
+    const response = await this.httpService
+      .post(eiChainlinkUrl + postJobUrl, body, {
+        headers,
+      })
+      .toPromise();
+    this.logger.verbose('postChainlinkRun response', response.data.data);
+    return response.data.data.id;
+  }
+
+  private createPostHeaders(eiIcAccessKey: string, eiIcSecret: string) {
+    const headers = {
+      'content-type': 'application/json',
+      'X-Chainlink-EA-AccessKey': eiIcAccessKey,
+      'X-Chainlink-EA-Secret': eiIcSecret,
+    };
+    return headers;
   }
 }
