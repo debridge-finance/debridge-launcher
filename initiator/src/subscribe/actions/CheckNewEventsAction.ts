@@ -3,7 +3,7 @@ import { IAction } from './IAction';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
 import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
@@ -79,8 +79,7 @@ export class CheckNewEvensAction implements IAction {
 
       const { affected } = await this.submissionsRepository.update(
         {
-          status: SubmisionStatusEnum.NEW,
-          chainTo: chainId,
+          submissionId: In(submissionIds),
         },
         {
           status: SubmisionStatusEnum.CREATED,
