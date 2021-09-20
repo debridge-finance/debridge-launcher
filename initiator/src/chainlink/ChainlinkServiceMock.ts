@@ -45,14 +45,7 @@ export class ChainlinkServiceMock extends ChainlinkService {
     return uuidv4();
   }
 
-  async postBulkChainlinkRun(
-    jobId: string,
-    data: string[],
-    eiChainlinkUrl: string,
-    eiIcAccessKey: string,
-    eiIcSecret: string,
-    web3: Web3,
-  ): Promise<string> {
+  async postBulkChainlinkRun(jobId: string, data: string[], eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string): Promise<string> {
     return uuidv4();
   }
 }

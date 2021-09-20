@@ -1,7 +1,7 @@
 import { IAction } from './IAction';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Column, In, PrimaryColumn, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
@@ -27,7 +27,7 @@ export class CheckAssetsEventAction implements IAction {
     const assetsSubmitions = [];
 
     for (const submission of submissions) {
-      const confirmNewAction = await this.submissionsRepository.findOne({
+      const confirmNewAction = await this.confirmNewAssetEntityRepository.findOne({
         debridgeId: submission.debridgeId,
       });
       if (!confirmNewAction) {

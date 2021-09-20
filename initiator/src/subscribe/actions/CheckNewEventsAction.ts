@@ -9,8 +9,6 @@ import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { ChainlinkService } from '../../chainlink/ChainlinkService';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
-import ChainsConfig from '../../config/chains_config.json';
-import Web3 from 'web3';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 
 @Injectable()
@@ -40,15 +38,15 @@ export class CheckNewEvensAction implements IAction {
     const supportedChainList = await this.supportedChainRepository.find();
     for (const chain of supportedChainList) {
       const chainId = chain.chainId;
-      const chainDetail = ChainsConfig.find(item => {
-        return item.chainId === chainId;
+
+      const aggregatorInfo = await this.aggregatorChainsRepository.findOne({
+        chainIdTo: chainId,
       });
+      if (!aggregatorInfo) continue;
 
       const config = await this.chainlinkConfigRepository.findOne({
-        chainId,
+        chainId: aggregatorInfo.aggregatorChain,
       });
-
-      const web3 = new Web3(chainDetail.provider);
 
       const submissionIds = await this.submissionsRepository
         .createQueryBuilder()
@@ -75,21 +73,10 @@ export class CheckNewEvensAction implements IAction {
           config.eiChainlinkUrl,
           config.eiCiAccesskey,
           config.eiIcSecret,
-          web3,
         );
       }
 
       if (runId) {
-        const submissionIds = await this.submissionsRepository
-          .createQueryBuilder()
-          .select('SubmissionEntity.submissionId')
-          .distinct(true)
-          .where({
-            status: SubmisionStatusEnum.NEW,
-            chainTo: chainId,
-          })
-          .getRawMany();
-
         const { affected } = await this.submissionsRepository.update(
           {
             submissionId: In(submissionIds),

@@ -89,19 +89,12 @@ export class ChainlinkHttpService extends ChainlinkService {
     return response.data.data.id;
   }
 
-  async postBulkChainlinkRun(
-    jobId: string,
-    data: string[],
-    eiChainlinkUrl: string,
-    eiIcAccessKey: string,
-    eiIcSecret: string,
-    web3: Web3,
-  ): Promise<string> {
+  async postBulkChainlinkRun(jobId: string, data: string[], eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string): Promise<string> {
     const postJobUrl = '/v2/specs/' + jobId + '/runs';
     const headers = this.createPostHeaders(eiIcAccessKey, eiIcSecret);
     this.logger.verbose('postChainlinkRun', data);
 
-    const result = web3.eth.abi.encodeParameter('bytes32[]', data);
+    const result = new Web3().eth.abi.encodeParameter('bytes32[]', data);
     const body = { result };
 
     const response = await this.httpService

@@ -29,7 +29,6 @@ export class AddNewEventsAction implements IAction {
     private readonly chainlinkConfigRepository: Repository<ChainlinkConfigEntity>,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
-    private readonly chainlinkService: ChainlinkService,
   ) {
     this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
   }
@@ -85,18 +84,9 @@ export class AddNewEventsAction implements IAction {
    */
   private async callChainlinkNode(jobId: string, chainConfig, submissionId: string, e, chainIdFrom: number) {
     this.logger.log(`callChainlinkNode jobId ${jobId}; submissionId: ${submissionId}`);
-    const runId = await this.chainlinkService.postChainlinkRun(
-      jobId,
-      submissionId,
-      chainConfig.eichainlinkurl,
-      chainConfig.eiicaccesskey,
-      chainConfig.eiicsecret,
-    );
-    this.logger.log(`Received runId ${runId}; submissionId: ${submissionId}`);
     await this.submissionsRepository.save({
       submissionId,
       txHash: 'NULL',
-      runId,
       chainFrom: chainIdFrom,
       chainTo: e.chainIdTo,
       debridgeId: e.debridgeId,
