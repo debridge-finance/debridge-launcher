@@ -11,6 +11,7 @@ import { ChainlinkService } from '../../chainlink/ChainlinkService';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
 import Web3 from 'web3';
+import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 
 @Injectable()
 export class CheckNewEvensAction implements IAction {
@@ -27,6 +28,8 @@ export class CheckNewEvensAction implements IAction {
     private readonly chainlinkConfigRepository: Repository<ChainlinkConfigEntity>,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
+    @InjectRepository(ConfirmNewAssetEntity)
+    private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
     private readonly chainlinkService: ChainlinkService,
   ) {
     this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
@@ -56,7 +59,6 @@ export class CheckNewEvensAction implements IAction {
           chainTo: chainId,
         })
         .getRawMany();
-
       let runId: string;
       if (submissionIds.length === 1) {
         runId = await this.chainlinkService.postChainlinkRun(
@@ -68,7 +70,7 @@ export class CheckNewEvensAction implements IAction {
         );
       } else {
         runId = await this.chainlinkService.postBulkChainlinkRun(
-          config.submitJobId,
+          config.submitManyJobId,
           submissionIds,
           config.eiChainlinkUrl,
           config.eiCiAccesskey,
@@ -77,17 +79,54 @@ export class CheckNewEvensAction implements IAction {
         );
       }
 
-      const { affected } = await this.submissionsRepository.update(
-        {
-          submissionId: In(submissionIds),
-        },
-        {
-          status: SubmisionStatusEnum.CREATED,
-          runId,
-        },
-      );
+      if (runId) {
+        const submissionIds = await this.submissionsRepository
+          .createQueryBuilder()
+          .select('SubmissionEntity.submissionId')
+          .distinct(true)
+          .where({
+            status: SubmisionStatusEnum.NEW,
+            chainTo: chainId,
+          })
+          .getRawMany();
 
-      this.logger.debug(`${affected} submissions is updated`);
+        const { affected } = await this.submissionsRepository.update(
+          {
+            submissionId: In(submissionIds),
+          },
+          {
+            status: SubmisionStatusEnum.CREATED,
+            runId,
+          },
+        );
+
+        this.logger.debug(`${affected} submissions is updated`);
+
+        await this.updateConfirmAssets(submissionIds, runId);
+      }
     }
+  }
+
+  private async updateConfirmAssets(submissionIds: string[], runId) {
+    this.logger.debug(`Start updating confirm assets ${submissionIds} ${runId}`);
+    const debridgeIds = await this.submissionsRepository
+      .createQueryBuilder()
+      .select('SubmissionEntity.debridgeId')
+      .distinct(true)
+      .where({
+        submissionId: In(submissionIds),
+      })
+      .getRawMany();
+
+    const { affected } = await this.confirmNewAssetEntityRepository.update(
+      {
+        debridgeId: In(debridgeIds),
+      },
+      {
+        status: SubmisionStatusEnum.CREATED,
+        runId,
+      },
+    );
+    this.logger.debug(`Finish updating (${affected}) confirm assets ${submissionIds} ${runId}`);
   }
 }

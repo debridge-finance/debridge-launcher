@@ -20,6 +20,8 @@ import { CheckNewEvensAction } from './subscribe/actions/CheckNewEventsAction';
 import { SetAllChainlinkCookiesAction } from './subscribe/actions/SetAllChainlinkCookiesAction';
 import { CheckConfirmationsAction } from './subscribe/actions/CheckConfirmationsAction';
 import { SubscribeHandler } from './subscribe/SubscribeHandler';
+import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
+import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { SubscribeHandler } from './subscribe/SubscribeHandler';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        //        logging: true,
+        logging: true,
         type: 'postgres',
         host: configService.get('DATABASE_HOST', 'host'),
         port: configService.get<number>('DATABASE_PORT', 5432),
@@ -38,10 +40,10 @@ import { SubscribeHandler } from './subscribe/SubscribeHandler';
         password: configService.get('DATABASE_PASSWORD', 'password'),
         database: configService.get('DATABASE_SCHEMA', 'postgres'),
         synchronize: true,
-        entities: [AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity],
+        entities: [AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
       }),
     }),
-    TypeOrmModule.forFeature([AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity]),
+    TypeOrmModule.forFeature([AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
@@ -60,6 +62,7 @@ import { SubscribeHandler } from './subscribe/SubscribeHandler';
     CheckNewEvensAction,
     SetAllChainlinkCookiesAction,
     CheckConfirmationsAction,
+    CheckAssetsEventAction,
     SubscribeHandler,
   ],
 })

@@ -8,6 +8,7 @@ import { SupportedChainEntity } from '../entities/SupportedChainEntity';
 import ChainsConfig from '../config/chains_config.json';
 import { AddNewEventsAction } from './actions/AddNewEventsAction';
 import { CheckNewEvensAction } from './actions/CheckNewEventsAction';
+import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 
 @Injectable()
 export class SubscribeHandler {
@@ -19,6 +20,7 @@ export class SubscribeHandler {
     private readonly checkConfirmationsAction: CheckConfirmationsAction,
     private readonly addNewEventsAction: AddNewEventsAction,
     private readonly checkNewEvensAction: CheckNewEvensAction,
+    private readonly checkAssetsEventAction: CheckAssetsEventAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
   ) {
@@ -58,6 +60,11 @@ export class SubscribeHandler {
   @Interval(3000)
   async checkNewEvents() {
     await this.checkNewEvensAction.action();
+  }
+
+  @Interval(3000)
+  async checkAssetsEvent() {
+    await this.checkAssetsEventAction.action();
   }
 
   @Interval(864000)
