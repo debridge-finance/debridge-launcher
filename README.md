@@ -16,7 +16,7 @@ In order to set up a node on the DeBridge network, we need to:
 1. Install full testnet nodes
   - Kovan 
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
-  - [HECO](https://docs.hecochain.com/#/dev/install)
+  - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
   - Arbitrum Testnet
   - Polygon Testnet
 2. Set ETH_URL (use the Websocket Endpoints) in each of the following files: chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
