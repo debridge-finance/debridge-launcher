@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn, Unique } from 'typeorm';
+import { Column, Entity, Index, PrimaryColumn, Unique } from 'typeorm';
+import { SubmisionStatusEnum } from '../enums/SubmisionStatusEnum';
 
 @Entity('submissions')
 @Unique(['submissionId'])
@@ -10,12 +11,14 @@ export class SubmissionEntity {
   txHash: string;
 
   @Column()
+  @Index()
   runId: string;
 
   @Column()
   chainFrom: number;
 
   @Column()
+  @Index()
   chainTo: number;
 
   @Column()
@@ -28,5 +31,6 @@ export class SubmissionEntity {
   amount: string;
 
   @Column()
-  status: number;
+  @Index()
+  status: SubmisionStatusEnum;
 }

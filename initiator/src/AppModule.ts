@@ -7,7 +7,6 @@ import { AggregatorChainEntity } from './entities/AggregatorChainEntity';
 import { ChainlinkConfigEntity } from './entities/ChainlinkConfigEntity';
 import { SubmissionEntity } from './entities/SubmissionEntity';
 import { SupportedChainEntity } from './entities/SupportedChainEntity';
-import { SubscriberService } from './SubsriberService';
 import { ChainlinkService } from './chainlink/ChainlinkService';
 import { chainlinkFactory } from './chainlink/ChainlinkFactory';
 import { ChainLinkConfigService } from './chainlink/ChainLinkConfigService';
@@ -15,15 +14,25 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { AuthService } from './auth/auth.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
+import { CheckNewEvensAction } from './subscribe/actions/CheckNewEventsAction';
+import { SetAllChainlinkCookiesAction } from './subscribe/actions/SetAllChainlinkCookiesAction';
+import { CheckConfirmationsAction } from './subscribe/actions/CheckConfirmationsAction';
+import { SubscribeHandler } from './subscribe/SubscribeHandler';
+import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
+import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 
 @Module({
   imports: [
     HttpModule,
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
+        logging: true,
         type: 'postgres',
         host: configService.get('DATABASE_HOST', 'host'),
         port: configService.get<number>('DATABASE_PORT', 5432),
@@ -31,10 +40,10 @@ import { AuthService } from './auth/auth.service';
         password: configService.get('DATABASE_PASSWORD', 'password'),
         database: configService.get('DATABASE_SCHEMA', 'postgres'),
         synchronize: true,
-        entities: [AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity],
+        entities: [AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
       }),
     }),
-    TypeOrmModule.forFeature([AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity]),
+    TypeOrmModule.forFeature([AggregatorChainEntity, ChainlinkConfigEntity, SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
@@ -46,10 +55,15 @@ import { AuthService } from './auth/auth.service';
       provide: ChainlinkService,
       useClass: chainlinkFactory(),
     },
-    SubscriberService,
     ChainLinkConfigService,
     JwtStrategy,
     AuthService,
+    AddNewEventsAction,
+    CheckNewEvensAction,
+    SetAllChainlinkCookiesAction,
+    CheckConfirmationsAction,
+    CheckAssetsEventAction,
+    SubscribeHandler,
   ],
 })
 export class AppModule {}

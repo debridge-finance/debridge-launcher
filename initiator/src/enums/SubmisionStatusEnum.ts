@@ -1,6 +1,9 @@
 export enum SubmisionStatusEnum {
-  CREATED = 0,
-  BROADCASTED = 1,
-  CONFIRMED = 2,
-  REVERTED = 3,
+  ASSETS = 0,
+  NEW = 1,
+  ASSETS_CREATE = 2,
+  CREATED = 3,
+  BROADCASTED = 4,
+  CONFIRMED = 5,
+  REVERTED = 6,
 }
