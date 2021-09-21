@@ -12,11 +12,13 @@ In order to set up a node on the DeBridge network, we need to:
   5. psql
     ``` sudo apt-get install postgresql-client```
 
-# 2) Set up the Chainlink environment:
+# 2) Set up the infrastructure:
 1. Install full testnet nodes
   - Kovan 
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
   - [HECO](https://docs.hecochain.com/#/dev/install)
+  - Arbitrum Testnet
+  - Polygon Testnet
 2. Set ETH_URL (use the Websocket Endpoints) in each of the following files: chainlink-eth.env, chainlink-bsc.env, chainlink-heco.env
 3. Set support chainlink configs(chainid, debridgeaddr, provider, interval) to ./initiator/config/chains_config.json 
 4. Change default (postgreschainlink) postgress password in .env.
