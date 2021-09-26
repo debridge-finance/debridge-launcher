@@ -39,7 +39,7 @@ export class AddNewEventsAction implements IAction {
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(events: EventData[], chainIdFrom: number) {
+  async processNewTransfers(events: any[], chainIdFrom: number) {
     if (!events) return true;
     let isOk = true;
     for (const e of events) {
@@ -96,24 +96,8 @@ export class AddNewEventsAction implements IAction {
     });
   }
 
-  async action(chainId: number): Promise<void> {
-    this.logger.verbose(`checkNewEvents ${chainId}`);
-    const supportedChain = await this.supportedChainRepository.findOne({
-      chainId,
-    });
-    const chainDetail = ChainsConfig.find(item => {
-      return item.chainId === chainId;
-    });
-
-    const web3 = new Web3(chainDetail.provider);
-    const registerInstance = new web3.eth.Contract(whiteDebridgeAbi as any, chainDetail.debridgeAddr);
-    /* get blocks range */
-    //console.log(await web3.eth.getBlockNumber());
-    const toBlock = (await web3.eth.getBlockNumber()) - this.minConfirmations;
-    const fromBlock = supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
-
+  async getEvents(registerInstance, fromBlock: number, toBlock) {
     if (fromBlock >= toBlock) return;
-    this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${toBlock}`);
 
     /* get events */
     const sentEvents = await registerInstance.getPastEvents(
@@ -136,6 +120,31 @@ export class AddNewEventsAction implements IAction {
       //await this.processNewTransfers(events, supportedChain.chainId);
       //}
     );
+
+    return {
+      sentEvents,
+      burntEvents,
+    };
+  }
+
+  async action(chainId: number): Promise<void> {
+    this.logger.verbose(`checkNewEvents ${chainId}`);
+    const supportedChain = await this.supportedChainRepository.findOne({
+      chainId,
+    });
+    const chainDetail = ChainsConfig.find(item => {
+      return item.chainId === chainId;
+    });
+
+    const web3 = new Web3(chainDetail.provider);
+    const registerInstance = new web3.eth.Contract(whiteDebridgeAbi as any, chainDetail.debridgeAddr);
+
+    const toBlock = (await web3.eth.getBlockNumber()) - this.minConfirmations;
+    const fromBlock = supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
+
+    this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${toBlock}`);
+
+    const { sentEvents, burntEvents } = await this.getEvents(registerInstance, fromBlock, toBlock);
 
     const isOk1 = await this.processNewTransfers(sentEvents, supportedChain.chainId);
     const isOk2 = await this.processNewTransfers(burntEvents, supportedChain.chainId);
