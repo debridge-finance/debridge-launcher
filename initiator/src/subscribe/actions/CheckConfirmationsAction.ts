@@ -1,7 +1,6 @@
 import { IAction } from './IAction';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { In, Repository } from 'typeorm';
 import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
 import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
@@ -16,8 +15,6 @@ export class CheckConfirmationsAction implements IAction {
 
   constructor(
     private readonly configService: ConfigService,
-    @InjectRepository(SupportedChainEntity)
-    private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     @InjectRepository(AggregatorChainEntity)
     private readonly aggregatorChainsRepository: Repository<AggregatorChainEntity>,
     @InjectRepository(ChainlinkConfigEntity)

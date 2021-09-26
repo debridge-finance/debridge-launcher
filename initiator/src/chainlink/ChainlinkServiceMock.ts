@@ -1,9 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { v4 as uuidv4 } from 'uuid';
 import { ChainlinkService } from './ChainlinkService';
-import Web3 from 'web3';
 
 @Injectable()
 export class ChainlinkServiceMock extends ChainlinkService {
@@ -42,10 +40,10 @@ export class ChainlinkServiceMock extends ChainlinkService {
 
   /* post chainlink run */
   async postChainlinkRun(jobId: string, data: any, eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string) {
-    return uuidv4();
+    return '5e9ea5d1-f09b-42bb-89f3-08e64fc79694';
   }
 
   async postBulkChainlinkRun(jobId: string, data: string[], eiChainlinkUrl: string, eiIcAccessKey: string, eiIcSecret: string): Promise<string> {
-    return uuidv4();
+    return '5e9ea5d1-f09b-42bb-89f3-08e64fc79694';
   }
 }

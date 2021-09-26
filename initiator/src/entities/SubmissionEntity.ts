@@ -1,5 +1,6 @@
 import { Column, Entity, Index, PrimaryColumn, Unique } from 'typeorm';
 import { SubmisionStatusEnum } from '../enums/SubmisionStatusEnum';
+import { SubmisionAssetsStatusEnum } from '../enums/SubmisionAssetsStatusEnum';
 
 @Entity('submissions')
 @Unique(['submissionId'])
@@ -33,4 +34,8 @@ export class SubmissionEntity {
   @Column()
   @Index()
   status: SubmisionStatusEnum;
+
+  @Column()
+  @Index()
+  assetsStatus: SubmisionAssetsStatusEnum;
 }

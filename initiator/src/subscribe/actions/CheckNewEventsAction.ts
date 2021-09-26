@@ -89,7 +89,7 @@ export class CheckNewEvensAction implements IAction {
 
         this.logger.debug(`${affected} submissions is updated`);
 
-        await this.updateConfirmAssets(submissionIds, runId);
+        //await this.updateConfirmAssets(submissionIds, runId);
       }
     }
   }

@@ -92,7 +92,7 @@ export class AddNewEventsAction implements IAction {
       debridgeId: e.debridgeId,
       receiverAddr: e.receiver,
       amount: e.amount,
-      status: SubmisionStatusEnum.ASSETS,
+      status: SubmisionStatusEnum.NEW,
     });
   }
 

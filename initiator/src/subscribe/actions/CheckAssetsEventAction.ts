@@ -5,6 +5,7 @@ import { In, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
+import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 
 @Injectable()
 export class CheckAssetsEventAction implements IAction {
@@ -49,6 +50,7 @@ export class CheckAssetsEventAction implements IAction {
       },
       {
         status: SubmisionStatusEnum.NEW,
+        assetsStatus: SubmisionAssetsStatusEnum.ASSETS,
       },
     );
 
@@ -57,7 +59,8 @@ export class CheckAssetsEventAction implements IAction {
         submissionId: In(assetsSubmitions),
       },
       {
-        status: SubmisionStatusEnum.ASSETS_CREATE,
+        status: SubmisionStatusEnum.NEW,
+        assetsStatus: SubmisionAssetsStatusEnum.ASSETS_CREATE,
       },
     );
 
