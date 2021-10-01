@@ -4,7 +4,6 @@ import { Column, Entity, PrimaryColumn, Unique } from 'typeorm';
 @Unique(['deployId'])
 export class ConfirmNewAssetEntity {
   @PrimaryColumn()
-  @Column()
   debridgeId: string;
 
   @Column()

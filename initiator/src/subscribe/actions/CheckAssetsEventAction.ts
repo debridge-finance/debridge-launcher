@@ -16,23 +16,23 @@ export class CheckAssetsEventAction implements IAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
-  ) {}
+  ) { }
 
   async action() {
     this.logger.log(`Check assets event`);
     const submissions = await this.submissionsRepository.find({
-      status: SubmisionStatusEnum.ASSETS,
+      assetsStatus: SubmisionAssetsStatusEnum.NEW,
     });
 
-    const newSubmitions = [];
-    const assetsSubmitions = [];
+    const newSubmitionIds = [];
+    const assetsWasCreatedSubmitions = [];
 
     for (const submission of submissions) {
       const confirmNewAction = await this.confirmNewAssetEntityRepository.findOne({
         debridgeId: submission.debridgeId,
       });
       if (!confirmNewAction) {
-        newSubmitions.push(submission.submissionId);
+        newSubmitionIds.push(submission.submissionId);
         await this.confirmNewAssetEntityRepository.save({
           debridgeId: submission.debridgeId,
           chainFrom: submission.chainFrom,
@@ -40,30 +40,30 @@ export class CheckAssetsEventAction implements IAction {
           status: SubmisionStatusEnum.NEW,
         });
       } else {
-        assetsSubmitions.push(submission.submissionId);
+        assetsWasCreatedSubmitions.push(submission.submissionId);
       }
     }
 
-    await this.submissionsRepository.update(
-      {
-        submissionId: In(newSubmitions),
-      },
-      {
-        status: SubmisionStatusEnum.NEW,
-        assetsStatus: SubmisionAssetsStatusEnum.ASSETS,
-      },
-    );
-
-    await this.submissionsRepository.update(
-      {
-        submissionId: In(assetsSubmitions),
-      },
-      {
-        status: SubmisionStatusEnum.NEW,
-        assetsStatus: SubmisionAssetsStatusEnum.ASSETS_CREATE,
-      },
-    );
-
+    if (newSubmitionIds.length > 0) {
+      await this.submissionsRepository.update(
+        {
+          submissionId: In(newSubmitionIds),
+        },
+        {
+          assetsStatus: SubmisionAssetsStatusEnum.ASSETS_CREATED,
+        },
+      );
+    }
+    if (assetsWasCreatedSubmitions.length > 0) {
+      await this.submissionsRepository.update(
+        {
+          submissionId: In(assetsWasCreatedSubmitions),
+        },
+        {
+          assetsStatus: SubmisionAssetsStatusEnum.ASSETS_ALREADY_CREATED,
+        },
+      );
+    }
     this.logger.log(`Finish Check assets event`);
   }
 }

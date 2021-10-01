@@ -57,7 +57,13 @@ export class CheckNewEvensAction implements IAction {
           chainTo: chainId,
         })
         .getRawMany();
+
+      if (submissionIds.length === 0) {
+        this.logger.debug(`submissionIds.length ${submissionIds.length}`);
+        return;
+      }
       let runId: string;
+
       if (submissionIds.length === 1) {
         runId = await this.chainlinkService.postChainlinkRun(
           config.submitJobId,
