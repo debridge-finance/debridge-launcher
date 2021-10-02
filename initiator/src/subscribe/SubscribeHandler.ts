@@ -9,10 +9,12 @@ import ChainsConfig from '../config/chains_config.json';
 import { AddNewEventsAction } from './actions/AddNewEventsAction';
 import { CheckNewEvensAction } from './actions/CheckNewEventsAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
+import chainConfigs from './../config/chains_config.json';
 
 @Injectable()
 export class SubscribeHandler {
   private readonly logger = new Logger(SubscribeHandler.name);
+  private isWorking = false;
 
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
@@ -24,20 +26,45 @@ export class SubscribeHandler {
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
   ) {
-    this.setupCheckEventsTimeout();
-    this.setChainLinkCookies();
+    this.init();
+  }
+
+  async init() {
+    await this.uploadConfig();
+    await this.setupCheckEventsTimeout();
+    await this.setChainLinkCookies();
+  }
+
+  private async uploadConfig() {
+    for (const config of chainConfigs) {
+      const configInDd = await this.supportedChainRepository.findOne({
+        chainId: config.chainId,
+      });
+      if (configInDd) {
+        await this.supportedChainRepository.update(config.chainId, {
+          latestBlock: config.firstStartBlock,
+        });
+      } else {
+        await this.supportedChainRepository.save({
+          chainId: config.chainId,
+          latestBlock: config.firstStartBlock,
+          network: config.name,
+        });
+      }
+    }
   }
 
   private async setupCheckEventsTimeout() {
     const chains = await this.supportedChainRepository.find();
     chains.forEach(chain => {
       const intervalName = `inteval_${chain.chainId}`;
-      if (this.schedulerRegistry.getInterval(intervalName)) {
-        this.schedulerRegistry.deleteInterval(intervalName);
-      }
       const callback = async () => {
         try {
-          await this.addNewEventsAction.action(chain.chainId);
+          if (!this.isWorking) {
+            this.isWorking = true;
+            await this.addNewEventsAction.action(chain.chainId);
+            this.isWorking = false;
+          }
         } catch (e) {
           this.logger.error(e);
         }
