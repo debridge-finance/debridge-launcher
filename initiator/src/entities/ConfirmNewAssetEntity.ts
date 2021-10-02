@@ -6,30 +6,49 @@ export class ConfirmNewAssetEntity {
   @PrimaryColumn()
   debridgeId: string;
 
-  @Column()
+  //@TODO yaro
+  @Column({
+    nullable: true,
+  })
   deployId: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   runId: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   tokenAddress: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   name: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   symbol: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   decimals: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   chainFrom: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   chainTo: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   status: number;
 }

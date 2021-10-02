@@ -48,15 +48,12 @@ export class CheckNewEvensAction implements IAction {
         chainId: aggregatorInfo.aggregatorChain,
       });
 
-      const submissionIds = await this.submissionsRepository
-        .createQueryBuilder()
-        .select('SubmissionEntity.submissionId')
-        .distinct(true)
-        .where({
+      const submissionIds = (
+        await this.submissionsRepository.find({
           status: SubmisionStatusEnum.NEW,
           chainTo: chainId,
         })
-        .getRawMany();
+      ).map(submission => submission.submissionId);
 
       if (submissionIds.length === 0) {
         this.logger.debug(`submissionIds.length ${submissionIds.length}`);
@@ -102,14 +99,11 @@ export class CheckNewEvensAction implements IAction {
 
   private async updateConfirmAssets(submissionIds: string[], runId) {
     this.logger.debug(`Start updating confirm assets ${submissionIds} ${runId}`);
-    const debridgeIds = await this.submissionsRepository
-      .createQueryBuilder()
-      .select('SubmissionEntity.debridgeId')
-      .distinct(true)
-      .where({
+    const debridgeIds = (
+      await this.submissionsRepository.find({
         submissionId: In(submissionIds),
       })
-      .getRawMany();
+    ).map(item => item.debridgeId);
 
     const { affected } = await this.confirmNewAssetEntityRepository.update(
       {

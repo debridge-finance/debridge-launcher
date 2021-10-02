@@ -3,11 +3,10 @@ import { IAction } from './IAction';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
 import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
-import { ChainlinkService } from '../../chainlink/ChainlinkService';
 import { EventData } from 'web3-eth-contract';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
@@ -42,11 +41,11 @@ export class AddNewEventsAction implements IAction {
    */
   async processNewTransfers(events: any[], chainIdFrom: number) {
     if (!events) return true;
-    let isOk = true;
-    for (const e of events) {
-      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${e.returnValues.submissionId}`);
-      this.logger.debug(JSON.stringify(sentEvents));
-      const submissionId = e.returnValues.submissionId;
+    const isOk = true;
+    for (const sendEvent of events) {
+      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${sendEvent.returnValues.submissionId}`);
+      //this.logger.debug(JSON.stringify(sentEvents));
+      const submissionId = sendEvent.returnValues.submissionId;
       const submission = await this.submissionsRepository.findOne({
         submissionId,
       });
@@ -55,17 +54,22 @@ export class AddNewEventsAction implements IAction {
         continue;
       }
 
-      await this.submissionsRepository.save({
-        submissionId,
-        txHash: e.transactionHash,
-        chainFrom: chainIdFrom,
-        chainTo: e.chainIdTo,
-        debridgeId: e.debridgeId,
-        receiverAddr: e.receiver,
-        amount: e.amount,
-        status: SubmisionStatusEnum.NEW,
-        assetsStatus: SubmisionAssetsStatusEnum.NEW
-      });
+      try {
+        await this.submissionsRepository.save({
+          submissionId,
+          txHash: sendEvent.transactionHash,
+          chainFrom: chainIdFrom,
+          chainTo: sendEvent.returnValues.chainIdTo,
+          debridgeId: sendEvent.returnValues.debridgeId,
+          receiverAddr: sendEvent.returnValues.receiver,
+          amount: sendEvent.returnValues.amount,
+          status: SubmisionStatusEnum.NEW,
+          assetsStatus: SubmisionAssetsStatusEnum.NEW,
+        });
+      } catch (e) {
+        this.logger.error(`Error in saving ${submissionId}`);
+        throw e;
+      }
     }
     return isOk;
   }
@@ -85,7 +89,7 @@ export class AddNewEventsAction implements IAction {
       //}
     );
 
-    this.logger.debug("getEvents: " + JSON.stringify(sentEvents));
+    this.logger.debug('getEvents: ' + JSON.stringify(sentEvents));
 
     return sentEvents;
   }

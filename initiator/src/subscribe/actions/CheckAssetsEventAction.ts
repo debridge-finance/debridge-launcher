@@ -16,7 +16,7 @@ export class CheckAssetsEventAction implements IAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
-  ) { }
+  ) {}
 
   async action() {
     this.logger.log(`Check assets event`);
@@ -28,6 +28,9 @@ export class CheckAssetsEventAction implements IAction {
     const assetsWasCreatedSubmitions = [];
 
     for (const submission of submissions) {
+      if (!submission.debridgeId) {
+        continue;
+      }
       const confirmNewAction = await this.confirmNewAssetEntityRepository.findOne({
         debridgeId: submission.debridgeId,
       });

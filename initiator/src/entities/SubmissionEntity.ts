@@ -11,24 +11,36 @@ export class SubmissionEntity {
   @Column()
   txHash: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   @Index()
-  runId: string;
+  runId?: string;
 
-  @Column()
-  chainFrom: number;
+  @Column({
+    nullable: true,
+  })
+  chainFrom?: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   @Index()
-  chainTo: number;
+  chainTo?: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   debridgeId: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   receiverAddr: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   amount: string;
 
   @Column()

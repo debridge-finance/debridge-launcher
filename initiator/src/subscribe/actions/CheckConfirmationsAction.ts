@@ -35,15 +35,12 @@ export class CheckConfirmationsAction implements IAction {
     });
     this.logger.debug(`checkConfirmations ${chainConfig.network} check submissions to network ${supportedChains.map(a => a.chainIdTo)}`);
 
-    const runIds = await this.submissionsRepository
-      .createQueryBuilder()
-      .select('SubmissionEntity.runId')
-      .distinct(true)
-      .where({
+    const runIds = (
+      await this.submissionsRepository.find({
         status: SubmisionStatusEnum.CREATED,
         chainTo: In(supportedChains.map(a => a.chainIdTo)),
       })
-      .getRawMany();
+    ).map(item => item.runId);
 
     for (const runId of runIds) {
       const runInfo = await this.chainlinkService.getChainlinkRun(chainConfig.eiChainlinkUrl, runId, chainConfig.cookie);
