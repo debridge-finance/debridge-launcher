@@ -17,6 +17,7 @@ import { SubmisionAssetsStatusEnum } from 'src/enums/SubmisionAssetsStatusEnum';
 @Injectable()
 export class AddNewEventsAction implements IAction {
   private readonly logger = new Logger(AddNewEventsAction.name);
+  private readonly EVENTS_PAGE_SIZE = 5000;
 
   private readonly minConfirmations: number;
   constructor(
@@ -102,31 +103,38 @@ export class AddNewEventsAction implements IAction {
     const chainDetail = ChainsConfig.find(item => {
       return item.chainId === chainId;
     });
+    if (chainDetail.blockConfirmation <= 3) {
+      chainDetail.blockConfirmation = 12;
+      this.logger.warn(`blockConfirmation ${chainDetail.chainId} is changed from ${chainDetail.blockConfirmation} to 12`);
+    }
 
     const web3 = new Web3(chainDetail.provider);
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
 
-    const toBlock = (await web3.eth.getBlockNumber()) - this.minConfirmations;
-    const fromBlock = supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
+    const toBlock = (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
+    let fromBlock = supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
 
-    this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${toBlock}`);
+    while (fromBlock <= toBlock) {
+      const to = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
+      this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${to}`);
 
-    const sentEvents = await this.getEvents(registerInstance, fromBlock, toBlock);
+      const sentEvents = await this.getEvents(registerInstance, fromBlock, to);
 
-    const processSucess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+      const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
-    /* update lattest viewed block */
-    //supportedChain.latestBlock = toBlock;
-    if (processSucess) {
-      const key = 'latestBlock';
-      if (supportedChain[key] != toBlock) {
-        this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: ${key}; value: ${toBlock}`);
-        await this.supportedChainRepository.update(chainId, {
-          latestBlock: toBlock,
-        });
+      /* update lattest viewed block */
+      if (processSuccess) {
+        if (supportedChain.latestBlock != to) {
+          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${to}`);
+          await this.supportedChainRepository.update(chainId, {
+            latestBlock: to,
+          });
+        }
+      } else {
+        this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
+        break;
       }
-    } else {
-      this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
+      fromBlock = to;
     }
   }
 }
