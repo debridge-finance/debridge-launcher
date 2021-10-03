@@ -78,11 +78,11 @@ services:
     volumes:
       - ./initiator/config:/config
     environment:
-      - PGUSER=${POSTGRES_USER}
-      - PGHOST=${POSTGRES_HOST}
-      - PGPASSWORD=${POSTGRES_PASSWORD}
-      - PGDATABASE=${EI_DATABASE}
-      - PGPORT=${POSTGRES_PORT}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_HOST=${POSTGRES_HOST}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_SCHEMA=${EI_DATABASE}
+      - DATABASE_PORT=${POSTGRES_PORT}
     depends_on:
       - postgres
       - chainlink-heco
