@@ -64,11 +64,7 @@ export class SubscribeHandler {
       const intervalName = `interval_${chain.chainId}`;
       const callback = async () => {
         try {
-          if (!this.isWorking) {
-            this.isWorking = true;
-            await this.addNewEventsAction.action(chain.chainId);
-            this.isWorking = false;
-          }
+          await this.addNewEventsAction.action(chain.chainId);
         } catch (e) {
           this.logger.error(e);
         }

@@ -7,7 +7,7 @@ import * as dotenv from 'dotenv';
 async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
-    logger: true,
+    logger: ['warn', 'log', 'debug', 'error'],
   });
 
   const config = new DocumentBuilder().setTitle('Initiator').setVersion('1.0').addBearerAuth().build();

@@ -95,7 +95,13 @@ export class AddNewEventsAction implements IAction {
     return sentEvents;
   }
 
-  async action(chainId: number): Promise<void> {
+  /**
+   * Process events by period
+   * @param {string} chainId
+   * @param {number} from
+   * @param {number} to
+   */
+  async processEvents(chainId: number, from: number = undefined, to: number = undefined) {
     this.logger.verbose(`checkNewEvents ${chainId}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       chainId,
@@ -107,15 +113,14 @@ export class AddNewEventsAction implements IAction {
     const web3 = new Web3(chainDetail.provider);
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
 
-    const toBlock = (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
-    let fromBlock = supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1;
+    const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
+    let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
 
     while (fromBlock <= toBlock) {
       const to = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
       this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${to}`);
 
       const sentEvents = await this.getEvents(registerInstance, fromBlock, to);
-
       const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
       /* update lattest viewed block */
@@ -132,5 +137,9 @@ export class AddNewEventsAction implements IAction {
       }
       fromBlock = to;
     }
+  }
+
+  action(chainId: number) {
+    return this.processEvents(chainId);
   }
 }
