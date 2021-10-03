@@ -40,11 +40,15 @@ export class SubscribeHandler {
       const configInDd = await this.supportedChainRepository.findOne({
         chainId: config.chainId,
       });
-      if (configInDd) {
-        await this.supportedChainRepository.update(config.chainId, {
-          latestBlock: config.firstStartBlock,
-        });
-      } else {
+      if (config.maxBlockRange <= 100) {
+        this.logger.error(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
+        process.exit();
+      }
+      if (config.blockConfirmation <= 8) {
+        this.logger.error(`Cant up application maxBlockRange(${config.blockConfirmation}) < 8`);
+        process.exit();
+      }
+      if (!configInDd) {
         await this.supportedChainRepository.save({
           chainId: config.chainId,
           latestBlock: config.firstStartBlock,
@@ -57,7 +61,7 @@ export class SubscribeHandler {
   private async setupCheckEventsTimeout() {
     const chains = await this.supportedChainRepository.find();
     chains.forEach(chain => {
-      const intervalName = `inteval_${chain.chainId}`;
+      const intervalName = `interval_${chain.chainId}`;
       const callback = async () => {
         try {
           if (!this.isWorking) {

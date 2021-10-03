@@ -103,10 +103,6 @@ export class AddNewEventsAction implements IAction {
     const chainDetail = ChainsConfig.find(item => {
       return item.chainId === chainId;
     });
-    if (chainDetail.blockConfirmation <= 3) {
-      chainDetail.blockConfirmation = 12;
-      this.logger.warn(`blockConfirmation ${chainDetail.chainId} is changed from ${chainDetail.blockConfirmation} to 12`);
-    }
 
     const web3 = new Web3(chainDetail.provider);
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
