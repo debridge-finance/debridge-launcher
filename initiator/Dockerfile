@@ -1,10 +1,11 @@
-FROM node:15-alpine
-WORKDIR /app
-
-COPY package*.json ./
+FROM node:14-alpine3.13
+RUN npm install -g typescript@4.3.5 @nestjs/cli@8.0.0
+COPY package.json /home/node
+COPY package-lock.json /home/node
+COPY tsconfig.json /home/node
+COPY tsconfig.build.json /home/node
+COPY nest-cli.json /home/node
+WORKDIR /home/node
 RUN npm install
-
-COPY . .
-RUN npm run build
-
-CMD node dist/index.js
+COPY src/  /home/node/src
+CMD npm start
