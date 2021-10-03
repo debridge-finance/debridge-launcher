@@ -77,24 +77,8 @@ describe('CheckNewEvensAction', () => {
         {
           provide: getRepositoryToken(SubmissionEntity),
           useValue: {
-            createQueryBuilder: jest.fn(() => ({
-              select: jest.fn().mockReturnThis(),
-              distinct: jest.fn().mockReturnThis(),
-              where: jest.fn().mockReturnThis(),
-              getRawMany: () => {
-                return ['test'];
-              },
-            })),
             find: async () => {
-              return [
-                { chainFrom: 1, chainTo: 2, submissionId: '1' } as SubmissionEntity,
-                {
-                  chainFrom: 3,
-                  chainTo: 4,
-                  debridgeId: '123',
-                  submissionId: 'test',
-                } as SubmissionEntity,
-              ];
+              return [{ chainFrom: 1, chainTo: 2, submissionId: 'test' } as SubmissionEntity];
             },
             update: async (any, entity: Partial<SubmissionEntity>) => {
               return { affected: 1 };

@@ -12,7 +12,7 @@ import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
 import Web3 from 'web3';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
-import { SubmisionAssetsStatusEnum } from 'src/enums/SubmisionAssetsStatusEnum';
+import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 
 @Injectable()
 export class AddNewEventsAction implements IAction {

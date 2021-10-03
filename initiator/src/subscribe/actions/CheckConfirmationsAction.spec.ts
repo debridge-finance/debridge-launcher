@@ -57,22 +57,15 @@ describe('CheckConfirmationsAction', () => {
         {
           provide: getRepositoryToken(SubmissionEntity),
           useValue: {
-            createQueryBuilder: jest.fn(() => ({
-              select: jest.fn().mockReturnThis(),
-              distinct: jest.fn().mockReturnThis(),
-              where: jest.fn().mockReturnThis(),
-              getRawMany: () => {
-                return ['test'];
-              },
-            })),
             find: async () => {
               return [
-                { chainFrom: 1, chainTo: 2, submissionId: '1' } as SubmissionEntity,
+                { chainFrom: 1, chainTo: 2, submissionId: '1', runId: 'test' } as SubmissionEntity,
                 {
                   chainFrom: 3,
                   chainTo: 4,
                   debridgeId: '123',
                   submissionId: '2',
+                  runId: 'test',
                 } as SubmissionEntity,
               ];
             },

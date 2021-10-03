@@ -150,10 +150,7 @@ describe('AddNewEventsAction', () => {
         },
       };
       const result = await service.getEvents(mock, 9, 11);
-      expect(result).toEqual({
-        sentEvents: [],
-        burntEvents: [],
-      });
+      expect(result).toEqual([]);
     });
 
     it('AddNewEventsAction processNewTransfers emptyEvents', async () => {

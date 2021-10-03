@@ -40,7 +40,7 @@ describe('CheckAssetsEventAction', () => {
           useValue: {
             find: async () => {
               return [
-                { chainFrom: 1, chainTo: 2, submissionId: '1' } as SubmissionEntity,
+                { chainFrom: 1, chainTo: 2, submissionId: '1', debridgeId: '12' } as SubmissionEntity,
                 {
                   chainFrom: 3,
                   chainTo: 4,
@@ -58,7 +58,7 @@ describe('CheckAssetsEventAction', () => {
           provide: getRepositoryToken(ConfirmNewAssetEntity),
           useValue: {
             findOne: async ({ debridgeId }: { debridgeId?: string }) => {
-              if (debridgeId) {
+              if (debridgeId === '123') {
                 return {
                   debridgeId,
                 } as ConfirmNewAssetEntity;
@@ -96,8 +96,7 @@ describe('CheckAssetsEventAction', () => {
           submissionId: In(['1']),
         },
         {
-          assetsStatus: SubmisionAssetsStatusEnum.ASSETS,
-          status: SubmisionStatusEnum.NEW,
+          assetsStatus: SubmisionAssetsStatusEnum.ASSETS_CREATED,
         },
       );
 
@@ -106,8 +105,7 @@ describe('CheckAssetsEventAction', () => {
           submissionId: In(['2']),
         },
         {
-          assetsStatus: SubmisionAssetsStatusEnum.ASSETS_CREATE,
-          status: SubmisionStatusEnum.NEW,
+          assetsStatus: SubmisionAssetsStatusEnum.ASSETS_ALREADY_CREATED,
         },
       );
 
