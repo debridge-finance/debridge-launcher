@@ -6,18 +6,12 @@ import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { In, Repository } from 'typeorm';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
-import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
-import { ChainlinkServiceMock } from '../../chainlink/ChainlinkServiceMock';
-import { ChainlinkService } from '../../chainlink/ChainlinkService';
 import { HttpModule } from '@nestjs/axios';
 import { CheckNewEvensAction } from './CheckNewEventsAction';
 
 describe('CheckNewEvensAction', () => {
   let service: CheckNewEvensAction;
   let repositorySubmissionEntity: Repository<SubmissionEntity>;
-
-  let chainlinkService: ChainlinkService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,43 +28,6 @@ describe('CheckNewEvensAction', () => {
                   network: 'etc',
                 } as SupportedChainEntity,
               ];
-            },
-          },
-        },
-        {
-          provide: getRepositoryToken(AggregatorChainEntity),
-          useValue: {
-            findOne: (entity: Partial<SupportedChainEntity>) => {
-              return { chainId: 97, network: 'test', latestBlock: 80 } as SupportedChainEntity;
-            },
-            find: (entity: Partial<SupportedChainEntity>) => {
-              return [{ chainId: 97, network: 'test', latestBlock: 80 } as SupportedChainEntity];
-            },
-          },
-        },
-        {
-          provide: getRepositoryToken(ChainlinkConfigEntity),
-          useValue: {
-            findOne: async () => {
-              return {
-                chainId: 97,
-                eiChainlinkUrl: 'test',
-                network: 'network',
-                cookie: 'test',
-              } as ChainlinkConfigEntity;
-            },
-            find: async () => {
-              return [
-                {
-                  chainId: 97,
-                  eiChainlinkUrl: 'test',
-                  network: 'network',
-                  cookie: 'test',
-                } as ChainlinkConfigEntity,
-              ];
-            },
-            update: async (any, entity: Partial<ChainlinkConfigEntity>) => {
-              return { affected: 1 };
             },
           },
         },
@@ -104,28 +61,20 @@ describe('CheckNewEvensAction', () => {
             },
           },
         },
-        {
-          provide: ChainlinkService,
-          useClass: ChainlinkServiceMock,
-        },
         CheckNewEvensAction,
       ],
     }).compile();
     service = module.get(CheckNewEvensAction);
     repositorySubmissionEntity = module.get(getRepositoryToken(SubmissionEntity));
-
-    chainlinkService = module.get(ChainlinkService);
   });
 
   describe('CheckNewEvensAction', () => {
     it('CheckNewEvensAction with 1 submittion', async () => {
-      jest.spyOn(chainlinkService, 'postChainlinkRun');
 
       jest.spyOn(repositorySubmissionEntity, 'update');
 
       await service.action();
 
-      expect(chainlinkService.postChainlinkRun).toHaveBeenCalled();
 
       expect(repositorySubmissionEntity.update).toHaveBeenCalledWith(
         {

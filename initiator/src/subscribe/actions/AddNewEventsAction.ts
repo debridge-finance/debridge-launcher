@@ -4,8 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { Repository } from 'typeorm';
-import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
-import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { EventData } from 'web3-eth-contract';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
@@ -24,10 +22,6 @@ export class AddNewEventsAction implements IAction {
     private readonly configService: ConfigService,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
-    @InjectRepository(AggregatorChainEntity)
-    private readonly aggregatorChainsRepository: Repository<AggregatorChainEntity>,
-    @InjectRepository(ChainlinkConfigEntity)
-    private readonly chainlinkConfigRepository: Repository<ChainlinkConfigEntity>,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
   ) {

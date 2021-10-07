@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Interval, SchedulerRegistry } from '@nestjs/schedule';
-import { SetAllChainlinkCookiesAction } from './actions/SetAllChainlinkCookiesAction';
-import { CheckConfirmationsAction } from './actions/CheckConfirmationsAction';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
@@ -18,8 +16,6 @@ export class SubscribeHandler {
 
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
-    private readonly setAllChainlinkCookiesAction: SetAllChainlinkCookiesAction,
-    private readonly checkConfirmationsAction: CheckConfirmationsAction,
     private readonly addNewEventsAction: AddNewEventsAction,
     private readonly checkNewEvensAction: CheckNewEvensAction,
     private readonly checkAssetsEventAction: CheckAssetsEventAction,
@@ -32,7 +28,6 @@ export class SubscribeHandler {
   async init() {
     await this.uploadConfig();
     await this.setupCheckEventsTimeout();
-    await this.setChainLinkCookies();
   }
 
   private async uploadConfig() {
@@ -80,11 +75,6 @@ export class SubscribeHandler {
   }
 
   @Interval(3000)
-  async confirmationChecker() {
-    await this.checkConfirmationsAction.action();
-  }
-
-  @Interval(3000)
   async checkNewEvents() {
     await this.checkNewEvensAction.action();
   }
@@ -92,10 +82,5 @@ export class SubscribeHandler {
   @Interval(3000)
   async checkAssetsEvent() {
     await this.checkAssetsEventAction.action();
-  }
-
-  @Interval(864000)
-  async setChainLinkCookies() {
-    await this.setAllChainlinkCookiesAction.action();
   }
 }

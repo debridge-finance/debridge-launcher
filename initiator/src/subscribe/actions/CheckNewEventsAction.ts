@@ -4,10 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { In, Repository } from 'typeorm';
-import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
-import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
-import { ChainlinkService } from '../../chainlink/ChainlinkService';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 
@@ -20,15 +17,10 @@ export class CheckNewEvensAction implements IAction {
     private readonly configService: ConfigService,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
-    @InjectRepository(AggregatorChainEntity)
-    private readonly aggregatorChainsRepository: Repository<AggregatorChainEntity>,
-    @InjectRepository(ChainlinkConfigEntity)
-    private readonly chainlinkConfigRepository: Repository<ChainlinkConfigEntity>,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
-    private readonly chainlinkService: ChainlinkService,
   ) {
     this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
   }
@@ -38,15 +30,6 @@ export class CheckNewEvensAction implements IAction {
     const supportedChainList = await this.supportedChainRepository.find();
     for (const chain of supportedChainList) {
       const chainId = chain.chainId;
-
-      const aggregatorInfo = await this.aggregatorChainsRepository.findOne({
-        chainIdTo: chainId,
-      });
-      if (!aggregatorInfo) continue;
-
-      const config = await this.chainlinkConfigRepository.findOne({
-        chainId: aggregatorInfo.aggregatorChain,
-      });
 
       const submissionIds = (
         await this.submissionsRepository.find({
@@ -61,59 +44,43 @@ export class CheckNewEvensAction implements IAction {
       }
       let runId: string;
 
-      if (submissionIds.length === 1) {
-        runId = await this.chainlinkService.postChainlinkRun(
-          config.submitJobId,
-          submissionIds[0],
-          config.eiChainlinkUrl,
-          config.eiCiAccesskey,
-          config.eiIcSecret,
-        );
-      } else {
-        runId = await this.chainlinkService.postBulkChainlinkRun(
-          config.submitManyJobId,
-          submissionIds,
-          config.eiChainlinkUrl,
-          config.eiCiAccesskey,
-          config.eiIcSecret,
-        );
-      }
+      //TODO: sign and  save to orbit db
 
-      if (runId) {
-        const { affected } = await this.submissionsRepository.update(
-          {
-            submissionId: In(submissionIds),
-          },
-          {
-            status: SubmisionStatusEnum.CREATED,
-            runId,
-          },
-        );
+      // if (runId) {
+      //   const { affected } = await this.submissionsRepository.update(
+      //     {
+      //       submissionId: In(submissionIds),
+      //     },
+      //     {
+      //       status: SubmisionStatusEnum.CREATED,
+      //       runId,
+      //     },
+      //   );
 
-        this.logger.debug(`${affected} submissions is updated`);
+        // this.logger.debug(`${affected} submissions is updated`);
 
         //await this.updateConfirmAssets(submissionIds, runId);
-      }
+      // }
     }
   }
 
-  private async updateConfirmAssets(submissionIds: string[], runId) {
-    this.logger.debug(`Start updating confirm assets ${submissionIds} ${runId}`);
-    const debridgeIds = (
-      await this.submissionsRepository.find({
-        submissionId: In(submissionIds),
-      })
-    ).map(item => item.debridgeId);
+  // private async updateConfirmAssets(submissionIds: string[], runId) {
+  //   this.logger.debug(`Start updating confirm assets ${submissionIds} ${runId}`);
+  //   const debridgeIds = (
+  //     await this.submissionsRepository.find({
+  //       submissionId: In(submissionIds),
+  //     })
+  //   ).map(item => item.debridgeId);
 
-    const { affected } = await this.confirmNewAssetEntityRepository.update(
-      {
-        debridgeId: In(debridgeIds),
-      },
-      {
-        status: SubmisionStatusEnum.CREATED,
-        runId,
-      },
-    );
-    this.logger.debug(`Finish updating (${affected}) confirm assets ${submissionIds} ${runId}`);
-  }
+  //   const { affected } = await this.confirmNewAssetEntityRepository.update(
+  //     {
+  //       debridgeId: In(debridgeIds),
+  //     },
+  //     {
+  //       status: SubmisionStatusEnum.CREATED,
+  //       runId,
+  //     },
+  //   );
+  //   this.logger.debug(`Finish updating (${affected}) confirm assets ${submissionIds} ${runId}`);
+  // }
 }

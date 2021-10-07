@@ -5,10 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
-import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
-import { ChainlinkServiceMock } from '../../chainlink/ChainlinkServiceMock';
-import { ChainlinkService } from '../../chainlink/ChainlinkService';
 import { HttpModule } from '@nestjs/axios';
 import { AddNewEventsAction } from './AddNewEventsAction';
 import spyOn = jest.spyOn;
@@ -16,8 +12,6 @@ import spyOn = jest.spyOn;
 describe('AddNewEventsAction', () => {
   let service: AddNewEventsAction;
   let repositorySubmissionEntity: Repository<SubmissionEntity>;
-
-  let chainlinkService: ChainlinkService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,43 +28,6 @@ describe('AddNewEventsAction', () => {
                   network: 'etc',
                 } as SupportedChainEntity,
               ];
-            },
-          },
-        },
-        {
-          provide: getRepositoryToken(AggregatorChainEntity),
-          useValue: {
-            findOne: (entity: Partial<SupportedChainEntity>) => {
-              return { chainId: 97, network: 'test', latestBlock: 80 } as SupportedChainEntity;
-            },
-            find: (entity: Partial<SupportedChainEntity>) => {
-              return [{ chainId: 97, network: 'test', latestBlock: 80 } as SupportedChainEntity];
-            },
-          },
-        },
-        {
-          provide: getRepositoryToken(ChainlinkConfigEntity),
-          useValue: {
-            findOne: async () => {
-              return {
-                chainId: 97,
-                eiChainlinkUrl: 'test',
-                network: 'network',
-                cookie: 'test',
-              } as ChainlinkConfigEntity;
-            },
-            find: async () => {
-              return [
-                {
-                  chainId: 97,
-                  eiChainlinkUrl: 'test',
-                  network: 'network',
-                  cookie: 'test',
-                } as ChainlinkConfigEntity,
-              ];
-            },
-            update: async (any, entity: Partial<ChainlinkConfigEntity>) => {
-              return { affected: 1 };
             },
           },
         },
@@ -125,10 +82,6 @@ describe('AddNewEventsAction', () => {
               return { affected: 0 };
             },
           },
-        },
-        {
-          provide: ChainlinkService,
-          useClass: ChainlinkServiceMock,
         },
         AddNewEventsAction,
       ],

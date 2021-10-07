@@ -6,10 +6,6 @@ import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { In, Repository } from 'typeorm';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { AggregatorChainEntity } from '../../entities/AggregatorChainEntity';
-import { ChainlinkConfigEntity } from '../../entities/ChainlinkConfigEntity';
-import { ChainlinkServiceMock } from '../../chainlink/ChainlinkServiceMock';
-import { ChainlinkService } from '../../chainlink/ChainlinkService';
 import { HttpModule } from '@nestjs/axios';
 import { CheckAssetsEventAction } from './CheckAssetsEventAction';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
@@ -25,14 +21,6 @@ describe('CheckAssetsEventAction', () => {
       providers: [
         {
           provide: getRepositoryToken(SupportedChainEntity),
-          useValue: {},
-        },
-        {
-          provide: getRepositoryToken(AggregatorChainEntity),
-          useValue: {},
-        },
-        {
-          provide: getRepositoryToken(ChainlinkConfigEntity),
           useValue: {},
         },
         {
@@ -72,10 +60,6 @@ describe('CheckAssetsEventAction', () => {
               return { affected: 0 };
             },
           },
-        },
-        {
-          provide: ChainlinkService,
-          useClass: ChainlinkServiceMock,
         },
         CheckAssetsEventAction,
       ],
