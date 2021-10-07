@@ -7,6 +7,7 @@ import { In, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
+import Web3 from 'web3';
 
 @Injectable()
 export class CheckNewEvensAction implements IAction {
@@ -28,21 +29,44 @@ export class CheckNewEvensAction implements IAction {
   async action(): Promise<void> {
     this.logger.log(`Check new events`);
     const supportedChainList = await this.supportedChainRepository.find();
-    for (const chain of supportedChainList) {
-      const chainId = chain.chainId;
 
-      const submissionIds = (
-        await this.submissionsRepository.find({
-          status: SubmisionStatusEnum.NEW,
-          chainTo: chainId,
-        })
-      ).map(submission => submission.submissionId);
+    //TODO: check is supported chainIdTo
+    const submissions = await this.submissionsRepository.find({
+      status: SubmisionStatusEnum.NEW,
+    });
 
-      if (submissionIds.length === 0) {
-        this.logger.debug(`submissionIds.length ${submissionIds.length}`);
-        return;
-      }
-      let runId: string;
+    // for (const chain of supportedChainList) {
+    //   const chainId = chain.chainId;
+
+    //   const submissionIds = (
+    //     await this.submissionsRepository.find({
+    //       status: SubmisionStatusEnum.NEW,
+    //       chainTo: chainId,
+    //     })
+    //   ).map(submission => submission.submissionId);
+
+    //   if (submissionIds.length === 0) {
+    //     this.logger.debug(`submissionIds.length ${submissionIds.length}`);
+    //     return;
+    //   }
+    //   let runId: string;
+
+    const web3 = new Web3();
+    for (const submission of submissions) {
+      const signature = (await web3.eth.accounts.sign(submission.submissionId, process.env.SIGNATURE_PRIVATE_KEY)).signature;
+      const hash = ""; //TODO: save to IPFS hash   let hash = await db.add(value);
+      this.logger.debug(`signed  ${submission.submissionId} {signature}`);
+      await this.submissionsRepository.update(
+        {
+          submissionId: submission.submissionId,
+        },
+        {
+          signature: signature,
+          status: SubmisionStatusEnum.SIGNED,
+          ipfsLogHash: hash,
+        },
+      );
+    }
 
       //TODO: sign and  save to orbit db
 
@@ -61,7 +85,7 @@ export class CheckNewEvensAction implements IAction {
 
         //await this.updateConfirmAssets(submissionIds, runId);
       // }
-    }
+    // }
   }
 
   // private async updateConfirmAssets(submissionIds: string[], runId) {

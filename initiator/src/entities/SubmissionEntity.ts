@@ -11,11 +11,6 @@ export class SubmissionEntity {
   @Column()
   txHash: string;
 
-  @Column({
-    nullable: true,
-  })
-  @Index()
-  runId?: string;
 
   @Column({
     nullable: true,
@@ -42,6 +37,21 @@ export class SubmissionEntity {
     nullable: true,
   })
   amount: string;
+
+  @Column({
+    nullable: true,
+  })
+  signature: string;
+
+  @Column({
+    nullable: true,
+  })
+  ipfsLogHash: string;
+
+  @Column({
+    nullable: true,
+  })
+  ipfsKeyHash: string;
 
   @Column()
   @Index()

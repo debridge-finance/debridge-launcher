@@ -15,11 +15,6 @@ export class ConfirmNewAssetEntity {
   @Column({
     nullable: true,
   })
-  runId: string;
-
-  @Column({
-    nullable: true,
-  })
   tokenAddress: string;
 
   @Column({
@@ -46,6 +41,21 @@ export class ConfirmNewAssetEntity {
     nullable: true,
   })
   chainTo: number;
+
+  @Column({
+      nullable: true,
+  })
+  signature: string;
+
+  @Column({
+      nullable: true,
+  })
+  ipfsLogHash: string;
+
+  @Column({
+      nullable: true,
+  })
+  ipfsKeyHash: string;
 
   @Column({
     nullable: true,
