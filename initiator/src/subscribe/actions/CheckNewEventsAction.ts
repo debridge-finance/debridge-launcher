@@ -14,6 +14,8 @@ import Web3 from 'web3';
 export class CheckNewEvensAction implements IAction {
   private readonly logger = new Logger(CheckNewEvensAction.name);
 
+  private isWorking = false;
+
   private readonly minConfirmations: number;
   constructor(
     private readonly configService: ConfigService,
@@ -30,6 +32,11 @@ export class CheckNewEvensAction implements IAction {
 
   async action(): Promise<void> {
     this.logger.log(`Check new events`);
+
+    if (this.isWorking) {
+      return ;
+    }
+    this.isWorking = true;
     const supportedChainList = await this.supportedChainRepository.find();
 
     //TODO: check is supported chainIdTo
@@ -68,6 +75,8 @@ export class CheckNewEvensAction implements IAction {
           ipfsLogHash: hash,
         },
       );
+
+      this.isWorking = false;
     }
 
       //TODO: sign and  save to orbit db

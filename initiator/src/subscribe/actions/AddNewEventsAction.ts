@@ -16,6 +16,7 @@ import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum
 export class AddNewEventsAction implements IAction {
   private readonly logger = new Logger(AddNewEventsAction.name);
   private readonly EVENTS_PAGE_SIZE = 5000;
+  private isWorking = false;
 
   private readonly minConfirmations: number;
   constructor(
@@ -133,7 +134,12 @@ export class AddNewEventsAction implements IAction {
     }
   }
 
-  action(chainId: number) {
-    return this.processEvents(chainId);
+  async action(chainId: number) {
+    if (this.isWorking) {
+      return ;
+    }
+    this.isWorking = true;
+    await this.processEvents(chainId);
+    this.isWorking = false;
   }
 }
