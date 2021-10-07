@@ -45,4 +45,15 @@ export class OrbitDbService {
         this.logger.log(`addLog hash: ${hash}`);
         return hash;
     }
+
+    async addLogConfirmNewAssets(deployId: string, signature: string): Promise<string> {
+        const value = {
+            deployId: deployId,
+            signature: signature,
+        };
+
+        let hash = await this.myOrbitDb.add(value);
+        this.logger.log(`addLogConfirmNewAssets hash: ${hash}`);
+        return hash;
+    }
 }

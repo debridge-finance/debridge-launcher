@@ -26,8 +26,11 @@ export class SubscribeHandler {
   }
 
   async init() {
-     await this.uploadConfig();
-     await this.setupCheckEventsTimeout();
+    await this.uploadConfig();
+    //  await this.setupCheckEventsTimeout();
+    //  await this.checkNewEvensAction.action();
+
+    await this.checkAssetsEventAction.action();
   }
 
   private async uploadConfig() {
@@ -74,13 +77,13 @@ export class SubscribeHandler {
     });
   }
 
-  @Interval(3000)
-  async checkNewEvents() {
-    await this.checkNewEvensAction.action();
-  }
+  // @Interval(30000)
+  // async checkNewEvents() {
+  //   await this.checkNewEvensAction.action();
+  // }
 
-   @Interval(3000)
-   async checkAssetsEvent() {
-     await this.checkAssetsEventAction.action();
-   }
+  //  @Interval(3000)
+  //  async checkAssetsEvent() {
+  //    await this.checkAssetsEventAction.action();
+  //  }
 }
