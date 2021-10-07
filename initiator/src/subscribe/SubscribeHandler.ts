@@ -77,13 +77,13 @@ export class SubscribeHandler {
     });
   }
 
-  // @Interval(30000)
-  // async checkNewEvents() {
-  //   await this.checkNewEvensAction.action();
-  // }
+  @Interval(30000)
+  async checkNewEvents() {
+     await this.checkNewEvensAction.action();
+  }
 
-  //  @Interval(3000)
-  //  async checkAssetsEvent() {
-  //    await this.checkAssetsEventAction.action();
-  //  }
+  @Interval(3000)
+  async checkAssetsEvent() {
+    await this.checkAssetsEventAction.action();
+  }
 }
