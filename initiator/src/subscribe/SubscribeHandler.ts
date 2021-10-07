@@ -26,8 +26,8 @@ export class SubscribeHandler {
   }
 
   async init() {
-    await this.uploadConfig();
-    await this.setupCheckEventsTimeout();
+     await this.uploadConfig();
+     await this.setupCheckEventsTimeout();
   }
 
   private async uploadConfig() {
@@ -79,8 +79,8 @@ export class SubscribeHandler {
     await this.checkNewEvensAction.action();
   }
 
-  @Interval(3000)
-  async checkAssetsEvent() {
-    await this.checkAssetsEventAction.action();
-  }
+   @Interval(3000)
+   async checkAssetsEvent() {
+     await this.checkAssetsEventAction.action();
+   }
 }

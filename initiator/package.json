@@ -35,6 +35,8 @@
     "class-validator": "0.13.1",
     "dotenv": "10.0.0",
     "fastify-swagger": "4.11.0",
+    "ipfs": "^0.59.1",
+    "orbit-db": "^0.27.1",
     "passport": "0.4.1",
     "passport-jwt": "4.0.0",
     "pg": "8.7.1",

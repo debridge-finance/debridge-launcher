@@ -7,6 +7,7 @@ import { In, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
+import { OrbitDbService } from 'src/services/orbitDbService';
 import Web3 from 'web3';
 
 @Injectable()
@@ -22,6 +23,7 @@ export class CheckNewEvensAction implements IAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
+    private readonly orbitDbService: OrbitDbService,
   ) {
     this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
   }
@@ -54,8 +56,8 @@ export class CheckNewEvensAction implements IAction {
     const web3 = new Web3();
     for (const submission of submissions) {
       const signature = (await web3.eth.accounts.sign(submission.submissionId, process.env.SIGNATURE_PRIVATE_KEY)).signature;
-      const hash = ""; //TODO: save to IPFS hash   let hash = await db.add(value);
-      this.logger.debug(`signed  ${submission.submissionId} {signature}`);
+      const hash = await this.orbitDbService.addLog(submission.submissionId, signature);
+      this.logger.log(`signed  ${submission.submissionId} ${signature}`);
       await this.submissionsRepository.update(
         {
           submissionId: submission.submissionId,

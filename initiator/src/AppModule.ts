@@ -15,6 +15,7 @@ import { CheckNewEvensAction } from './subscribe/actions/CheckNewEventsAction';
 import { SubscribeHandler } from './subscribe/SubscribeHandler';
 import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
 import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
+import { OrbitDbService } from './services/orbitDbService';
 
 @Module({
   imports: [
@@ -50,6 +51,10 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
     CheckNewEvensAction,
     CheckAssetsEventAction,
     SubscribeHandler,
+    {
+      provide: OrbitDbService,
+      useFactory: async () => { const service = new OrbitDbService(); await service.init(); return service }
+    }
   ],
 })
-export class AppModule {}
+export class AppModule { }
