@@ -12,6 +12,7 @@ import chainConfigs from './../config/chains_config.json';
 @Injectable()
 export class SubscribeHandler {
   private readonly logger = new Logger(SubscribeHandler.name);
+  private isWorking = false;
 
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
@@ -27,9 +28,6 @@ export class SubscribeHandler {
   async init() {
     await this.uploadConfig();
     await this.setupCheckEventsTimeout();
-    await this.checkNewEvensAction.action();
-
-    await this.checkAssetsEventAction.action();
   }
 
   private async uploadConfig() {
