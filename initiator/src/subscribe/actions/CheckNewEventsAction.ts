@@ -3,7 +3,7 @@ import { IAction } from './IAction';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
@@ -11,11 +11,7 @@ import { OrbitDbService } from 'src/services/orbitDbService';
 import Web3 from 'web3';
 
 @Injectable()
-export class CheckNewEvensAction implements IAction {
-  private readonly logger = new Logger(CheckNewEvensAction.name);
-
-  private isWorking = false;
-
+export class CheckNewEvensAction extends IAction<void> {
   private readonly minConfirmations: number;
   constructor(
     private readonly configService: ConfigService,
@@ -27,16 +23,13 @@ export class CheckNewEvensAction implements IAction {
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
     private readonly orbitDbService: OrbitDbService,
   ) {
+    super();
+    this.logger = new Logger(CheckNewEvensAction.name);
     this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
   }
 
-  async action(): Promise<void> {
+  async process(): Promise<void> {
     this.logger.log(`Check new events`);
-
-    if (this.isWorking) {
-      return ;
-    }
-    this.isWorking = true;
     const supportedChainList = await this.supportedChainRepository.find();
 
     //TODO: check is supported chainIdTo
@@ -75,8 +68,6 @@ export class CheckNewEvensAction implements IAction {
           ipfsLogHash: hash,
         },
       );
-
-      this.isWorking = false;
     }
 
       //TODO: sign and  save to orbit db

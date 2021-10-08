@@ -13,10 +13,8 @@ import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 
 @Injectable()
-export class AddNewEventsAction implements IAction {
-  private readonly logger = new Logger(AddNewEventsAction.name);
+export class AddNewEventsAction extends IAction<number> {
   private readonly EVENTS_PAGE_SIZE = 5000;
-  private isWorking = false;
 
   private readonly minConfirmations: number;
   constructor(
@@ -26,6 +24,8 @@ export class AddNewEventsAction implements IAction {
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
   ) {
+    super();
+    this.logger = new Logger(AddNewEventsAction.name);
     this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
   }
 
@@ -96,7 +96,7 @@ export class AddNewEventsAction implements IAction {
    * @param {number} from
    * @param {number} to
    */
-  async processEvents(chainId: number, from: number = undefined, to: number = undefined) {
+  async process(chainId: number, from: number = undefined, to: number = undefined) {
     this.logger.verbose(`checkNewEvents ${chainId}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       chainId,
@@ -132,14 +132,5 @@ export class AddNewEventsAction implements IAction {
       }
       fromBlock = to;
     }
-  }
-
-  async action(chainId: number) {
-    if (this.isWorking) {
-      return ;
-    }
-    this.isWorking = true;
-    await this.processEvents(chainId);
-    this.isWorking = false;
   }
 }

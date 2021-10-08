@@ -14,10 +14,7 @@ import Web3 from 'web3';
 
 
 @Injectable()
-export class CheckAssetsEventAction implements IAction {
-  private readonly logger = new Logger(CheckAssetsEventAction.name);
-
-  private isWorking = false;
+export class CheckAssetsEventAction extends IAction<void> {
 
   constructor(
     @InjectRepository(SubmissionEntity)
@@ -25,16 +22,13 @@ export class CheckAssetsEventAction implements IAction {
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
     private readonly orbitDbService: OrbitDbService
-  ) { }
+  ) {
+    super();
+    this.logger = new Logger(CheckAssetsEventAction.name)
+  }
 
-  async action() {
+  async process() {
     this.logger.log(`Check assets event`);
-
-    if (this.isWorking) {
-      return ;
-    }
-    this.isWorking = true;
-
     const submissions = await this.submissionsRepository.find({
       assetsStatus: SubmisionAssetsStatusEnum.NEW,
     });
@@ -148,7 +142,6 @@ export class CheckAssetsEventAction implements IAction {
         },
       );
     }
-    this.isWorking = false;
     this.logger.log(`Finish Check assets event`);
   }
 }

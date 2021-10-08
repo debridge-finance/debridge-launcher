@@ -53,7 +53,11 @@ import { OrbitDbService } from './services/orbitDbService';
     SubscribeHandler,
     {
       provide: OrbitDbService,
-      useFactory: async () => { const service = new OrbitDbService(); await service.init(); return service }
+      useFactory: async () => {
+        const service = new OrbitDbService();
+        await service.init();
+        return service;
+      }
     }
   ],
 })
