@@ -111,7 +111,9 @@ export class AddNewEventsAction extends IAction<number> {
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
     let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
 
-    while (fromBlock <= toBlock) {
+    this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
+
+    while (fromBlock < toBlock) {
       const to = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
       this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${to}`);
 

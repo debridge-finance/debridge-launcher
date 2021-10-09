@@ -4,18 +4,18 @@ import {Logger} from "@nestjs/common";
  * Interface for doing action in interval
  */
 export abstract class IAction<T> {
-   logger: Logger;
+  logger: Logger;
 
   private isWorking = false;
 
   abstract process(data?: T): Promise<void>;
 
   async action(data?: T) {
+    if (this.isWorking) {
+      this.logger.warn('Is working now');
+      return ;
+    }
     try {
-      if (this.isWorking) {
-        this.logger.warn('Is working now');
-        return ;
-      }
       this.isWorking = true;
       this.logger.log(`Is locked`);
       await this.process(data);
