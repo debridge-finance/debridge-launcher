@@ -1,8 +1,7 @@
 import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
 import { UserLoginDto } from './auth/user.login.dto';
 import { AuthService } from './auth/auth.service';
-import { AuthGuard } from '@nestjs/passport';
 import { RescanDto } from './dto/RescanDto';
 import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
 
