@@ -113,7 +113,7 @@ export class AddNewEventsAction extends IAction<number> {
 
     this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
 
-    for (let fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
+    for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
       const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
       this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
@@ -122,10 +122,10 @@ export class AddNewEventsAction extends IAction<number> {
 
       /* update lattest viewed block */
       if (processSuccess) {
-        if (supportedChain.latestBlock != to) {
-          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${to}`);
+        if (supportedChain.latestBlock != lastBlockOfPage) {
+          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
           await this.supportedChainRepository.update(chainId, {
-            latestBlock: to,
+            latestBlock: lastBlockOfPage,
           });
         }
       } else {
