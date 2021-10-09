@@ -8,9 +8,9 @@ export abstract class IAction<T> {
 
   private isWorking = false;
 
-  abstract process(data?: T): Promise<void>;
+  abstract process(): Promise<void>;
 
-  async action(data?: T) {
+  async action() {
     if (this.isWorking) {
       this.logger.warn('Is working now');
       return ;
@@ -18,7 +18,7 @@ export abstract class IAction<T> {
     try {
       this.isWorking = true;
       this.logger.log(`Is locked`);
-      await this.process(data);
+      await this.process();
     } catch (e) {
       this.logger.error(e);
     } finally {
