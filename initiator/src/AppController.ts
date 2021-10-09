@@ -40,6 +40,6 @@ export class AppController {
   })
   @UsePipes(new ValidationPipe({ transform: true }))
   restart(@Body() dto: RescanDto) {
-    return this.addNewEventsAction.processEvents(dto.chainId, dto.from, dto.to);
+    return this.addNewEventsAction.process(dto.chainId, dto.from, dto.to);
   }
 }

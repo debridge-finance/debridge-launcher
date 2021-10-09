@@ -1,7 +1,7 @@
 [
   {
     "chainId": 97,
-    "name": "BNB",
+    "name": "BSC",
     "debridgeAddr": "0xCc6b8F50ABa13b6b9861D29BCb59139Cb9a652c8",
     "firstStartBlock": 12822441,
     "provider": "https://data-seed-prebsc-1-s1.binance.org:8545/",
@@ -11,7 +11,7 @@
   },
   {
     "chainId": 42,
-    "name": "ETH",
+    "name": "KOVAN",
     "debridgeAddr": "0xCc6b8F50ABa13b6b9861D29BCb59139Cb9a652c8",
     "firstStartBlock": 27415469,
     "provider": "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
@@ -21,7 +21,7 @@
   },
   {
     "chainId": 256,
-    "name": "HT",
+    "name": "HECO",
     "debridgeAddr": "0xCc6b8F50ABa13b6b9861D29BCb59139Cb9a652c8",
     "firstStartBlock": 8711003,
     "provider": "https://http-testnet.hecochain.com",

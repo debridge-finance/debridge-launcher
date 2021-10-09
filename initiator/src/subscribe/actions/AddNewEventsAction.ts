@@ -113,11 +113,11 @@ export class AddNewEventsAction extends IAction<number> {
 
     this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
 
-    while (fromBlock < toBlock) {
-      const to = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
-      this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${to}`);
+    for (let fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
+      const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
+      this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
-      const sentEvents = await this.getEvents(registerInstance, fromBlock, to);
+      const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
       const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
       /* update lattest viewed block */
@@ -132,7 +132,6 @@ export class AddNewEventsAction extends IAction<number> {
         this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
         break;
       }
-      fromBlock = to;
     }
   }
 }
