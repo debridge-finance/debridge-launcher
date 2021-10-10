@@ -13,10 +13,10 @@ import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 
 @Injectable()
-export class AddNewEventsAction extends IAction<number> {
-  private readonly EVENTS_PAGE_SIZE = 5000;
+export class AddNewEventsAction {
+  logger: Logger;
+  private locker  = new Map();
 
-  private readonly minConfirmations: number;
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(SupportedChainEntity)
@@ -24,9 +24,24 @@ export class AddNewEventsAction extends IAction<number> {
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
   ) {
-    super();
     this.logger = new Logger(AddNewEventsAction.name);
-    this.minConfirmations = this.configService.get<number>('MIN_CONFIRMATIONS');
+  }
+
+  async action(chainId: number) {
+    if (this.locker.get(chainId)) {
+      this.logger.warn(`Is working now. chainId: ${chainId}`);
+      return ;
+    }
+    try {
+      this.locker.set(chainId, true);
+      this.logger.log(`Is locked chainId: ${chainId}`);
+      await this.process(chainId);
+    } catch (e) {
+      this.logger.error(e);
+    } finally {
+      this.locker.set(chainId, false);
+      this.logger.log(`Is unlocked chainId: ${chainId}`);
+    }
   }
 
   /**
