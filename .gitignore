@@ -11,3 +11,5 @@ node_modules/
 /initiator/log
 dist/
 /initiator/ipfs
+/initiator/test/orbitdb/orbitdb
+/initiator/test/orbitdb/ipfs
