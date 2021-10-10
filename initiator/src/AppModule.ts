@@ -15,7 +15,7 @@ import { CheckNewEvensAction } from './subscribe/actions/CheckNewEventsAction';
 import { SubscribeHandler } from './subscribe/SubscribeHandler';
 import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
 import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
-import { OrbitDbService } from './services/orbitDbService';
+import { OrbitDbService } from './services/OrbitDbService';
 
 @Module({
   imports: [

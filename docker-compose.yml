@@ -77,12 +77,15 @@ services:
       - initiator/.env
     volumes:
       - ./initiator/config:/config
+      - ./initiator/ipfs:/home/node/ipfs
+      - ./initiator/orbitdb:/home/node/orbitdb
     environment:
       - DATABASE_USER=${POSTGRES_USER}
       - DATABASE_HOST=${POSTGRES_HOST}
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_SCHEMA=${EI_DATABASE}
       - DATABASE_PORT=${POSTGRES_PORT}
+      - SIGNATURE_PRIVATE_KEY=${SIGNATURE_PRIVATE_KEY}
     depends_on:
       - postgres
       - chainlink-heco
