@@ -56,7 +56,16 @@ export class CheckNewEvensAction extends IAction<void> {
     const web3 = new Web3();
     for (const submission of submissions) {
       const signature = (await web3.eth.accounts.sign(submission.submissionId, process.env.SIGNATURE_PRIVATE_KEY)).signature;
-      const hash = await this.orbitDbService.addLog(submission.submissionId, signature);
+      const [logHash, doscHash] = await this.orbitDbService.addSignedSubmission(submission.submissionId, signature,
+        {
+          txHash: submission.txHash,
+          submissionId: submission.submissionId,
+          chainFrom: submission.chainFrom,
+          chainTo: submission.chainTo,
+          debridgeId: submission.debridgeId,
+          receiverAddr: submission.receiverAddr,
+          amount: submission.amount
+        });
       this.logger.log(`signed  ${submission.submissionId} ${signature}`);
       await this.submissionsRepository.update(
         {
@@ -65,7 +74,8 @@ export class CheckNewEvensAction extends IAction<void> {
         {
           signature: signature,
           status: SubmisionStatusEnum.SIGNED,
-          ipfsLogHash: hash,
+          ipfsLogHash: logHash,
+          ipfsKeyHash: doscHash
         },
       );
     }

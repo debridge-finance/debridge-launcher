@@ -95,7 +95,19 @@ export class CheckAssetsEventAction extends IAction<void> {
           this.logger.log(`deployId: ${deployId}`);
           const signature = (await web3.eth.accounts.sign(deployId, process.env.SIGNATURE_PRIVATE_KEY)).signature;
           this.logger.log(`signature: ${signature}`);
-          const hash = await this.orbitDbService.addLogConfirmNewAssets(deployId, signature);
+          const [logHash, doscHash] = await this.orbitDbService.addConfirmNewAssets(deployId, signature,
+            {
+              txHash: submission.txHash,
+              submissionId: submission.submissionId,
+              debridgeId: submission.debridgeId,
+              tokenAddress: nativeTokenInfo.nativeAddress,
+              name: tokenName,
+              symbol: tokenSymbol,
+              decimals: tokenDecimals,
+              chainFrom: submission.chainFrom,
+              chainTo: submission.chainTo,
+              deployId: deployId
+            });
           this.logger.log(`signed ${deployId} ${signature}`);
 
           await this.confirmNewAssetEntityRepository.save({
@@ -109,7 +121,8 @@ export class CheckAssetsEventAction extends IAction<void> {
             status: SubmisionStatusEnum.SIGNED,
             signature: signature,
             deployId: deployId,
-            ipfsLogHash: hash
+            ipfsLogHash: logHash,
+            ipfsKeyHash: doscHash
           });
           newSubmitionIds.push(submission.submissionId);
         }
