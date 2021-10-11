@@ -11,11 +11,14 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { AuthService } from './auth/auth.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
-import { CheckNewEvensAction } from './subscribe/actions/CheckNewEventsAction';
+import { SignAction } from './subscribe/actions/SignAction';
 import { SubscribeHandler } from './subscribe/SubscribeHandler';
 import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
 import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from './services/OrbitDbService';
+import { DebrdigeApiService } from './services/DebrdigeApiService';
+import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
+import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
 
 @Module({
   imports: [
@@ -48,7 +51,9 @@ import { OrbitDbService } from './services/OrbitDbService';
     JwtStrategy,
     AuthService,
     AddNewEventsAction,
-    CheckNewEvensAction,
+    SignAction,
+    UpdadToIPFSAction,
+    UploadToApiAction,
     CheckAssetsEventAction,
     SubscribeHandler,
     {
@@ -58,7 +63,16 @@ import { OrbitDbService } from './services/OrbitDbService';
         await service.init();
         return service;
       }
-    }
+    },
+    DebrdigeApiService,
+    // {
+    //   provide: DebrdigeApiService,
+    //   useFactory: async () => {
+    //     const service = new DebrdigeApiService();
+    //     await service.init();
+    //     return service;
+    //   }
+    // },
   ],
 })
 export class AppModule { }

@@ -11,6 +11,7 @@ import ChainsConfig from '../../config/chains_config.json';
 import Web3 from 'web3';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
+import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
 
 @Injectable()
 export class AddNewEventsAction {
@@ -67,7 +68,7 @@ export class AddNewEventsAction {
 
       try {
         await this.submissionsRepository.save({
-          submissionId,
+          submissionId: submissionId,
           txHash: sendEvent.transactionHash,
           chainFrom: chainIdFrom,
           chainTo: sendEvent.returnValues.chainIdTo,
@@ -75,8 +76,11 @@ export class AddNewEventsAction {
           receiverAddr: sendEvent.returnValues.receiver,
           amount: sendEvent.returnValues.amount,
           status: SubmisionStatusEnum.NEW,
+          ipfsStatus: UploadStatusEnum.NEW,
+          apiStatus: UploadStatusEnum.NEW,
           assetsStatus: SubmisionAssetsStatusEnum.NEW,
-        });
+          rawEvent: JSON.stringify(sendEvent),
+        } as SubmissionEntity);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
         throw e;

@@ -5,7 +5,9 @@ import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
 import ChainsConfig from '../config/chains_config.json';
 import { AddNewEventsAction } from './actions/AddNewEventsAction';
-import { CheckNewEvensAction } from './actions/CheckNewEventsAction';
+import { SignAction } from './actions/SignAction';
+import { UpdadToIPFSAction } from './actions/UpdadToIPFSAction';
+import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
 
@@ -17,7 +19,9 @@ export class SubscribeHandler {
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly addNewEventsAction: AddNewEventsAction,
-    private readonly checkNewEvensAction: CheckNewEvensAction,
+    private readonly signAction: SignAction,
+    private readonly updadToIPFSAction: UpdadToIPFSAction,
+    private readonly uploadToApiAction: UploadToApiAction,
     private readonly checkAssetsEventAction: CheckAssetsEventAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
@@ -75,9 +79,22 @@ export class SubscribeHandler {
   }
 
   @Interval(3000)
-  async checkNewEvents() {
-     await this.checkNewEvensAction.action();
+  async Sign() {
+     await this.signAction.action();
   }
+
+
+  @Interval(3000)
+  async UpdadToIPFSAction() {
+     await this.updadToIPFSAction.action();
+  }
+
+
+  //TODO: need to implement
+  // @Interval(3000)
+  // async UploadToApiAction() {
+  //    await this.uploadToApiAction.action();
+  // }
 
   @Interval(3000)
   async checkAssetsEvent() {
