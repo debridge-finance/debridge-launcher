@@ -30,9 +30,20 @@ export class UploadToApiAction extends IAction {
       apiStatus: UploadStatusEnum.NEW,
     });
 
-    for (const submission of submissions) {
+    const submissionsConfirmation = new Map();
 
-      const externalId = "";
+    const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
+    resultSubmissionConfirmation.forEach(item => {
+      submissionsConfirmation.set(item.sumbmissionId, item.id);
+    });
+
+    for (const submission of submissions) {
+      const confirmation = submissionsConfirmation.get(submission.submissionId);
+      if (!confirmation) {
+        this.logger.error(`Not exists confirmation for ${submission.submissionId}`);
+      }
+
+      const externalId = confirmation || '';
       this.logger.log(`uploaded to debridgeAPI ${submission.submissionId} ${externalId}`);
       await this.submissionsRepository.update(
         {
@@ -40,11 +51,12 @@ export class UploadToApiAction extends IAction {
         },
         {
           apiStatus: UploadStatusEnum.UPLOADED,
-          externalId: externalId
+          externalId: externalId,
         },
       );
     }
-
+    //TODO: YARO
+    /*
     //Process Assets
     const assets = await this.confirmNewAssetEntityRepository.find({
       status: SubmisionStatusEnum.SIGNED,
@@ -52,7 +64,7 @@ export class UploadToApiAction extends IAction {
     });
 
     for (const asset of assets) {
-      const externalId = "";
+      const externalId = '';
       this.logger.log(`uploaded deployId to debridgeAPI ${asset.deployId} ${externalId}`);
       await this.confirmNewAssetEntityRepository.update(
         {
@@ -60,9 +72,9 @@ export class UploadToApiAction extends IAction {
         },
         {
           apiStatus: UploadStatusEnum.UPLOADED,
-          externalId: externalId
+          externalId: externalId,
         },
       );
-    }
+    }*/
   }
 }
