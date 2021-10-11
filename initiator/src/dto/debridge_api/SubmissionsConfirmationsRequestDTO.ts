@@ -12,11 +12,14 @@ export class SubmissionConfirmationRequest {
   chainId: number;
 
   @IsString()
-  sumbmissionId: string;
+  submissionId: string;
 }
 
 export class SubmissionsConfirmationsRequestDTO {
   @IsArray()
   @Type(() => SubmissionConfirmationRequest)
   confirmations: SubmissionConfirmationRequest[];
+
+  @IsString()
+  accessKey: string;
 }

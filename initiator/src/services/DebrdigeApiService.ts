@@ -17,10 +17,11 @@ export class DebrdigeApiService {
         return {
           txHash: submission.txHash,
           signature: submission.signature,
-          sumbmissionId: submission.submissionId,
+          submissionId: submission.submissionId,
           chainId: submission.chainFrom,
         };
       }),
+      accessKey: this.configService.get('DEBRIDGE_API_ACCESS_KEY')
     } as SubmissionsConfirmationsRequestDTO;
     this.logger.log(`uploadToApi is started`);
     const httpResult = await this.httpService
