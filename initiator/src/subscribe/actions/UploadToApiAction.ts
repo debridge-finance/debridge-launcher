@@ -30,30 +30,33 @@ export class UploadToApiAction extends IAction {
       apiStatus: UploadStatusEnum.NEW,
     });
 
-    const submissionsConfirmation = new Map();
+    if (submissions.length > 0) {
 
-    const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
-    resultSubmissionConfirmation.forEach(item => {
-      submissionsConfirmation.set(item.sumbmissionId, item.id);
-    });
+      const submissionsConfirmation = new Map();
 
-    for (const submission of submissions) {
-      const confirmation = submissionsConfirmation.get(submission.submissionId);
-      if (!confirmation) {
-        this.logger.error(`Not exists confirmation for ${submission.submissionId}`);
+      const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
+      resultSubmissionConfirmation.forEach(item => {
+        submissionsConfirmation.set(item.sumbmissionId, item.id);
+      });
+
+      for (const submission of submissions) {
+        const confirmation = submissionsConfirmation.get(submission.submissionId);
+        if (!confirmation) {
+          this.logger.error(`Not exists confirmation for ${submission.submissionId}`);
+        }
+
+        const externalId = confirmation || '';
+        this.logger.log(`uploaded to debridgeAPI ${submission.submissionId} ${externalId}`);
+        await this.submissionsRepository.update(
+          {
+            submissionId: submission.submissionId,
+          },
+          {
+            apiStatus: UploadStatusEnum.UPLOADED,
+            externalId: externalId,
+          },
+        );
       }
-
-      const externalId = confirmation || '';
-      this.logger.log(`uploaded to debridgeAPI ${submission.submissionId} ${externalId}`);
-      await this.submissionsRepository.update(
-        {
-          submissionId: submission.submissionId,
-        },
-        {
-          apiStatus: UploadStatusEnum.UPLOADED,
-          externalId: externalId,
-        },
-      );
     }
     //TODO: YARO
     /*

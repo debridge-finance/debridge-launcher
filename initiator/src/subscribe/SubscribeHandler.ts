@@ -84,17 +84,17 @@ export class SubscribeHandler {
   }
 
 
+   @Interval(3000)
+   async UpdadToIPFSAction() {
+      await this.updadToIPFSAction.action();
+   }
+
+
   @Interval(3000)
-  async UpdadToIPFSAction() {
-     await this.updadToIPFSAction.action();
+  async UploadToApiAction() {
+     await this.uploadToApiAction.action();
   }
 
-
-  //TODO: need to implement
-  // @Interval(3000)
-  // async UploadToApiAction() {
-  //    await this.uploadToApiAction.action();
-  // }
 
   @Interval(3000)
   async checkAssetsEvent() {
