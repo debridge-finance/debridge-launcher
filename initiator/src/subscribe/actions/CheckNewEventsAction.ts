@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
-import { OrbitDbService } from 'src/services/orbitDbService';
+import { OrbitDbService } from '../../services/OrbitDbService';
 import Web3 from 'web3';
 import keystore from 'keystore.json';
 

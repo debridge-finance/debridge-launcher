@@ -1,16 +1,16 @@
 import { IAction } from './IAction';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConnectionIsNotSetError, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
-import { OrbitDbService } from 'src/services/orbitDbService';
 import ChainsConfig from '../../config/chains_config.json';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { abi as ERC20Abi } from '../../assets/ERC20.json';
 import Web3 from 'web3';
+import { OrbitDbService } from '../../services/OrbitDbService';
 
 
 @Injectable()
