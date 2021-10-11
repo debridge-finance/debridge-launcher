@@ -1,6 +1,7 @@
 import { Column, Entity, Index, PrimaryColumn, Unique } from 'typeorm';
 import { SubmisionStatusEnum } from '../enums/SubmisionStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../enums/SubmisionAssetsStatusEnum';
+import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
 
 @Entity('submissions')
 @Unique(['submissionId'])
@@ -12,31 +13,24 @@ export class SubmissionEntity {
   txHash: string;
 
 
-  @Column({
-    nullable: true,
-  })
-  chainFrom?: number;
+  @Column()
+  chainFrom: number;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   @Index()
-  chainTo?: number;
+  chainTo: number;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   debridgeId: string;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   receiverAddr: string;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   amount: string;
+
+  @Column()
+  rawEvent: string;
 
   @Column({
     nullable: true,
@@ -53,9 +47,23 @@ export class SubmissionEntity {
   })
   ipfsKeyHash: string;
 
+  // ExternalId of signature in debridge system
+  @Column({
+    nullable: true,
+  })
+  externalId: string;
+
   @Column()
   @Index()
   status: SubmisionStatusEnum;
+
+  @Column()
+  @Index()
+  ipfsStatus: UploadStatusEnum;
+
+  @Column()
+  @Index()
+  apiStatus: UploadStatusEnum;
 
   @Column()
   @Index()

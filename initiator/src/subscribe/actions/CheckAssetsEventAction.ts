@@ -5,26 +5,29 @@ import { In, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
+import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { abi as ERC20Abi } from '../../assets/ERC20.json';
 import Web3 from 'web3';
-import { OrbitDbService } from '../../services/OrbitDbService';
+import keystore from 'keystore.json';
+import { Account } from 'web3-core';
 
 
 @Injectable()
-export class CheckAssetsEventAction extends IAction<void> {
+export class CheckAssetsEventAction extends IAction {
+  private account: Account;
 
   constructor(
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
-    private readonly orbitDbService: OrbitDbService
   ) {
     super();
-    this.logger = new Logger(CheckAssetsEventAction.name)
+    this.logger = new Logger(CheckAssetsEventAction.name);
+    this.account = (new Web3()).eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
   }
 
   async process() {
@@ -45,7 +48,6 @@ export class CheckAssetsEventAction extends IAction<void> {
       });
       if (!confirmNewAction) {
         try {
-
           this.logger.log(`Process debridgeId: ${submission.debridgeId}`);
           const chainDetail = ChainsConfig.find(item => {
             return item.chainId === submission.chainFrom;
@@ -93,37 +95,25 @@ export class CheckAssetsEventAction extends IAction<void> {
           this.logger.log(`tokenSymbol: ${tokenSymbol}`);
           this.logger.log(`tokenDecimals: ${tokenDecimals}`);
           this.logger.log(`deployId: ${deployId}`);
-          const signature = (await web3.eth.accounts.sign(deployId, process.env.SIGNATURE_PRIVATE_KEY)).signature;
+          const signature = this.account.sign(deployId).signature;
           this.logger.log(`signature: ${signature}`);
-          const [logHash, doscHash] = await this.orbitDbService.addConfirmNewAssets(deployId, signature,
-            {
-              txHash: submission.txHash,
-              submissionId: submission.submissionId,
-              debridgeId: submission.debridgeId,
-              tokenAddress: nativeTokenInfo.nativeAddress,
-              name: tokenName,
-              symbol: tokenSymbol,
-              decimals: tokenDecimals,
-              chainFrom: submission.chainFrom,
-              chainTo: submission.chainTo,
-              deployId: deployId
-            });
           this.logger.log(`signed ${deployId} ${signature}`);
 
           await this.confirmNewAssetEntityRepository.save({
             debridgeId: submission.debridgeId,
+            submissionTxHash: submission.txHash,
             tokenAddress: nativeTokenInfo.nativeAddress,
             name: tokenName,
             symbol: tokenSymbol,
             decimals: tokenDecimals,
-            chainFrom: submission.chainFrom,
-            chainTo: submission.chainTo,
+            submissionChainFrom: submission.chainFrom,
+            submissionChainTo: submission.chainTo,
             status: SubmisionStatusEnum.SIGNED,
+            ipfsStatus: UploadStatusEnum.NEW,
+            apiStatus: UploadStatusEnum.NEW,
             signature: signature,
-            deployId: deployId,
-            ipfsLogHash: logHash,
-            ipfsKeyHash: doscHash
-          });
+            deployId: deployId
+          } as ConfirmNewAssetEntity);
           newSubmitionIds.push(submission.submissionId);
         }
         catch (e) {

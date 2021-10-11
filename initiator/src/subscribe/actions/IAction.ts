@@ -3,7 +3,7 @@ import {Logger} from "@nestjs/common";
 /**
  * Interface for doing action in interval
  */
-export abstract class IAction<T> {
+export abstract class IAction {
   logger: Logger;
 
   private isWorking = false;
