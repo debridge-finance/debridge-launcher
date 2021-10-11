@@ -9,6 +9,7 @@ import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from 'src/services/orbitDbService';
 import Web3 from 'web3';
+import keystore from 'keystore.json';
 
 @Injectable()
 export class CheckNewEvensAction extends IAction<void> {
@@ -54,8 +55,9 @@ export class CheckNewEvensAction extends IAction<void> {
     //   let runId: string;
 
     const web3 = new Web3();
+    const account = web3.eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
     for (const submission of submissions) {
-      const signature = (await web3.eth.accounts.sign(submission.submissionId, process.env.SIGNATURE_PRIVATE_KEY)).signature;
+      const signature = account.sign(submission.submissionId).signature;
       const [logHash, doscHash] = await this.orbitDbService.addSignedSubmission(submission.submissionId, signature,
         {
           txHash: submission.txHash,
