@@ -64,14 +64,15 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
         return service;
       }
     },
-    {
-      provide: DebrdigeApiService,
-      useFactory: async () => {
-        const service = new DebrdigeApiService();
-        await service.init();
-        return service;
-      }
-    },
+    DebrdigeApiService,
+    // {
+    //   provide: DebrdigeApiService,
+    //   useFactory: async () => {
+    //     const service = new DebrdigeApiService();
+    //     await service.init();
+    //     return service;
+    //   }
+    // },
   ],
 })
 export class AppModule { }
