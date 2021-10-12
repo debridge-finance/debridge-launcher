@@ -17,12 +17,13 @@ services:
     container_name: initiator${DOCKER_ID}
     restart: on-failure
     env_file:
-      - initiator/.env
+      - .env
     volumes:
       - ./initiator/src/config:/config
       - ./initiator/ipfs:/home/node/ipfs
       - ./initiator/orbitdb:/home/node/orbitdb
     environment:
+      - PORT=${INITIATOR_PORT}
       - DATABASE_USER=${POSTGRES_USER}
       - DATABASE_HOST=${POSTGRES_HOST}
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
@@ -36,7 +37,9 @@ services:
       - postgres
     networks:
       - debridge
-
+networks:
+  debridge:
+    name: debridge
 secrets:
   keystore:
     file: ./initiator/keystore.json
