@@ -18,8 +18,10 @@ services:
     restart: on-failure
     env_file:
       - .env
+    secrets:
+      - keystore
     volumes:
-      - ./initiator/src/config:/config
+      - ./config:/home/node/src/config
       - ./initiator/ipfs:/home/node/ipfs
       - ./initiator/orbitdb:/home/node/orbitdb
     environment:
@@ -42,4 +44,4 @@ networks:
     name: debridge
 secrets:
   keystore:
-    file: ./initiator/keystore.json
+    file: ./secrets/keystore.json

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-const config = require("config");
+
+import IPFSConfig from '../config/ipfs_config.json';
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
@@ -11,7 +12,7 @@ export class OrbitDbService {
 
     async init() {
         this.logger.log(`OrbitDbService init`);
-        const ipfsConfig = config.get('ipfsConfig')
+        const ipfsConfig = IPFSConfig.get('ipfsConfig')
         const ipfs = await IPFS.create(ipfsConfig);
 
         // await ipfs.swarm.connect(PINNER_ADDRESS);
