@@ -1,7 +1,14 @@
-This repo allows to setup the oracles for few chains quickly with the same credentials.
-In order to set up a node on the DeBridge network, we need to:
+[deBridge](https://debridge.finance/) — cross-chain interoperability and liquidity transfer protocol that allows the truly decentralized transfer of assets between various blockchains. deBridge protocol is an infrastructure platform and a hooking service which aims to become a standard for:
+- cross-chain composability of smart contracts
+- cross-chain swaps
+- bridging of any arbitrary asset
+- interoperability and bridging of NFTs
 
-# 1) Install prerequisite packages on your VM:
+More information about the project can be also found in the [documentation portal](https://docs.debridge.finance/)
+
+deBridge launcher is a software that is run by deBridge validators who were elected by the protocol governance and perform validation of all cross-chain transactions passed through the protocol. to set up a validation node, the following steps should be performed:
+
+## 1) Install prerequisite packages on your server:
 
   1. docker
     - https://docs.docker.com/engine/install/ubuntu/
@@ -12,53 +19,35 @@ In order to set up a node on the DeBridge network, we need to:
   5. psql
     ``` sudo apt-get install postgresql-client```
 
-# 2) Set up the infrastructure:
+## 2) Set up the blockchain infrastructure:
 1. Install full testnet nodes
-  - Kovan
+  - [Kovan](https://kovan-testnet.github.io/website/)
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
   - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
-  - Arbitrum Testnet
-  - Polygon Testnet
+  - Arbitrum
+  - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
 2. Update HTTP RPC URL in initiator/src/config/chains_config.json
-3. Change default (postgrestestpassword) postgress password in .env.
-4. Now, we're going to need to create a keystore for our node, based on a private key. We have script in folder `generate-keystore`. To start generate new keystore info
+3. Change default (postgrestestpassword) postgress password in .env
+4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
 
   - npm i
   - node index.js
 
-  Script will show new generated ethereum address, private key, password for keystore and keystore info. You need to copy pasword to `.env KEYSTORE_PASSWORD`, keystore info to /`secrets/keystore.json`
+The script will show newly generated Ethereum address, private key, password for keystore, and keystore info. Copy password to `.env KEYSTORE_PASSWORD`, keystore info to /`secrets/keystore.json`
 
 5. Put the keystore file under `secrets/keystore.json`.
 6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
-7. Make your oracle-operator address to be whitelisted by deBridge governance (contact the DeBridge team for that)
+7. Make your wallet public address to be whitelisted by deBridge governance (contact the deBridge team for that)
 8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
 9. Run the command `docker-compose up --build -d`.
-10. Do not delete any files in following directories:
+10. Backuo and do not delete any files from the following directories:
     - `./initiator/orbitdb`
     - `./initiator/ipfs`
 
-11. If you want to start multiple instances on one server or one postgresql you can do this:
+11. If there is a need to start multiple instances of the launcher (e.g. one for testnet and one for mainnet) on one server you can:
   - checkout or copy repo to new directory
   - change DOCKER_ID variable in .env
-  - start as previously described
-
-
-# Add new chain support
-
-1. Configure initiator/src/chains_config.json:
-
-```
- {
-    "chainId": 97,
-    "name": "BSC",
-    "debridgeAddr": "0xFA1C16eA140de187d20413418FB57320144773f1",
-    "firstStartBlock": 13146725,
-    "provider": "https://data-seed-prebsc-1-s1.binance.org:8545/",
-    "interval": 10000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 5000
-  }
-```
+  - start as described above
 
 # Miscellaneous
 
@@ -67,11 +56,12 @@ Connect to the database(if you use docker-compose):
 ```
 docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v ON_ERROR_STOP=1 --username postgres -d $DATABASE_NAME
 ```
-# Mandatory for monitoring
+
+# Mandatory monitorings
 
 1. Basic monitoring of the server/virtual machine(cpu, memory, disk space).
-2. Availability check(may be connectivity):
+2. Availability check (may be connectivity):
   - all of full nodes(heco, bsc, etc). It is also good to check the synchronization status
   - database
   - initiator
-3. Strongly recommend to check `docker-compose logs` for ERROR.
+3. It's recommended to check `docker-compose logs` for ERROR
