@@ -16,8 +16,6 @@ services:
     image: initiator
     container_name: initiator${DOCKER_ID}
     restart: on-failure
-    # env_file:
-    #   - .env
     secrets:
       - source: keystore
         target: /home/node/keystore.json

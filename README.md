@@ -28,7 +28,7 @@ In order to set up a node on the DeBridge network, we need to:
 
   Script will show new generated ethereum address, private key, password for keystore and keystore info. You need to copy pasword to `.env KEYSTORE_PASSWORD`, keystore info to /`initiator/keystore.json`
 
-5. Put the keystore file under `initiator/keystore.json`.
+5. Put the keystore file under `secrets/keystore.json`.
 6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
 7. Make your oracle-operator address to be whitelisted by deBridge governance (contact the DeBridge team for that)
 8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
