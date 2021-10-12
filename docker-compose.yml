@@ -1,62 +1,5 @@
 version: "3.6"
 services:
-  chainlink-bsc:
-    container_name: chainlink-bsc${DOCKER_ID}
-    image: smartcontract/chainlink:0.10.2
-    entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
-    restart: always
-    env_file:
-      - chainlink-bsc.env
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${BSC_DATABASE}?sslmode=disable
-    secrets:
-      - node_password
-      - apicredentials
-      - keystore
-    depends_on:
-      - postgres
-    networks:
-      - chainlink
-    volumes:
-      - ./chainlink-bsc:/chainlink
-  # chainlink-eth:
-  #   container_name: chainlink-eth${DOCKER_ID}
-  #   image: smartcontract/chainlink:0.10.2
-  #   entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
-  #   restart: always
-  #   env_file:
-  #     - chainlink-eth.env
-  #   environment:
-  #    - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${ETH_DATABASE}?sslmode=disable
-  #   secrets:
-  #     - node_password
-  #     - apicredentials
-  #     - keystore
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - chainlink
-  #   volumes:
-  #     - ./chainlink-eth:/chainlink
-  chainlink-heco:
-    container_name: chainlink-heco${DOCKER_ID}
-    image: smartcontract/chainlink:0.10.2
-    entrypoint: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
-    restart: always
-    env_file:
-      - chainlink-heco.env
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${HECO_DATABASE}?sslmode=disable
-    secrets:
-      - node_password
-      - apicredentials
-      - keystore
-    depends_on:
-      - postgres
-    networks:
-      - chainlink
-    volumes:
-      - ./chainlink-heco:/chainlink
   postgres:
     image: postgres
     container_name: postgres${DOCKER_ID}
@@ -67,7 +10,7 @@ services:
       - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
-      - chainlink
+      - debridge
   initiator:
     build: ./initiator
     image: initiator
@@ -76,30 +19,24 @@ services:
     env_file:
       - initiator/.env
     volumes:
-      - ./initiator/config:/config
+      - ./initiator/src/config:/config
+      - ./initiator/ipfs:/home/node/ipfs
+      - ./initiator/orbitdb:/home/node/orbitdb
     environment:
-      - PGUSER=${POSTGRES_USER}
-      - PGHOST=${POSTGRES_HOST}
-      - PGPASSWORD=${POSTGRES_PASSWORD}
-      - PGDATABASE=${EI_DATABASE}
-      - PGPORT=${POSTGRES_PORT}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_HOST=${POSTGRES_HOST}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_SCHEMA=${EI_DATABASE}
+      - DATABASE_PORT=${POSTGRES_PORT}
+      - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}      
+      - JWT_SECRET=${JWT_SECRET}
+      - API_BASE_URL=${API_BASE_URL}
+      - DEBRIDGE_API_ACCESS_KEY=${DEBRIDGE_API_ACCESS_KEY}
     depends_on:
       - postgres
-      - chainlink-heco
-      - chainlink-bsc
     networks:
-      - chainlink
+      - debridge
 
-volumes:
-  chainlink:
-    name: chainlink${DOCKER_ID}
-networks:
-  chainlink:
-    name: chainlink${DOCKER_ID}
 secrets:
-  node_password:
-    file: ./password.txt
-  apicredentials:
-    file: ./apicredentials
   keystore:
-    file: ./secrets/keystore.json
+    file: ./initiator/keystore.json

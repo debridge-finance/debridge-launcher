@@ -1,8 +1,11 @@
-FROM ubuntu:20.04
-
-ARG DEBIAN_FRONTEND=noninteractive
-COPY . /
-RUN apt-get update; apt-get install npm -y
-RUN npm i
-
-CMD node index.js 
+FROM node:14
+RUN npm install -g typescript@4.3.5 @nestjs/cli@8.0.0
+COPY package.json /home/node
+COPY package-lock.json /home/node
+COPY tsconfig.json /home/node
+COPY tsconfig.build.json /home/node
+COPY nest-cli.json /home/node
+WORKDIR /home/node
+RUN npm install
+COPY src/  /home/node/src
+CMD npm start

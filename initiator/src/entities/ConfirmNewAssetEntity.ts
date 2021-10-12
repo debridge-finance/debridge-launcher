@@ -1,0 +1,67 @@
+import { SubmisionStatusEnum } from 'src/enums/SubmisionStatusEnum';
+import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
+import { Column, Index, Entity, PrimaryColumn, Unique } from 'typeorm';
+
+@Entity('confirmNewAssets')
+@Unique(['deployId'])
+export class ConfirmNewAssetEntity {
+  @PrimaryColumn()
+  debridgeId: string;
+
+  @Column()
+  deployId: string;
+
+  @Column()
+  tokenAddress: string;
+
+  @Column()
+  name: string;
+
+  @Column()
+  symbol: string;
+
+  @Column()
+  decimals: string;
+
+  @Column()
+  submissionTxHash: string;
+
+  @Column()
+  submissionChainFrom: number;
+
+  @Column()
+  submissionChainTo: number;
+
+  @Column({
+      nullable: true,
+  })
+  signature: string;
+
+  @Column({
+      nullable: true,
+  })
+  ipfsLogHash: string;
+
+  @Column({
+      nullable: true,
+  })
+  ipfsKeyHash: string;
+
+  //ExternalId of signature in debridge system
+  @Column({
+    nullable: true,
+  })
+  externalId: string;
+
+  @Column()
+  @Index()
+  status: SubmisionStatusEnum;
+
+  @Column()
+  @Index()
+  ipfsStatus: UploadStatusEnum;
+
+  @Column()
+  @Index()
+  apiStatus: UploadStatusEnum;
+}

@@ -1,11 +1,10 @@
 secrets/*
-chainlink-*/*
-!chainlink-*/submit-job.json
-!chainlink-init-scripts/*.sh
-password.txt
-apicredentials
 pgdata/
 
 .vs/
 node_modules/
 /initiator/log
+dist/
+/initiator/ipfs
+/initiator/test/orbitdb/orbitdb
+/initiator/test/orbitdb/ipfs
