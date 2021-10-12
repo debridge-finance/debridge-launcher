@@ -2,8 +2,8 @@
   {
     "chainId": 97,
     "name": "BSC",
-    "debridgeAddr": "0xCc6b8F50ABa13b6b9861D29BCb59139Cb9a652c8",
-    "firstStartBlock": 12822441,
+    "debridgeAddr": "0xFA1C16eA140de187d20413418FB57320144773f1",
+    "firstStartBlock": 13146725,
     "provider": "https://data-seed-prebsc-1-s1.binance.org:8545/",
     "interval": 10000,
     "blockConfirmation": 12,
@@ -12,8 +12,8 @@
   {
     "chainId": 42,
     "name": "KOVAN",
-    "debridgeAddr": "0xCc6b8F50ABa13b6b9861D29BCb59139Cb9a652c8",
-    "firstStartBlock": 27415469,
+    "debridgeAddr": "0xFA1C16eA140de187d20413418FB57320144773f1",
+    "firstStartBlock": 27652362,
     "provider": "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
     "interval": 10000,
     "blockConfirmation": 12,
@@ -22,8 +22,8 @@
   {
     "chainId": 256,
     "name": "HECO",
-    "debridgeAddr": "0xCc6b8F50ABa13b6b9861D29BCb59139Cb9a652c8",
-    "firstStartBlock": 8711003,
+    "debridgeAddr": "0xFA1C16eA140de187d20413418FB57320144773f1",
+    "firstStartBlock": 9036620,
     "provider": "https://http-testnet.hecochain.com",
     "interval": 10000,
     "blockConfirmation": 12,

@@ -1,9 +1,4 @@
 secrets/*
-chainlink-*/*
-!chainlink-*/submit-job.json
-!chainlink-init-scripts/*.sh
-password.txt
-apicredentials
 pgdata/
 
 .vs/
