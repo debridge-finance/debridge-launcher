@@ -35,7 +35,7 @@ deBridge launcher is a software that is run by deBridge validators who were elec
   - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
   - Arbitrum
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
-2. Update HTTP RPC URL in initiator/src/config/chains_config.json
+2. Update HTTP RPC URL in /config/chains_config.json
 3. Change default (postgrestestpassword) postgress password in .env
 4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
 
