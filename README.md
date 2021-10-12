@@ -8,7 +8,7 @@ More information about the project can be also found in the [documentation porta
 
 deBridge launcher is a software that is run by deBridge validators who were elected by the protocol governance and perform validation of all cross-chain transactions passed through the protocol. to set up a validation node, the following steps should be performed:
 
-## 1) Install prerequisite packages on your server:
+## Install prerequisite packages on your server:
 
   1. docker
     - https://docs.docker.com/engine/install/ubuntu/
@@ -19,7 +19,7 @@ deBridge launcher is a software that is run by deBridge validators who were elec
   5. psql
     ``` sudo apt-get install postgresql-client```
 
-## 2) Set up the blockchain infrastructure:
+## Set up the blockchain infrastructure:
 1. Install full testnet nodes
   - [Kovan](https://kovan-testnet.github.io/website/)
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
