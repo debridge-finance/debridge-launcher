@@ -26,18 +26,22 @@ In order to set up a node on the DeBridge network, we need to:
   - npm i
   - node index.js
 
-  Script will show new generated ethereum address, private key, password for keystore and keystore info. You need to copy pasword to `.env KEYSTORE_PASSWORD`, keystore info to /`initiator/keystore.json`
+  Script will show new generated ethereum address, private key, password for keystore and keystore info. You need to copy pasword to `.env KEYSTORE_PASSWORD`, keystore info to /`secrets/keystore.json`
 
 5. Put the keystore file under `secrets/keystore.json`.
 6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
 7. Make your oracle-operator address to be whitelisted by deBridge governance (contact the DeBridge team for that)
 8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
 9. Run the command `docker-compose up --build -d`.
+10. Do not delete any files in following directories:
+    - `./initiator/orbitdb`
+    - `./initiator/ipfs`
 
-10. If you want to start multiple instances on one server or one postgresql you can do this:
+11. If you want to start multiple instances on one server or one postgresql you can do this:
   - checkout or copy repo to new directory
   - change DOCKER_ID variable in .env
   - start as previously described
+
 
 # Add new chain support
 
@@ -69,5 +73,5 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 2. Availability check(may be connectivity):
   - all of full nodes(heco, bsc, etc). It is also good to check the synchronization status
   - database
-  - initiator and chainlinks
+  - initiator
 3. Strongly recommend to check `docker-compose logs` for ERROR.
