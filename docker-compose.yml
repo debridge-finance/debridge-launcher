@@ -16,10 +16,11 @@ services:
     image: initiator
     container_name: initiator${DOCKER_ID}
     restart: on-failure
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     secrets:
-      - keystore
+      - source: keystore
+        target: /home/node/keystore.json
     volumes:
       - ./config:/home/node/src/config
       - ./initiator/ipfs:/home/node/ipfs
