@@ -12,7 +12,6 @@ export class OrbitDbService {
 
     async init() {
         this.logger.log(`OrbitDbService init`);
-        const ipfsConfig = IPFSConfig.get('ipfsConfig')
         const ipfs = await IPFS.create(IPFSConfig.ipfsConfig);
 
         // await ipfs.swarm.connect(PINNER_ADDRESS);
