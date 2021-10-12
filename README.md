@@ -1,4 +1,13 @@
-[deBridge](https://debridge.finance/) — cross-chain interoperability and liquidity transfer protocol that allows the truly decentralized transfer of assets between various blockchains. deBridge protocol is an infrastructure platform and a hooking service which aims to become a standard for:
+<br/>
+<p align="center">
+<a href="https://debridge.finance/" target="_blank">
+<img src="https://user-images.githubusercontent.com/10200871/137014801-40decb80-0595-4f0f-8ee5-f0f1ab5c0380.png" width="225" alt="logo">
+</a>
+</p>
+<br/>
+
+[deBridge](https://debridge.finance/) — cross-chain interoperability
+ and liquidity transfer protocol that allows the truly decentralized transfer of data and assets between various blockchains. deBridge protocol is an infrastructure platform and a hooking service which aims to become a standard for:
 - cross-chain composability of smart contracts
 - cross-chain swaps
 - bridging of any arbitrary asset
