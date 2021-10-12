@@ -38,6 +38,11 @@
     },
     {
       "inputs": [],
+      "name": "FeeContractUpdaterBadRole",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "FeeNotPaid",
       "type": "error"
     },
@@ -170,7 +175,7 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "version",
+          "name": "variation",
           "type": "uint256"
         },
         {
@@ -295,6 +300,38 @@
         }
       ],
       "name": "Claimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "globalFixedNativeFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "FixedNativeFeeAutoUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "globalFixedNativeFee",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "globalTransferFeeBps",
+          "type": "uint256"
+        }
+      ],
+      "name": "FixedNativeFeeUpdated",
       "type": "event"
     },
     {
@@ -544,32 +581,10 @@
           "type": "tuple"
         },
         {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "executionFee",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "flags",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bytes",
-              "name": "fallbackAddress",
-              "type": "bytes"
-            },
-            {
-              "internalType": "bytes",
-              "name": "data",
-              "type": "bytes"
-            }
-          ],
           "indexed": false,
-          "internalType": "struct IDeBridgeGate.SubmissionAutoParamsTo",
+          "internalType": "bytes",
           "name": "autoParams",
-          "type": "tuple"
+          "type": "bytes"
         },
         {
           "indexed": false,
@@ -731,6 +746,19 @@
           "internalType": "uint8",
           "name": "",
           "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feeContractUpdater",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -945,6 +973,32 @@
           "internalType": "bytes32",
           "name": "",
           "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "globalFixedNativeFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "globalTransferFeeBps",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
         }
       ],
       "stateMutability": "view",
@@ -1197,11 +1251,6 @@
           "type": "address"
         },
         {
-          "internalType": "bytes",
-          "name": "_receiver",
-          "type": "bytes"
-        },
-        {
           "internalType": "uint256",
           "name": "_amount",
           "type": "uint256"
@@ -1210,6 +1259,11 @@
           "internalType": "uint256",
           "name": "_chainIdTo",
           "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_receiver",
+          "type": "bytes"
         },
         {
           "internalType": "bytes",
@@ -1246,6 +1300,11 @@
         },
         {
           "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
           "name": "_chainIdFrom",
           "type": "uint256"
         },
@@ -1253,11 +1312,6 @@
           "internalType": "address",
           "name": "_receiver",
           "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -1349,6 +1403,19 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "_globalFixedNativeFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "autoUpdateFixedNativeFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256[]",
           "name": "_supportedChainIds",
           "type": "uint256[]"
@@ -1377,6 +1444,24 @@
         }
       ],
       "name": "updateChainSupport",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_globalFixedNativeFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16",
+          "name": "_globalTransferFeeBps",
+          "type": "uint16"
+        }
+      ],
+      "name": "updateGlobalFee",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1439,7 +1524,7 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "version",
+          "name": "variation",
           "type": "uint256"
         },
         {
@@ -1529,6 +1614,19 @@
         }
       ],
       "name": "setDefiController",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_value",
+          "type": "address"
+        }
+      ],
+      "name": "setFeeContractUpdater",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
