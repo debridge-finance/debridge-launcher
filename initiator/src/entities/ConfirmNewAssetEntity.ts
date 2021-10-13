@@ -12,6 +12,9 @@ export class ConfirmNewAssetEntity {
   deployId: string;
 
   @Column()
+  nativeChainId: number;
+
+  @Column()
   tokenAddress: string;
 
   @Column()
@@ -21,7 +24,7 @@ export class ConfirmNewAssetEntity {
   symbol: string;
 
   @Column()
-  decimals: string;
+  decimals: number;
 
   @Column()
   submissionTxHash: string;

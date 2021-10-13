@@ -25,47 +25,61 @@ export class UploadToApiAction extends IAction {
   async process(): Promise<void> {
     this.logger.log(`process UploadToApiAction`);
 
-    const submissions = await this.submissionsRepository.find({
-      status: SubmisionStatusEnum.SIGNED,
-      apiStatus: UploadStatusEnum.NEW,
-    });
+    try {
+      const submissions = await this.submissionsRepository.find({
+        status: SubmisionStatusEnum.SIGNED,
+        apiStatus: UploadStatusEnum.NEW,
+      });
 
-    if (submissions.length > 0) {
-      const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
-      // Confirm only accepted records by api
-      for (const submission of resultSubmissionConfirmation) {
-        this.logger.log(`uploaded to debridgeAPI submissionId: ${submission.submissionId} externalId: ${submission.id}`);
-        await this.submissionsRepository.update(
-          {
-            submissionId: submission.submissionId,
-          },
-          {
-            apiStatus: UploadStatusEnum.UPLOADED,
-            externalId: submission.id,
-          },
-        );
+      if (submissions.length > 0) {
+        const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
+        // Confirm only accepted records by api
+        for (const submission of resultSubmissionConfirmation) {
+          this.logger.log(`uploaded to debridgeAPI submissionId: ${submission.submissionId} externalId: ${submission.registrationId}`);
+          await this.submissionsRepository.update(
+            {
+              submissionId: submission.submissionId,
+            },
+            {
+              apiStatus: UploadStatusEnum.UPLOADED,
+              externalId: submission.registrationId,
+            },
+          );
+        }
       }
     }
-    //TODO: YARO
-    /*
-    //Process Assets
-    const assets = await this.confirmNewAssetEntityRepository.find({
-      status: SubmisionStatusEnum.SIGNED,
-      ipfsStatus: UploadStatusEnum.NEW
-    });
+    catch (e) {
+      this.logger.error(e);
+    }
 
-    for (const asset of assets) {
-      const externalId = '';
-      this.logger.log(`uploaded deployId to debridgeAPI ${asset.deployId} ${externalId}`);
-      await this.confirmNewAssetEntityRepository.update(
-        {
-          deployId: asset.deployId,
-        },
-        {
-          apiStatus: UploadStatusEnum.UPLOADED,
-          externalId: externalId,
-        },
-      );
-    }*/
+    try {
+      //Process Assets
+      const assets = await this.confirmNewAssetEntityRepository.find({
+        status: SubmisionStatusEnum.SIGNED,
+        apiStatus: UploadStatusEnum.NEW
+      });
+      console.log(assets.length);
+      for (const asset of assets) {
+        try {
+          const result = await this.debridgeApiService.uploadConfirmNewAssetsToApi(asset);
+          this.logger.log(`uploaded deployId to debridgeAPI deployId: ${result.deployId} externalId: ${result.registrationId}`);
+          await this.confirmNewAssetEntityRepository.update(
+            {
+              deployId: asset.deployId,
+            },
+            {
+              apiStatus: UploadStatusEnum.UPLOADED,
+              externalId: result.registrationId,
+            },
+          );
+        }
+        catch (e) {
+          this.logger.error(e);
+        }
+      }
+    }
+    catch (e) {
+      this.logger.error(e);
+    }
   }
 }

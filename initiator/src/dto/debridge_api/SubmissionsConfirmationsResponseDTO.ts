@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 
 export class SubmissionConfirmationResponse {
   @IsString()
-  id: string;
+  registrationId: string;
 
   @IsString()
   submissionId: string;
