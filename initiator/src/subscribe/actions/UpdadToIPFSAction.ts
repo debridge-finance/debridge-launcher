@@ -65,6 +65,7 @@ export class UpdadToIPFSAction extends IAction {
         {
           debridgeId: asset.debridgeId,
           deployId: asset.deployId,
+          nativeChainId: asset.nativeChainId,
           tokenAddress: asset.tokenAddress,
           name: asset.name,
           symbol: asset.symbol,
