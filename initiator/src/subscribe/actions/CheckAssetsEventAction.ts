@@ -83,17 +83,18 @@ export class CheckAssetsEventAction extends IAction {
           const tokenSymbol = await nativeTokenInstance.methods.symbol().call();
           const tokenDecimals = await nativeTokenInstance.methods.decimals().call();
           //keccak256(abi.encodePacked(debridgeId, _name, _symbol, _decimals));
-          const deployId = web3.eth.abi.encodeParameters(
+          const encoded = web3.eth.abi.encodeParameters(
             ['bytes32', 'string', 'string', 'uint8'],
             [submission.debridgeId,
               tokenName,
               tokenSymbol,
               tokenDecimals
             ]);
-
+          const deployId = web3.utils.keccak256(encoded);
           this.logger.log(`tokenName: ${tokenName}`);
           this.logger.log(`tokenSymbol: ${tokenSymbol}`);
           this.logger.log(`tokenDecimals: ${tokenDecimals}`);
+          this.logger.log(`encoded: ${encoded}`);
           this.logger.log(`deployId: ${deployId}`);
           const signature = this.account.sign(deployId).signature;
           this.logger.log(`signature: ${signature}`);
@@ -102,6 +103,7 @@ export class CheckAssetsEventAction extends IAction {
           await this.confirmNewAssetEntityRepository.save({
             debridgeId: submission.debridgeId,
             submissionTxHash: submission.txHash,
+            nativeChainId: debridgeInfo.chainId,
             tokenAddress: nativeTokenInfo.nativeAddress,
             name: tokenName,
             symbol: tokenSymbol,

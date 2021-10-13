@@ -36,12 +36,14 @@ export class OrbitDbService {
     }
 
     async addSignedSubmission(submissionId: string, signature: string, sendEvent: any): Promise<[string, string]> {
+        this.logger.log(`addSignedSubmission start submissionId: ${submissionId}, signature: ${signature}`);
         const logHash = await this.addLogSignedSubmission(submissionId, signature, sendEvent);
         const docsHash = await this.addDocsSignedSubmission(submissionId, signature, sendEvent);
         return [logHash, docsHash];
     }
 
     async addConfirmNewAssets(deployId: string, signature: string, sendEvent: any): Promise<[string, string]> {
+        this.logger.log(`addConfirmNewAssets start deployId: ${deployId}, signature: ${signature}`);
         const logHash = await this.addLogConfirmNewAssets(deployId, signature, sendEvent);
         const docsHash = await this.addDocsConfirmNewAssets(deployId, signature, sendEvent);
         return [logHash, docsHash];
