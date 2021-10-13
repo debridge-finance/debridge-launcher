@@ -36,25 +36,26 @@ deBridge launcher is a software that is run by deBridge validators who were elec
   - Arbitrum
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
 2. Update HTTP RPC URL in /config/chains_config.json
-3. Change default (postgrestestpassword) postgress password in .env
+3. Change default (postgrestestpassword) Postgres password in .env
 4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
-
   - npm i
   - node index.js
 
-The script will show newly generated Ethereum address, private key, password for keystore, and keystore info. Copy password to `.env KEYSTORE_PASSWORD`, keystore info to /`secrets/keystore.json`
+The script will show the newly generated Ethereum address, private key, password for keystore, and keystore info. Copy password to `.env KEYSTORE_PASSWORD`, keystore info to /`secrets/keystore.json`
 
 5. Put the keystore file under `secrets/keystore.json`.
 6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
 7. Make your wallet public address to be whitelisted by deBridge governance (contact the deBridge team for that)
 8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
 9. Run the command `docker-compose up --build -d`.
-10. Backuo and do not delete any files from the following directories:
+10. Backup and do not delete any files from the following directories:
     - `./initiator/orbitdb`
     - `./initiator/ipfs`
+11. Run `docker-compose logs | grep  "started at: /orbitdb/"` command that will show two addresses of orbitdb databases.
+Send the output to deBridge team so that your database addresses can be reflected in deBridge explorer and be pinned by other nodes for persistency
 
 11. If there is a need to start multiple instances of the launcher (e.g. one for testnet and one for mainnet) on one server you can:
-  - checkout or copy repo to new directory
+  - checkout or copy repo to the new directory
   - change DOCKER_ID variable in .env
   - start as described above
 
@@ -68,9 +69,9 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 
 # Mandatory monitorings
 
-1. Basic monitoring of the server/virtual machine(cpu, memory, disk space).
-2. Availability check (may be connectivity):
-  - all of full nodes(heco, bsc, etc). It is also good to check the synchronization status
+1. Basic monitoring of the server/virtual machine(CPU, memory, disk space).
+2. Availability check:
+  - each of the full nodes(heco, bsc, etc). It is also good to check the synchronization status
   - database
   - initiator
 3. It's recommended to check `docker-compose logs` for ERROR
