@@ -56,7 +56,7 @@ export class OrbitDbService {
             event: sendEvent,
             type: "submission"
         };
-
+        this.logger.verbose(value);
         let hash = await this.orbitLogsDb.add(value, { pin: true });
         this.logger.log(`addLogSignedSubmission hash: ${hash}`);
         return hash;
@@ -69,7 +69,7 @@ export class OrbitDbService {
             event: sendEvent,
             type: "confirmNewAsset"
         };
-
+        this.logger.verbose(value);
         let hash = await this.orbitLogsDb.add(value, { pin: true });
         this.logger.log(`addLogConfirmNewAssets hash: ${hash}`);
         return hash;
@@ -82,6 +82,7 @@ export class OrbitDbService {
             event: sendEvent,
             type: "submission"
         };
+        this.logger.verbose(value);
         // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
         let hash = await this.orbitDocsDb.put(value, { pin: true });
         this.logger.log(`addDocsSignedSubmission hash: ${hash}`);
@@ -90,11 +91,12 @@ export class OrbitDbService {
 
     async addDocsConfirmNewAssets(deployId: string, signature: string, sendEvent: any): Promise<string> {
         const value = {
-            id: deployId,
+            _id: deployId,
             signature: signature,
             event: sendEvent,
             type: "confirmNewAsset"
         };
+        this.logger.verbose(value);
         // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
         let hash = await this.orbitDocsDb.put(value, { pin: true });
         this.logger.log(`addDocsConfirmNewAssets hash: ${hash}`);
