@@ -6,7 +6,7 @@ export class SubmissionConfirmationResponse {
   id: string;
 
   @IsString()
-  sumbmissionId: string;
+  submissionId: string;
 }
 
 export class SubmissionsConfirmationsResponseDTO {

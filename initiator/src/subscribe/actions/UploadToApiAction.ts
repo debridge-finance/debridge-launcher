@@ -31,29 +31,17 @@ export class UploadToApiAction extends IAction {
     });
 
     if (submissions.length > 0) {
-
-      const submissionsConfirmation = new Map();
-
       const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
-      resultSubmissionConfirmation.forEach(item => {
-        submissionsConfirmation.set(item.sumbmissionId, item.id);
-      });
-
-      for (const submission of submissions) {
-        const confirmation = submissionsConfirmation.get(submission.submissionId);
-        if (!confirmation) {
-          this.logger.error(`Not exists confirmation for ${submission.submissionId}`);
-        }
-
-        const externalId = confirmation || '';
-        this.logger.log(`uploaded to debridgeAPI ${submission.submissionId} ${externalId}`);
+      // Confirm only accepted records by api
+      for (const submission of resultSubmissionConfirmation) {
+        this.logger.log(`uploaded to debridgeAPI submissionId: ${submission.submissionId} externalId: ${submission.id}`);
         await this.submissionsRepository.update(
           {
             submissionId: submission.submissionId,
           },
           {
             apiStatus: UploadStatusEnum.UPLOADED,
-            externalId: externalId,
+            externalId: submission.id,
           },
         );
       }
