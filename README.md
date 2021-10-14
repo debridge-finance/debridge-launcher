@@ -52,8 +52,8 @@ The script will show the newly generated Ethereum address, private key, password
 8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
 9. Run the command `docker-compose up --build -d`.
 10. Backup and do not delete any files from the following directories:
-    - `./debridge-node/orbitdb`
-    - `./debridge-node/ipfs`
+    - `./debridge_node/orbitdb`
+    - `./debridge_node/ipfs`
 11. Run `docker-compose logs | grep  "started at: /orbitdb/"` command that will show two addresses of orbitdb databases.
 Send the output to deBridge team so that your database addresses can be reflected in deBridge explorer and be pinned by other nodes for persistency
 
