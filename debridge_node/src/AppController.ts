@@ -1,16 +1,14 @@
-import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { UserLoginDto } from './auth/user.login.dto';
 import { AuthService } from './auth/auth.service';
 import { RescanDto } from './dto/RescanDto';
-import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
+import { RescanService } from './services/RescanService';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly addNewEventsAction: AddNewEventsAction,
-  ) {}
+  constructor(private readonly authService: AuthService, private readonly rescanService: RescanService) {}
 
   @Get()
   @HttpCode(200)
@@ -38,7 +36,9 @@ export class AppController {
     summary: 'Api for rescan',
   })
   @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   restart(@Body() dto: RescanDto) {
-    return this.addNewEventsAction.process(dto.chainId, dto.from, dto.to);
+    return this.rescanService.rescan(dto.chainId, dto.from, dto.to);
   }
 }

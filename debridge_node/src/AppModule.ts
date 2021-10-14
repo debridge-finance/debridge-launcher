@@ -19,6 +19,7 @@ import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
 import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
+import { RescanService } from './services/RescanService';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
   ],
   controllers: [AppController],
   providers: [
+    RescanService,
     JwtStrategy,
     AuthService,
     AddNewEventsAction,
@@ -62,7 +64,7 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
         const service = new OrbitDbService();
         await service.init();
         return service;
-      }
+      },
     },
     DebrdigeApiService,
     // {
@@ -75,4 +77,4 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
     // },
   ],
 })
-export class AppModule { }
+export class AppModule {}
