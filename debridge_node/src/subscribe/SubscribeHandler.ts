@@ -9,6 +9,7 @@ import { UpdadToIPFSAction } from './actions/UpdadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
+import * as Sentry from '@sentry/minimal';
 
 @Injectable()
 export class SubscribeHandler {
@@ -38,10 +39,12 @@ export class SubscribeHandler {
         chainId: config.chainId,
       });
       if (config.maxBlockRange <= 100) {
+        Sentry.captureMessage(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
         this.logger.error(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
         process.exit();
       }
       if (config.blockConfirmation <= 8) {
+        Sentry.captureMessage(`Cant up application maxBlockRange(${config.blockConfirmation}) < 8`);
         this.logger.error(`Cant up application maxBlockRange(${config.blockConfirmation}) < 8`);
         process.exit();
       }
@@ -64,6 +67,7 @@ export class SubscribeHandler {
           await this.addNewEventsAction.action(chain.chainId);
         } catch (e) {
           this.logger.error(e);
+          Sentry.captureException(e);
         }
       };
 
@@ -78,21 +82,18 @@ export class SubscribeHandler {
 
   @Interval(3000)
   async Sign() {
-     await this.signAction.action();
+    await this.signAction.action();
   }
 
-
-   @Interval(3000)
-   async UpdadToIPFSAction() {
-      await this.updadToIPFSAction.action();
-   }
-
+  @Interval(3000)
+  async UpdadToIPFSAction() {
+    await this.updadToIPFSAction.action();
+  }
 
   @Interval(3000)
   async UploadToApiAction() {
-     await this.uploadToApiAction.action();
+    await this.uploadToApiAction.action();
   }
-
 
   @Interval(3000)
   async checkAssetsEvent() {

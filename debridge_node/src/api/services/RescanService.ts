@@ -1,6 +1,7 @@
 import { AddNewEventsAction } from '../../subscribe/actions/AddNewEventsAction';
 import ChainsConfig from '../../config/chains_config.json';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import * as Sentry from '@sentry/minimal';
 
 /**
  * Rescan service
@@ -20,7 +21,9 @@ export class RescanService {
     });
 
     if (toBlock - fromBlock >= chainDetail.maxBlockRange) {
-      throw new HttpException('Out of range', HttpStatus.METHOD_NOT_ALLOWED);
+      const e = new HttpException('Out of range', HttpStatus.METHOD_NOT_ALLOWED);
+      Sentry.captureException(e);
+      throw e;
     }
     return this.addNewEventsAction.process(chainId, fromBlock, toBlock);
   }

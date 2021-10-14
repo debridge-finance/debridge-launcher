@@ -7,6 +7,7 @@ import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
+import * as Sentry from '@sentry/minimal';
 
 //Action that update signatures to debridge API
 @Injectable()
@@ -47,8 +48,8 @@ export class UploadToApiAction extends IAction {
           );
         }
       }
-    }
-    catch (e) {
+    } catch (e) {
+      Sentry.captureException(e);
       this.logger.error(e);
     }
 
@@ -56,7 +57,7 @@ export class UploadToApiAction extends IAction {
       //Process Assets
       const assets = await this.confirmNewAssetEntityRepository.find({
         status: SubmisionStatusEnum.SIGNED,
-        apiStatus: UploadStatusEnum.NEW
+        apiStatus: UploadStatusEnum.NEW,
       });
       console.log(assets.length);
       for (const asset of assets) {
@@ -72,14 +73,14 @@ export class UploadToApiAction extends IAction {
               externalId: result.registrationId,
             },
           );
-        }
-        catch (e) {
+        } catch (e) {
           this.logger.error(e);
+          Sentry.captureException(e);
         }
       }
-    }
-    catch (e) {
+    } catch (e) {
       this.logger.error(e);
+      Sentry.captureException(e);
     }
   }
 }
