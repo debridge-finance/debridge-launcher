@@ -3,7 +3,6 @@ import { Interval, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
-import ChainsConfig from '../config/chains_config.json';
 import { AddNewEventsAction } from './actions/AddNewEventsAction';
 import { SignAction } from './actions/SignAction';
 import { UpdadToIPFSAction } from './actions/UpdadToIPFSAction';
@@ -14,7 +13,6 @@ import chainConfigs from './../config/chains_config.json';
 @Injectable()
 export class SubscribeHandler {
   private readonly logger = new Logger(SubscribeHandler.name);
-  private isWorking = false;
 
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
@@ -69,7 +67,7 @@ export class SubscribeHandler {
         }
       };
 
-      const chainDetail = ChainsConfig.find(item => {
+      const chainDetail = chainConfigs.find(item => {
         return item.chainId === chain.chainId;
       });
 
