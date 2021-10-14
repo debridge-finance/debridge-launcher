@@ -11,20 +11,20 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge
-  initiator:
-    build: ./initiator
-    image: initiator
-    container_name: initiator${DOCKER_ID}
+  debridge_node:
+    build: ./debridge_node
+    image: debridge_node
+    container_name: debridge_node${DOCKER_ID}
     restart: on-failure
     secrets:
       - source: keystore
         target: /home/node/keystore.json
     volumes:
       - ./config:/home/node/src/config
-      - ./initiator/ipfs:/home/node/ipfs
-      - ./initiator/orbitdb:/home/node/orbitdb
+      - ./debridge_node/ipfs:/home/node/ipfs
+      - ./debridge_node/orbitdb:/home/node/orbitdb
     environment:
-      - PORT=${INITIATOR_PORT}
+      - PORT=${DEBRIDGE_NODE_PORT}
       - DATABASE_USER=${POSTGRES_USER}
       - DATABASE_HOST=${POSTGRES_HOST}
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}

@@ -3,8 +3,8 @@ pgdata/
 
 .vs/
 node_modules/
-/initiator/log
+/debridge_node/log
 dist/
-/initiator/ipfs
-/initiator/test/orbitdb/orbitdb
-/initiator/test/orbitdb/ipfs
+/debridge_node/ipfs
+/debridge_node/test/orbitdb/orbitdb
+/debridge_node/test/orbitdb/ipfs
