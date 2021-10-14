@@ -5,10 +5,15 @@ import { AuthService } from './auth/auth.service';
 import { RescanDto } from './dto/RescanDto';
 import { RescanService } from './services/RescanService';
 import { AuthGuard } from '@nestjs/passport';
+import { GetSupportedChainsService } from './services/GetSupportedChainsService';
 
 @Controller()
 export class AppController {
-  constructor(private readonly authService: AuthService, private readonly rescanService: RescanService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly rescanService: RescanService,
+    private readonly getSupportedChainsService: GetSupportedChainsService,
+  ) {}
 
   @Get()
   @HttpCode(200)
@@ -31,7 +36,7 @@ export class AppController {
     return this.authService.login(userLoginDto.login, userLoginDto.password);
   }
 
-  @Post('rescan')
+  @Post('/rescan')
   @ApiOperation({
     summary: 'Api for rescan',
   })
@@ -40,5 +45,13 @@ export class AppController {
   @UseGuards(AuthGuard())
   rescan(@Body() dto: RescanDto) {
     return this.rescanService.rescan(dto.chainId, dto.from, dto.to);
+  }
+
+  @Get('/chains')
+  @ApiOperation({
+    summary: 'Api for getting supported chains',
+  })
+  getSupportedChains() {
+    return this.getSupportedChainsService.get();
   }
 }

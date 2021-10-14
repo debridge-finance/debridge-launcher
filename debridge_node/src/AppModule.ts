@@ -2,13 +2,13 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './AppController';
+import { AppController } from './api/AppController';
 import { SubmissionEntity } from './entities/SubmissionEntity';
 import { SupportedChainEntity } from './entities/SupportedChainEntity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './auth/jwt.strategy';
-import { AuthService } from './auth/auth.service';
+import { JwtStrategy } from './api/auth/jwt.strategy';
+import { AuthService } from './api/auth/auth.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
 import { SignAction } from './subscribe/actions/SignAction';
@@ -19,7 +19,8 @@ import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
 import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
-import { RescanService } from './services/RescanService';
+import { RescanService } from './api/services/RescanService';
+import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { RescanService } from './services/RescanService';
     UploadToApiAction,
     CheckAssetsEventAction,
     SubscribeHandler,
+    GetSupportedChainsService,
     {
       provide: OrbitDbService,
       useFactory: async () => {

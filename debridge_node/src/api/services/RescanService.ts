@@ -1,5 +1,5 @@
-import { AddNewEventsAction } from '../subscribe/actions/AddNewEventsAction';
-import ChainsConfig from '../config/chains_config.json';
+import { AddNewEventsAction } from '../../subscribe/actions/AddNewEventsAction';
+import ChainsConfig from '../../config/chains_config.json';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 /**
@@ -22,6 +22,6 @@ export class RescanService {
     if (toBlock - fromBlock >= chainDetail.maxBlockRange) {
       throw new HttpException('Out of range', HttpStatus.METHOD_NOT_ALLOWED);
     }
-    this.addNewEventsAction.process(chainId, fromBlock, toBlock);
+    return this.addNewEventsAction.process(chainId, fromBlock, toBlock);
   }
 }
