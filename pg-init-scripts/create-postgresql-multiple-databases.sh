@@ -7,9 +7,7 @@ function create_user_and_database() {
 	local database=$1
 	echo "  Creating user and database '$database'"
 	psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/?sslmode=disable <<-EOSQL
-	    CREATE USER $database;
 	    CREATE DATABASE $database;
-	    GRANT ALL PRIVILEGES ON DATABASE $database TO $database;
 EOSQL
 }
 
@@ -20,4 +18,3 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	done
 	echo "Multiple databases created"
 fi
-
