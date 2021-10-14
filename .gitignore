@@ -3,8 +3,8 @@ pgdata/
 
 .vs/
 node_modules/
-/debridge-node/log
+/debridge_node/log
 dist/
-/debridge-node/ipfs
-/debridge-node/test/orbitdb/orbitdb
-/debridge-node/test/orbitdb/ipfs
+/debridge_node/ipfs
+/debridge_node/test/orbitdb/orbitdb
+/debridge_node/test/orbitdb/ipfs
