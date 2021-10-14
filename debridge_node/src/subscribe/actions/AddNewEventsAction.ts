@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IAction } from './IAction';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
@@ -16,7 +15,7 @@ import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
 @Injectable()
 export class AddNewEventsAction {
   logger: Logger;
-  private locker  = new Map();
+  private locker = new Map();
 
   constructor(
     private readonly configService: ConfigService,
@@ -31,7 +30,7 @@ export class AddNewEventsAction {
   async action(chainId: number) {
     if (this.locker.get(chainId)) {
       this.logger.warn(`Is working now. chainId: ${chainId}`);
-      return ;
+      return;
     }
     try {
       this.locker.set(chainId, true);
