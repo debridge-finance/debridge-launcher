@@ -38,8 +38,9 @@ In order to set up the validation node, the following steps should be performed:
   - Arbitrum
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
 2. Update HTTP RPC URL in /config/chains_config.json
-3. Change default (postgrestestpassword) Postgres password in .env
-4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
+3. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
+deBridge launcher has an embedded API that is implemented to send internal commands to the launcher. The set of methods for this API will be expanded in the future (e.g. query last scanned blocks, rescan blockchain from the specific block). By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET to randomly generated one
+5. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
   - npm i
   - node index.js
 
@@ -51,8 +52,8 @@ The script will show the newly generated Ethereum address, private key, password
 8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
 9. Run the command `docker-compose up --build -d`.
 10. Backup and do not delete any files from the following directories:
-    - `./initiator/orbitdb`
-    - `./initiator/ipfs`
+    - `./debridge-node/orbitdb`
+    - `./debridge-node/ipfs`
 11. Run `docker-compose logs | grep  "started at: /orbitdb/"` command that will show two addresses of orbitdb databases.
 Send the output to deBridge team so that your database addresses can be reflected in deBridge explorer and be pinned by other nodes for persistency
 
@@ -75,5 +76,5 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 2. Availability check:
   - each of the full nodes(heco, bsc, etc). It is also good to check the synchronization status
   - database
-  - initiator
+  - deBridge node
 3. It's recommended to check `docker-compose logs` for ERROR
