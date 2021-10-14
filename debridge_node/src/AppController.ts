@@ -38,7 +38,7 @@ export class AppController {
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiBearerAuth()
   @UseGuards(AuthGuard())
-  restart(@Body() dto: RescanDto) {
+  rescan(@Body() dto: RescanDto) {
     return this.rescanService.rescan(dto.chainId, dto.from, dto.to);
   }
 }
