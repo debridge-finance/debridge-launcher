@@ -5,11 +5,12 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import * as dotenv from 'dotenv';
 import * as Sentry from '@sentry/node';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from './Logger';
 
 async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
-    logger: ['warn', 'log', 'debug', 'error'],
+    logger: new Logger(),
   });
 
   const configService = app.get<ConfigService>(ConfigService);

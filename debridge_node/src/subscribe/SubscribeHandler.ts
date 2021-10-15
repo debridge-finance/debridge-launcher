@@ -39,12 +39,10 @@ export class SubscribeHandler {
         chainId: config.chainId,
       });
       if (config.maxBlockRange <= 100) {
-        Sentry.captureMessage(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
         this.logger.error(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
         process.exit();
       }
       if (config.blockConfirmation <= 8) {
-        Sentry.captureMessage(`Cant up application maxBlockRange(${config.blockConfirmation}) < 8`);
         this.logger.error(`Cant up application maxBlockRange(${config.blockConfirmation}) < 8`);
         process.exit();
       }

@@ -149,7 +149,6 @@ export class AddNewEventsAction {
           });
         }
       } else {
-        Sentry.captureMessage(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
         this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
         break;
       }
