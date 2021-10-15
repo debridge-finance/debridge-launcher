@@ -11,9 +11,9 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge
-  ipfs:
+  ipfs_daemon:
     image: ipfs/go-ipfs
-    container_name: ipfs${DOCKER_ID}
+    container_name: ipfs_daemon${DOCKER_ID}
     command: daemon --writable --enable-pubsub-experiment 
     restart: on-failure
     volumes:
@@ -46,11 +46,9 @@ services:
       - DEBRIDGE_API_ACCESS_KEY=${DEBRIDGE_API_ACCESS_KEY}
     depends_on:
       - postgres
-      - ipfs
+      - ipfs_daemon
     networks:
       - debridge
-    links:
-      - "ipfs:ipfs_node"
 networks:
   debridge:
     name: debridge

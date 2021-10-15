@@ -13,9 +13,6 @@ export class OrbitDbService {
     async init() {
         this.logger.log(`OrbitDbService init`);
         const ipfs = IPFS.create(config.IPFSNodeAddress);
-        await ipfs.bootstrap.add(
-            "/ip4/139.59.164.64/tcp/4002/p2p/QmNN6JwFwEyhTALAphnuLNmUsD1VNLiiQheGoXbLp226xE"
-        );
         // await ipfs.swarm.connect(PINNER_ADDRESS);
         const orbitdb = await OrbitDB.createInstance(ipfs,
             {
