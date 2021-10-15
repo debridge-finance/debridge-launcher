@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import IPFSConfig from '../config/ipfs_config.json';
-const IPFS = require('ipfs')
+import config from '../config/ipfs_client_config.json';
+const IPFS = require("ipfs-http-client");
 const OrbitDB = require('orbit-db')
 
 @Injectable()
@@ -12,7 +12,7 @@ export class OrbitDbService {
 
     async init() {
         this.logger.log(`OrbitDbService init`);
-        const ipfs = await IPFS.create(IPFSConfig.ipfsConfig);
+        const ipfs = IPFS.create(config.IPFSNodeAddress);
 
         // await ipfs.swarm.connect(PINNER_ADDRESS);
         const orbitdb = await OrbitDB.createInstance(ipfs,
@@ -57,7 +57,7 @@ export class OrbitDbService {
             type: "submission"
         };
         this.logger.verbose(value);
-        let hash = await this.orbitLogsDb.add(value);//, { pin: true });
+        let hash = await this.orbitLogsDb.add(value, { pin: true });//, { pin: true });
         this.logger.log(`addLogSignedSubmission hash: ${hash}`);
         return hash;
     }
@@ -70,7 +70,7 @@ export class OrbitDbService {
             type: "confirmNewAsset"
         };
         this.logger.verbose(value);
-        let hash = await this.orbitLogsDb.add(value);//, { pin: true });
+        let hash = await this.orbitLogsDb.add(value, { pin: true });//, { pin: true });
         this.logger.log(`addLogConfirmNewAssets hash: ${hash}`);
         return hash;
     }
@@ -84,7 +84,7 @@ export class OrbitDbService {
         };
         this.logger.verbose(value);
         // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-        let hash = await this.orbitDocsDb.put(value);//, { pin: true });
+        let hash = await this.orbitDocsDb.put(value, { pin: true });//, { pin: true });
         this.logger.log(`addDocsSignedSubmission hash: ${hash}`);
         return hash;
     }
@@ -98,7 +98,7 @@ export class OrbitDbService {
         };
         this.logger.verbose(value);
         // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-        let hash = await this.orbitDocsDb.put(value);//, { pin: true });
+        let hash = await this.orbitDocsDb.put(value, { pin: true });//, { pin: true });
         this.logger.log(`addDocsConfirmNewAssets hash: ${hash}`);
         return hash;
     }

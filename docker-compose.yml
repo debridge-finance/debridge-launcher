@@ -11,6 +11,21 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge
+  ipfs:
+    image: ipfs/go-ipfs
+    container_name: ipfs${DOCKER_ID}
+    command: daemon --writable --enable-pubsub-experiment
+    restart: on-failure
+    ports:
+      - "4001:4001" # ipfs swarm - expose if needed/wanted
+      - "5001:5001" # ipfs api - expose if needed/wanted
+      - "8080:8080" # ipfs gateway - expose if needed/wanted
+    volumes:
+      - ./data/ipfs:/data/ipfs
+      - ./data/export:/export
+      - ./config/ipfs_node_config.json:/data/ipfs/config
+    networks:
+      - debridge
   debridge_node:
     build: ./debridge_node
     image: debridge_node
@@ -21,7 +36,6 @@ services:
         target: /home/node/keystore.json
     volumes:
       - ./config:/home/node/src/config
-      - ./debridge_node/ipfs:/home/node/ipfs
       - ./debridge_node/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
@@ -36,6 +50,7 @@ services:
       - DEBRIDGE_API_ACCESS_KEY=${DEBRIDGE_API_ACCESS_KEY}
     depends_on:
       - postgres
+      - ipfs
     networks:
       - debridge
 networks:
