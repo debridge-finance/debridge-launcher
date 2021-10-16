@@ -100,10 +100,7 @@ export class UploadToApiAction extends IAction {
       });
 
       if (assets.length > 0) {
-        const size = Math.ceil(assets.length / this.PAGE_SIZE);
-        for (let part = 1; part <= size; part++) {
-          await this.confirmAssets(UploadToApiAction.paginate(assets, this.PAGE_SIZE, part));
-        }
+        await this.confirmAssets(assets);
       }
     } catch (e) {
       this.logger.error(e);
