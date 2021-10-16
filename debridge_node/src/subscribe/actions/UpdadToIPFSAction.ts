@@ -26,21 +26,20 @@ export class UpdadToIPFSAction extends IAction {
 
     const submissions = await this.submissionsRepository.find({
       status: SubmisionStatusEnum.SIGNED,
-      ipfsStatus: UploadStatusEnum.NEW
+      ipfsStatus: UploadStatusEnum.NEW,
     });
 
     for (const submission of submissions) {
-      const [logHash, doscHash] = await this.orbitDbService.addSignedSubmission(submission.submissionId, submission.signature,
-        {
-          txHash: submission.txHash,
-          submissionId: submission.submissionId,
-          chainFrom: submission.chainFrom,
-          chainTo: submission.chainTo,
-          debridgeId: submission.debridgeId,
-          receiverAddr: submission.receiverAddr,
-          amount: submission.amount,
-          eventRaw: submission.rawEvent
-        });
+      const [logHash, doscHash] = await this.orbitDbService.addSignedSubmission(submission.submissionId, submission.signature, {
+        txHash: submission.txHash,
+        submissionId: submission.submissionId,
+        chainFrom: submission.chainFrom,
+        chainTo: submission.chainTo,
+        debridgeId: submission.debridgeId,
+        receiverAddr: submission.receiverAddr,
+        amount: submission.amount,
+        eventRaw: submission.rawEvent,
+      });
       this.logger.log(`uploaded ${submission.submissionId} ipfsLogHash: ${logHash} ipfsKeyHash: ${doscHash}`);
       await this.submissionsRepository.update(
         {
@@ -49,7 +48,7 @@ export class UpdadToIPFSAction extends IAction {
         {
           ipfsStatus: UploadStatusEnum.UPLOADED,
           ipfsLogHash: logHash,
-          ipfsKeyHash: doscHash
+          ipfsKeyHash: doscHash,
         },
       );
     }
@@ -57,23 +56,22 @@ export class UpdadToIPFSAction extends IAction {
     //Process Assets
     const assets = await this.confirmNewAssetEntityRepository.find({
       status: SubmisionStatusEnum.SIGNED,
-      ipfsStatus: UploadStatusEnum.NEW
+      ipfsStatus: UploadStatusEnum.NEW,
     });
 
     for (const asset of assets) {
-      const [logHash, doscHash] = await this.orbitDbService.addConfirmNewAssets(asset.deployId, asset.signature,
-        {
-          debridgeId: asset.debridgeId,
-          deployId: asset.deployId,
-          nativeChainId: asset.nativeChainId,
-          tokenAddress: asset.tokenAddress,
-          name: asset.name,
-          symbol: asset.symbol,
-          decimals: asset.decimals,
-          submissionTxHash: asset.submissionTxHash,
-          submissionChainFrom: asset.submissionChainFrom,
-          submissionChainTo: asset.submissionChainTo
-        });
+      const [logHash, doscHash] = await this.orbitDbService.addConfirmNewAssets(asset.deployId, asset.signature, {
+        debridgeId: asset.debridgeId,
+        deployId: asset.deployId,
+        nativeChainId: asset.nativeChainId,
+        tokenAddress: asset.tokenAddress,
+        name: asset.name,
+        symbol: asset.symbol,
+        decimals: asset.decimals,
+        submissionTxHash: asset.submissionTxHash,
+        submissionChainFrom: asset.submissionChainFrom,
+        submissionChainTo: asset.submissionChainTo,
+      });
 
       this.logger.log(`uploaded deployId ${asset.deployId} ipfsLogHash: ${logHash} ipfsKeyHash: ${doscHash}`);
       await this.confirmNewAssetEntityRepository.update(
@@ -83,7 +81,7 @@ export class UpdadToIPFSAction extends IAction {
         {
           ipfsStatus: UploadStatusEnum.UPLOADED,
           ipfsLogHash: logHash,
-          ipfsKeyHash: doscHash
+          ipfsKeyHash: doscHash,
         },
       );
     }

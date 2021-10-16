@@ -36,6 +36,7 @@ services:
       - DEBRIDGE_API_ACCESS_KEY=${DEBRIDGE_API_ACCESS_KEY}
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - postgres
     networks:

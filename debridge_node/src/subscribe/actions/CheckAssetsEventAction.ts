@@ -13,7 +13,7 @@ import { abi as ERC20Abi } from '../../assets/ERC20.json';
 import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
-
+import * as Sentry from '@sentry/minimal';
 
 @Injectable()
 export class CheckAssetsEventAction extends IAction {
@@ -27,7 +27,7 @@ export class CheckAssetsEventAction extends IAction {
   ) {
     super();
     this.logger = new Logger(CheckAssetsEventAction.name);
-    this.account = (new Web3()).eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
+    this.account = new Web3().eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
   }
 
   async process() {
@@ -84,10 +84,11 @@ export class CheckAssetsEventAction extends IAction {
           const tokenDecimals = await nativeTokenInstance.methods.decimals().call();
           //keccak256(abi.encodePacked(debridgeId, _name, _symbol, _decimals));
           const deployId = web3.utils.soliditySha3(
-            {t: 'bytes32', v: submission.debridgeId},
-            {t: 'string', v: tokenName },
-            {t: 'string', v: tokenSymbol},
-            {t: 'uint8', v: tokenDecimals});
+            { t: 'bytes32', v: submission.debridgeId },
+            { t: 'string', v: tokenName },
+            { t: 'string', v: tokenSymbol },
+            { t: 'uint8', v: tokenDecimals },
+          );
           this.logger.log(`tokenName: ${tokenName}`);
           this.logger.log(`tokenSymbol: ${tokenSymbol}`);
           this.logger.log(`tokenDecimals: ${tokenDecimals}`);
@@ -110,12 +111,12 @@ export class CheckAssetsEventAction extends IAction {
             ipfsStatus: UploadStatusEnum.NEW,
             apiStatus: UploadStatusEnum.NEW,
             signature: signature,
-            deployId: deployId
+            deployId: deployId,
           } as ConfirmNewAssetEntity);
           newSubmitionIds.push(submission.submissionId);
-        }
-        catch (e) {
+        } catch (e) {
           this.logger.error(`Error processing ${submission.submissionId}`);
+          Sentry.captureException(e);
           this.logger.error(e);
         }
       } else {

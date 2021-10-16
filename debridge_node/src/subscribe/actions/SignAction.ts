@@ -1,13 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IAction } from './IAction';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
-import { OrbitDbService } from '../../services/OrbitDbService';
 import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
@@ -47,7 +44,7 @@ export class SignAction extends IAction {
         },
         {
           signature: signature,
-          status: SubmisionStatusEnum.SIGNED
+          status: SubmisionStatusEnum.SIGNED,
         },
       );
     }
