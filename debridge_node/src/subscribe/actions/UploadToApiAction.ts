@@ -25,8 +25,42 @@ export class UploadToApiAction extends IAction {
 
   private readonly PAGE_SIZE = 100;
 
-  private static paginate(array: any, pageSize: number, pageNumber: number) {
-    return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+  async process(): Promise<void> {
+    this.logger.log(`process UploadToApiAction`);
+
+    try {
+      const submissions = await this.submissionsRepository.find({
+        status: SubmisionStatusEnum.SIGNED,
+        apiStatus: UploadStatusEnum.NEW,
+      });
+
+      if (submissions.length > 0) {
+        const size = Math.ceil(submissions.length / this.PAGE_SIZE);
+        for (let pageNumber = 0; pageNumber < size; pageNumber++) {
+          const skip = pageNumber * this.PAGE_SIZE;
+          const end = Math.min((pageNumber + 1) * this.PAGE_SIZE, submissions.length);
+          await this.confirmSubmissions(submissions.slice(skip, end));
+        }
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      this.logger.error(e);
+    }
+
+    try {
+      //Process Assets
+      const assets = await this.confirmNewAssetEntityRepository.find({
+        status: SubmisionStatusEnum.SIGNED,
+        apiStatus: UploadStatusEnum.NEW,
+      });
+
+      if (assets.length > 0) {
+        await this.confirmAssets(assets);
+      }
+    } catch (e) {
+      this.logger.error(e);
+      Sentry.captureException(e);
+    }
   }
 
   private async confirmSubmissions(submissions: SubmissionEntity[]) {
@@ -69,42 +103,6 @@ export class UploadToApiAction extends IAction {
         this.logger.error(e);
         Sentry.captureException(e);
       }
-    }
-  }
-
-  async process(): Promise<void> {
-    this.logger.log(`process UploadToApiAction`);
-
-    try {
-      const submissions = await this.submissionsRepository.find({
-        status: SubmisionStatusEnum.SIGNED,
-        apiStatus: UploadStatusEnum.NEW,
-      });
-
-      if (submissions.length > 0) {
-        const size = Math.ceil(submissions.length / this.PAGE_SIZE);
-        for (let part = 1; part <= size; part++) {
-          await this.confirmSubmissions(UploadToApiAction.paginate(submissions, this.PAGE_SIZE, part));
-        }
-      }
-    } catch (e) {
-      Sentry.captureException(e);
-      this.logger.error(e);
-    }
-
-    try {
-      //Process Assets
-      const assets = await this.confirmNewAssetEntityRepository.find({
-        status: SubmisionStatusEnum.SIGNED,
-        apiStatus: UploadStatusEnum.NEW,
-      });
-
-      if (assets.length > 0) {
-        await this.confirmAssets(assets);
-      }
-    } catch (e) {
-      this.logger.error(e);
-      Sentry.captureException(e);
     }
   }
 }
