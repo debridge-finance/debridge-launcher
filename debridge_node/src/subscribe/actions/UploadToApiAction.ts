@@ -23,6 +23,55 @@ export class UploadToApiAction extends IAction {
     this.logger = new Logger(UploadToApiAction.name);
   }
 
+  private readonly PAGE_SIZE = 100;
+
+  private static paginate(array: any, pageSize: number, pageNumber: number) {
+    return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+  }
+
+  private async confirmSubmissions(submissions: SubmissionEntity[]) {
+    try {
+      const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
+      // Confirm only accepted records by api
+      for (const submission of resultSubmissionConfirmation) {
+        this.logger.log(`uploaded to debridgeAPI submissionId: ${submission.submissionId} externalId: ${submission.registrationId}`);
+        await this.submissionsRepository.update(
+          {
+            submissionId: submission.submissionId,
+          },
+          {
+            apiStatus: UploadStatusEnum.UPLOADED,
+            externalId: submission.registrationId,
+          },
+        );
+      }
+    } catch (e) {
+      this.logger.error(e);
+      Sentry.captureException(e);
+    }
+  }
+
+  private async confirmAssets(assets: ConfirmNewAssetEntity[]) {
+    for (const asset of assets) {
+      try {
+        const result = await this.debridgeApiService.uploadConfirmNewAssetsToApi(asset);
+        this.logger.log(`uploaded deployId to debridgeAPI deployId: ${result.deployId} externalId: ${result.registrationId}`);
+        await this.confirmNewAssetEntityRepository.update(
+          {
+            deployId: asset.deployId,
+          },
+          {
+            apiStatus: UploadStatusEnum.UPLOADED,
+            externalId: result.registrationId,
+          },
+        );
+      } catch (e) {
+        this.logger.error(e);
+        Sentry.captureException(e);
+      }
+    }
+  }
+
   async process(): Promise<void> {
     this.logger.log(`process UploadToApiAction`);
 
@@ -33,19 +82,9 @@ export class UploadToApiAction extends IAction {
       });
 
       if (submissions.length > 0) {
-        const resultSubmissionConfirmation = await this.debridgeApiService.uploadToApi(submissions);
-        // Confirm only accepted records by api
-        for (const submission of resultSubmissionConfirmation) {
-          this.logger.log(`uploaded to debridgeAPI submissionId: ${submission.submissionId} externalId: ${submission.registrationId}`);
-          await this.submissionsRepository.update(
-            {
-              submissionId: submission.submissionId,
-            },
-            {
-              apiStatus: UploadStatusEnum.UPLOADED,
-              externalId: submission.registrationId,
-            },
-          );
+        const size = Math.ceil(submissions.length / this.PAGE_SIZE);
+        for (let part = 1; part <= size; part++) {
+          await this.confirmSubmissions(UploadToApiAction.paginate(submissions, this.PAGE_SIZE, part));
         }
       }
     } catch (e) {
@@ -59,23 +98,11 @@ export class UploadToApiAction extends IAction {
         status: SubmisionStatusEnum.SIGNED,
         apiStatus: UploadStatusEnum.NEW,
       });
-      console.log(assets.length);
-      for (const asset of assets) {
-        try {
-          const result = await this.debridgeApiService.uploadConfirmNewAssetsToApi(asset);
-          this.logger.log(`uploaded deployId to debridgeAPI deployId: ${result.deployId} externalId: ${result.registrationId}`);
-          await this.confirmNewAssetEntityRepository.update(
-            {
-              deployId: asset.deployId,
-            },
-            {
-              apiStatus: UploadStatusEnum.UPLOADED,
-              externalId: result.registrationId,
-            },
-          );
-        } catch (e) {
-          this.logger.error(e);
-          Sentry.captureException(e);
+
+      if (assets.length > 0) {
+        const size = Math.ceil(assets.length / this.PAGE_SIZE);
+        for (let part = 1; part <= size; part++) {
+          await this.confirmAssets(UploadToApiAction.paginate(assets, this.PAGE_SIZE, part));
         }
       }
     } catch (e) {
