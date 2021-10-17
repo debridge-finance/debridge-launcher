@@ -1,12 +1,13 @@
 import { AddNewEventsAction } from '../../subscribe/actions/AddNewEventsAction';
 import ChainsConfig from '../../config/chains_config.json';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import * as Sentry from '@sentry/minimal';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 
 /**
  * Rescan service
  */
 export class RescanService {
+  private readonly logger = new Logger();
+
   constructor(private readonly addNewEventsAction: AddNewEventsAction) {}
 
   /**
@@ -22,7 +23,7 @@ export class RescanService {
 
     if (toBlock - fromBlock >= chainDetail.maxBlockRange) {
       const e = new HttpException('Out of range', HttpStatus.METHOD_NOT_ALLOWED);
-      Sentry.captureException(e);
+      this.logger.error(e);
       throw e;
     }
     return this.addNewEventsAction.process(chainId, fromBlock, toBlock);

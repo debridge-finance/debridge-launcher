@@ -11,7 +11,6 @@ import Web3 from 'web3';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
-import * as Sentry from '@sentry/minimal';
 
 @Injectable()
 export class AddNewEventsAction {
@@ -83,7 +82,6 @@ export class AddNewEventsAction {
         } as SubmissionEntity);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
-        Sentry.captureException(e);
         throw e;
       }
     }

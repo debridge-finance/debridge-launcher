@@ -9,7 +9,6 @@ import { UpdadToIPFSAction } from './actions/UpdadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
-import * as Sentry from '@sentry/minimal';
 
 @Injectable()
 export class SubscribeHandler {
@@ -65,7 +64,6 @@ export class SubscribeHandler {
           await this.addNewEventsAction.action(chain.chainId);
         } catch (e) {
           this.logger.error(e);
-          Sentry.captureException(e);
         }
       };
 

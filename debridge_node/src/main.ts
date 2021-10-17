@@ -9,20 +9,17 @@ import { Logger } from './Logger';
 
 async function bootstrap() {
   dotenv.config();
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+    });
+  }
+
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     logger: new Logger(),
   });
 
   const configService = app.get<ConfigService>(ConfigService);
-
-  if (!configService.get('SENTRY_DSN')) {
-    console.log(`Not exists SENTRY_DSN`);
-    process.exit();
-  }
-
-  Sentry.init({
-    dsn: configService.get('SENTRY_DSN'),
-  });
 
   const config = new DocumentBuilder().setTitle('Initiator').setVersion('1.0').addBearerAuth().build();
   const document = SwaggerModule.createDocument(app, config);

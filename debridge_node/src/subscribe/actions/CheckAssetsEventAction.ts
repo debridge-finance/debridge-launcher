@@ -13,7 +13,6 @@ import { abi as ERC20Abi } from '../../assets/ERC20.json';
 import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
-import * as Sentry from '@sentry/minimal';
 
 @Injectable()
 export class CheckAssetsEventAction extends IAction {
@@ -116,7 +115,6 @@ export class CheckAssetsEventAction extends IAction {
           newSubmitionIds.push(submission.submissionId);
         } catch (e) {
           this.logger.error(`Error processing ${submission.submissionId}`);
-          Sentry.captureException(e);
           this.logger.error(e);
         }
       } else {
