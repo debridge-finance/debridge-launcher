@@ -47,8 +47,7 @@ export class UploadToApiAction extends IAction {
           );
         }
       }
-    }
-    catch (e) {
+    } catch (e) {
       this.logger.error(e);
     }
 
@@ -56,7 +55,7 @@ export class UploadToApiAction extends IAction {
       //Process Assets
       const assets = await this.confirmNewAssetEntityRepository.find({
         status: SubmisionStatusEnum.SIGNED,
-        apiStatus: UploadStatusEnum.NEW
+        apiStatus: UploadStatusEnum.NEW,
       });
       console.log(assets.length);
       for (const asset of assets) {
@@ -72,13 +71,11 @@ export class UploadToApiAction extends IAction {
               externalId: result.registrationId,
             },
           );
-        }
-        catch (e) {
+        } catch (e) {
           this.logger.error(e);
         }
       }
-    }
-    catch (e) {
+    } catch (e) {
       this.logger.error(e);
     }
   }

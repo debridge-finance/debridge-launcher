@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { UserLoginDto } from './auth/user.login.dto';
 import { AuthService } from './auth/auth.service';
@@ -7,10 +7,7 @@ import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly addNewEventsAction: AddNewEventsAction,
-  ) {}
+  constructor(private readonly authService: AuthService, private readonly addNewEventsAction: AddNewEventsAction) {}
 
   @Get()
   @HttpCode(200)
@@ -18,7 +15,7 @@ export class AppController {
     return true;
   }
 
-  @Get('/jobs')
+  @Get('jobs')
   @HttpCode(200)
   jobs(): boolean {
     return true;

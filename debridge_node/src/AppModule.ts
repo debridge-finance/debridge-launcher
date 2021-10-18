@@ -18,7 +18,7 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
-import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
+import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 
 @Module({
   imports: [
@@ -52,7 +52,7 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
     AuthService,
     AddNewEventsAction,
     SignAction,
-    UpdadToIPFSAction,
+    UploadToIPFSAction,
     UploadToApiAction,
     CheckAssetsEventAction,
     SubscribeHandler,
@@ -62,7 +62,7 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
         const service = new OrbitDbService();
         await service.init();
         return service;
-      }
+      },
     },
     DebrdigeApiService,
     // {
@@ -75,4 +75,4 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
     // },
   ],
 })
-export class AppModule { }
+export class AppModule {}
