@@ -1,4 +1,4 @@
-import {Logger} from "@nestjs/common";
+import { Logger } from '@nestjs/common';
 
 /**
  * Interface for doing action in interval
@@ -13,7 +13,7 @@ export abstract class IAction {
   async action() {
     if (this.isWorking) {
       this.logger.warn('Is working now');
-      return ;
+      return;
     }
     try {
       this.isWorking = true;

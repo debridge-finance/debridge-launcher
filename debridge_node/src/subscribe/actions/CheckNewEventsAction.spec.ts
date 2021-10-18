@@ -70,11 +70,9 @@ describe('CheckNewEvensAction', () => {
 
   describe('CheckNewEvensAction', () => {
     it('CheckNewEvensAction with 1 submittion', async () => {
-
       jest.spyOn(repositorySubmissionEntity, 'update');
 
       await service.action();
-
 
       expect(repositorySubmissionEntity.update).toHaveBeenCalledWith(
         {
