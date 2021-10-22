@@ -9,7 +9,7 @@ import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 
 @Injectable()
-export class UpdadToIPFSAction extends IAction {
+export class UploadToIPFSAction extends IAction {
   constructor(
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
@@ -18,11 +18,11 @@ export class UpdadToIPFSAction extends IAction {
     private readonly orbitDbService: OrbitDbService,
   ) {
     super();
-    this.logger = new Logger(UpdadToIPFSAction.name);
+    this.logger = new Logger(UploadToIPFSAction.name);
   }
 
   async process(): Promise<void> {
-    this.logger.log(`process UpdadToIPFSAction`);
+    this.logger.log(`process UploadToIPFSAction`);
 
     const submissions = await this.submissionsRepository.find({
       status: SubmisionStatusEnum.SIGNED,

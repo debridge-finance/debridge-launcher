@@ -1,10 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
-import { EventData } from 'web3-eth-contract';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
 import Web3 from 'web3';
@@ -18,7 +16,6 @@ export class AddNewEventsAction {
   private locker = new Map();
 
   constructor(
-    private readonly configService: ConfigService,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     @InjectRepository(SubmissionEntity)

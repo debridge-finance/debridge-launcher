@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-
 import IPFSConfig from '../config/ipfs_config.json';
+
 const IPFS = require('ipfs');
 const OrbitDB = require('orbit-db');
 

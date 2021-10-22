@@ -18,9 +18,9 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
-import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
 import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
+import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 
 @Module({
   imports: [
@@ -55,7 +55,7 @@ import { GetSupportedChainsService } from './api/services/GetSupportedChainsServ
     AuthService,
     AddNewEventsAction,
     SignAction,
-    UpdadToIPFSAction,
+    UploadToIPFSAction,
     UploadToApiAction,
     CheckAssetsEventAction,
     SubscribeHandler,

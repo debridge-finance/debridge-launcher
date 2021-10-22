@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
 import { AddNewEventsAction } from './actions/AddNewEventsAction';
 import { SignAction } from './actions/SignAction';
-import { UpdadToIPFSAction } from './actions/UpdadToIPFSAction';
+import { UploadToIPFSAction } from './actions/UploadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
@@ -18,7 +18,7 @@ export class SubscribeHandler {
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly addNewEventsAction: AddNewEventsAction,
     private readonly signAction: SignAction,
-    private readonly updadToIPFSAction: UpdadToIPFSAction,
+    private readonly uploadToIPFSAction: UploadToIPFSAction,
     private readonly uploadToApiAction: UploadToApiAction,
     private readonly checkAssetsEventAction: CheckAssetsEventAction,
     @InjectRepository(SupportedChainEntity)
@@ -82,8 +82,8 @@ export class SubscribeHandler {
   }
 
   @Interval(3000)
-  async UpdadToIPFSAction() {
-    await this.updadToIPFSAction.action();
+  async UploadToIPFSAction() {
+    await this.uploadToIPFSAction.action();
   }
 
   @Interval(3000)
