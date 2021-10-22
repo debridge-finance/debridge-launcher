@@ -19,7 +19,4 @@ export class SubmissionsConfirmationsRequestDTO {
   @IsArray()
   @Type(() => SubmissionConfirmationRequest)
   confirmations: SubmissionConfirmationRequest[];
-
-  @IsString()
-  accessKey: string;
 }

@@ -9,6 +9,7 @@ import { UploadToIPFSAction } from './actions/UploadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
+import { StatisticToApiAction } from './actions/StatisticToApiAction';
 
 @Injectable()
 export class SubscribeHandler {
@@ -21,6 +22,7 @@ export class SubscribeHandler {
     private readonly uploadToIPFSAction: UploadToIPFSAction,
     private readonly uploadToApiAction: UploadToApiAction,
     private readonly checkAssetsEventAction: CheckAssetsEventAction,
+    private readonly statisticToApiAction: StatisticToApiAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
   ) {
@@ -94,5 +96,10 @@ export class SubscribeHandler {
   @Interval(3000)
   async checkAssetsEvent() {
     await this.checkAssetsEventAction.action();
+  }
+
+  @Interval(60000)
+  async UploadStatisticToApiAction() {
+    await this.statisticToApiAction.action();
   }
 }

@@ -21,6 +21,7 @@ import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
 import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
+import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
       },
     },
     DebrdigeApiService,
+    StatisticToApiAction,
     // {
     //   provide: DebrdigeApiService,
     //   useFactory: async () => {
