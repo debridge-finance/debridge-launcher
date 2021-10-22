@@ -19,6 +19,7 @@ import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
 import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
+import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 
 @Module({
   imports: [
@@ -62,9 +63,10 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
         const service = new OrbitDbService();
         await service.init();
         return service;
-      }
+      },
     },
     DebrdigeApiService,
+    StatisticToApiAction,
     // {
     //   provide: DebrdigeApiService,
     //   useFactory: async () => {
@@ -75,4 +77,4 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
     // },
   ],
 })
-export class AppModule { }
+export class AppModule {}
