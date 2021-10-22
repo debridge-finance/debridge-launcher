@@ -33,6 +33,9 @@ services:
       - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - API_BASE_URL=${API_BASE_URL}
+      - API_LOGIN=${API_LOGIN}
+      - API_PASSWORD=${API_PASSWORD}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - postgres
     networks:

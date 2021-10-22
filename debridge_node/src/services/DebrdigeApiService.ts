@@ -20,10 +20,12 @@ export class DebrdigeApiService {
   private web3: Web3;
   private accessToken: string;
 
+
   constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) {
     this.web3 = new Web3();
     this.account = this.web3.eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
   }
+
 
   async uploadToApi(submissions: SubmissionEntity[]): Promise<SubmissionConfirmationResponse[]> {
     const requestBody = {
@@ -71,6 +73,7 @@ export class DebrdigeApiService {
     } as ConfrimNewAssetsRequestDTO;
     this.logger.log(`uploadConfirmNewAssetsToApi is started`);
     const httpResult = await this.authRequest('/ConfirmNewAssets/confirm', requestBody);
+
 
     this.logger.verbose(`response: ${httpResult.data}`);
     const result = httpResult.data as ConfrimNewAssetsResponseDTO;
