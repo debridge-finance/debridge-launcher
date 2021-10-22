@@ -11,7 +11,7 @@ export class AuthService {
   login(login: string, password: string) {
     this.logger.verbose(`Authorization ${login} is started`);
 
-    const res = login === this.configService.get('LOGIN') && password === this.configService.get('PASSWORD');
+    const res = login === this.configService.get('API_LOGIN') && password === this.configService.get('API_PASSWORD');
     this.logger.verbose(`Authorization ${login} is finished with ${res}`);
 
     if (res) {

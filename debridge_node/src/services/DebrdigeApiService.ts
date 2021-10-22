@@ -12,7 +12,7 @@ import { ConfrimNewAssetsResponseDTO } from 'src/dto/debridge_api/ConfrimNewAsse
 export class DebrdigeApiService {
   private readonly logger = new Logger(DebrdigeApiService.name);
 
-  constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) { }
+  constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) {}
 
   async uploadToApi(submissions: SubmissionEntity[]): Promise<SubmissionConfirmationResponse[]> {
     const requestBody = {
@@ -24,7 +24,7 @@ export class DebrdigeApiService {
           chainId: submission.chainFrom,
         };
       }),
-      accessKey: this.configService.get('DEBRIDGE_API_ACCESS_KEY')
+      accessKey: this.configService.get('DEBRIDGE_API_ACCESS_KEY'),
     } as SubmissionsConfirmationsRequestDTO;
     this.logger.log(`uploadToApi is started`);
     const httpResult = await this.httpService
@@ -37,7 +37,6 @@ export class DebrdigeApiService {
     return result.confirmations;
   }
 
-
   async uploadConfirmNewAssetsToApi(asset: ConfirmNewAssetEntity): Promise<ConfrimNewAssetsResponseDTO> {
     const requestBody = {
       deployId: asset.deployId,
@@ -48,12 +47,10 @@ export class DebrdigeApiService {
       tokenName: asset.name,
       tokenSymbol: asset.symbol,
       tokenDecimals: asset.decimals,
-      accessKey: this.configService.get('DEBRIDGE_API_ACCESS_KEY')
+      accessKey: this.configService.get('DEBRIDGE_API_ACCESS_KEY'),
     } as ConfrimNewAssetsRequestDTO;
     this.logger.log(`uploadConfirmNewAssetsToApi is started`);
-    const httpResult = await this.httpService
-      .post(`${this.configService.get('API_BASE_URL')}/ConfirmNewAssets/confirm`, requestBody)
-      .toPromise();
+    const httpResult = await this.httpService.post(`${this.configService.get('API_BASE_URL')}/ConfirmNewAssets/confirm`, requestBody).toPromise();
 
     this.logger.verbose(`response: ${httpResult.data}`);
     const result = httpResult.data as ConfrimNewAssetsResponseDTO;
