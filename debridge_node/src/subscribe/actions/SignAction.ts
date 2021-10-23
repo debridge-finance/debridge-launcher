@@ -9,6 +9,7 @@ import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
 import { ConfigService } from '@nestjs/config';
+import { createProxy } from '../../utils/create.proxy';
 
 //Simple action that sign submissionId and save signatures to DB
 @Injectable()
@@ -25,7 +26,7 @@ export class SignAction extends IAction {
   ) {
     super();
     this.logger = new Logger(SignAction.name);
-    this.web3 = new Web3();
+    this.web3 = createProxy(new Web3(), { logger: this.logger });
     this.account = this.web3.eth.accounts.decrypt(keystore, configService.get('KEYSTORE_PASSWORD'));
   }
 
