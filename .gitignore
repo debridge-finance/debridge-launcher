@@ -8,3 +8,4 @@ dist/
 /debridge_node/ipfs
 /debridge_node/test/orbitdb/orbitdb
 /debridge_node/test/orbitdb/ipfs
+/debridge_node/keystore.json
