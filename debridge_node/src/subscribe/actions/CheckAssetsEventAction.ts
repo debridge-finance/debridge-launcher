@@ -13,6 +13,7 @@ import { abi as ERC20Abi } from '../../assets/ERC20.json';
 import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
+import { createProxy } from '../../utils/create.proxy';
 
 @Injectable()
 export class CheckAssetsEventAction extends IAction {
@@ -26,7 +27,7 @@ export class CheckAssetsEventAction extends IAction {
   ) {
     super();
     this.logger = new Logger(CheckAssetsEventAction.name);
-    this.account = new Web3().eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
+    this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
   }
 
   async process() {
@@ -52,8 +53,9 @@ export class CheckAssetsEventAction extends IAction {
             return item.chainId === submission.chainFrom;
           });
           this.logger.log(chainDetail.provider);
+
           const web3 = new Web3(chainDetail.provider);
-          const deBridgeGateInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+          const deBridgeGateInstance = createProxy(new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr), { logger: this.logger });
           // struct DebridgeInfo {
           //   uint256 chainId; // native chain id
           //   uint256 maxAmount; // maximum amount to transfer
@@ -76,7 +78,9 @@ export class CheckAssetsEventAction extends IAction {
           });
           const tokenWeb3 = new Web3(tokenChainDetail.provider);
           this.logger.log(tokenChainDetail.provider);
-          const nativeTokenInstance = new tokenWeb3.eth.Contract(ERC20Abi as any, nativeTokenInfo.nativeAddress);
+          const nativeTokenInstance = createProxy(new tokenWeb3.eth.Contract(ERC20Abi as any, nativeTokenInfo.nativeAddress), {
+            logger: this.logger,
+          });
 
           const tokenName = await nativeTokenInstance.methods.name().call();
           const tokenSymbol = await nativeTokenInstance.methods.symbol().call();

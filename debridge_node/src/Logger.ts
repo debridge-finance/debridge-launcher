@@ -6,6 +6,6 @@ export class Logger extends ConsoleLogger {
     if (process.env.SENTRY_DSN) {
       Sentry.captureMessage(message);
     }
-    super.error(message, stack, context);
+    super.error(`[${stack}] ${message}`);
   }
 }
