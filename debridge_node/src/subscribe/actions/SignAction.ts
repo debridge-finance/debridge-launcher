@@ -8,6 +8,7 @@ import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
+import { ConfigService } from '@nestjs/config';
 
 //Simple action that sign submissionId and save signatures to DB
 @Injectable()
@@ -20,11 +21,12 @@ export class SignAction extends IAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
+    private readonly configService: ConfigService,
   ) {
     super();
     this.logger = new Logger(SignAction.name);
     this.web3 = new Web3();
-    this.account = this.web3.eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
+    this.account = this.web3.eth.accounts.decrypt(keystore, configService.get('KEYSTORE_PASSWORD'));
   }
 
   async process(): Promise<void> {
