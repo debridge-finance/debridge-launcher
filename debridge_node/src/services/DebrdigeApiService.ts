@@ -80,7 +80,7 @@ export class DebrdigeApiService {
     return result;
   }
 
-  private async request<T>(api: string, requestBody: T, configs: any) {
+  private async request<T>(api: string, requestBody: T, configs: RequestConfig) {
     const url = `${this.configService.get('API_BASE_URL')}${api}`;
     let httpResult;
     try {
@@ -146,4 +146,10 @@ export class DebrdigeApiService {
     }
     return accessToken;
   }
+}
+
+interface RequestConfig {
+  headers: {
+    Authorization: string;
+  };
 }
