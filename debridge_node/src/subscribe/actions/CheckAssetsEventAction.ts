@@ -14,6 +14,7 @@ import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
 import { createProxy } from '../../utils/create.proxy';
+import { getTokenName } from '../../utils/get.token.name';
 
 @Injectable()
 export class CheckAssetsEventAction extends IAction {
@@ -82,7 +83,7 @@ export class CheckAssetsEventAction extends IAction {
             logger: this.logger,
           });
 
-          const tokenName = await nativeTokenInstance.methods.name().call();
+          const tokenName = await getTokenName(nativeTokenInstance, nativeTokenInfo.nativeAddress, { logger: this.logger });
           const tokenSymbol = await nativeTokenInstance.methods.symbol().call();
           const tokenDecimals = await nativeTokenInstance.methods.decimals().call();
           //keccak256(abi.encodePacked(debridgeId, _name, _symbol, _decimals));
