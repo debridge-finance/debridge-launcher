@@ -80,15 +80,11 @@ export class DebrdigeApiService {
     return result;
   }
 
-  private async request<T>(api: string, requestBody: T, headers: any) {
+  private async request<T>(api: string, requestBody: T, configs: RequestConfig) {
     const url = `${this.configService.get('API_BASE_URL')}${api}`;
     let httpResult;
     try {
-      httpResult = await lastValueFrom(
-        this.httpService.post(`${this.configService.get('API_BASE_URL')}${api}`, requestBody, {
-          headers,
-        }),
-      );
+      httpResult = await lastValueFrom(this.httpService.post(`${this.configService.get('API_BASE_URL')}${api}`, requestBody, configs));
     } catch (e) {
       const response = e.response;
       this.logger.error(
@@ -150,4 +146,10 @@ export class DebrdigeApiService {
     }
     return accessToken;
   }
+}
+
+interface RequestConfig {
+  headers: {
+    Authorization: string;
+  };
 }
