@@ -7,6 +7,7 @@ import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
+import { LockService } from '../../services/LockService';
 
 //Action that update signatures to debridge API
 @Injectable()
@@ -17,8 +18,9 @@ export class UploadToApiAction extends IAction {
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
     private readonly debridgeApiService: DebrdigeApiService,
+    readonly lockService: LockService,
   ) {
-    super();
+    super(lockService, UploadToApiAction.name);
     this.logger = new Logger(UploadToApiAction.name);
   }
 

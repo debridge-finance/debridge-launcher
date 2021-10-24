@@ -7,6 +7,7 @@ import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { OrbitDbService } from '../../services/OrbitDbService';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
+import { LockService } from '../../services/LockService';
 
 @Injectable()
 export class UploadToIPFSAction extends IAction {
@@ -16,8 +17,9 @@ export class UploadToIPFSAction extends IAction {
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
     private readonly orbitDbService: OrbitDbService,
+    readonly lockService: LockService,
   ) {
-    super();
+    super(lockService, UploadToIPFSAction.name);
     this.logger = new Logger(UploadToIPFSAction.name);
   }
 

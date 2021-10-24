@@ -10,6 +10,7 @@ import keystore from 'keystore.json';
 import { Account } from 'web3-core';
 import { ConfigService } from '@nestjs/config';
 import { createProxy } from '../../utils/create.proxy';
+import { LockService } from '../../services/LockService';
 
 //Simple action that sign submissionId and save signatures to DB
 @Injectable()
@@ -23,8 +24,9 @@ export class SignAction extends IAction {
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
     private readonly configService: ConfigService,
+    readonly lockService: LockService,
   ) {
-    super();
+    super(lockService, SignAction.name);
     this.logger = new Logger(SignAction.name);
     this.web3 = createProxy(new Web3(), { logger: this.logger });
     this.account = this.web3.eth.accounts.decrypt(keystore, configService.get('KEYSTORE_PASSWORD'));

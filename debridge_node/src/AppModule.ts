@@ -22,6 +22,8 @@ import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
+import { LockEntity } from './entities/LockEntity';
+import { LockService } from './services/LockService';
 
 @Module({
   imports: [
@@ -40,10 +42,10 @@ import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
         password: configService.get('DATABASE_PASSWORD', 'password'),
         database: configService.get('DATABASE_SCHEMA', 'postgres'),
         synchronize: true,
-        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
+        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, LockEntity],
       }),
     }),
-    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity]),
+    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, LockEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
@@ -71,6 +73,7 @@ import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
     },
     DebrdigeApiService,
     StatisticToApiAction,
+    LockService,
     // {
     //   provide: DebrdigeApiService,
     //   useFactory: async () => {

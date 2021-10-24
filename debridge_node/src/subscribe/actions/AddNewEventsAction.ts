@@ -9,6 +9,7 @@ import Web3 from 'web3';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
+import { LockService } from '../../services/LockService';
 
 @Injectable()
 export class AddNewEventsAction {
@@ -20,6 +21,7 @@ export class AddNewEventsAction {
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
+    private readonly lockService: LockService,
   ) {
     this.logger = new Logger(AddNewEventsAction.name);
   }
@@ -31,12 +33,14 @@ export class AddNewEventsAction {
     }
     try {
       this.locker.set(chainId, true);
+      await this.lockService.lock(`action_${chainId}`);
       this.logger.log(`Is locked chainId: ${chainId}`);
       await this.process(chainId);
     } catch (e) {
       this.logger.error(e);
     } finally {
       this.locker.set(chainId, false);
+      await this.lockService.unlock(`action_${chainId}`);
       this.logger.log(`Is unlocked chainId: ${chainId}`);
     }
   }

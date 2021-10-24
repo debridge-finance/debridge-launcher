@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { ProgressInfoDTO } from '../../dto/debridge_api/ValidationProgressDTO';
+import { LockService } from '../../services/LockService';
 
 @Injectable()
 export class StatisticToApiAction extends IAction {
@@ -12,8 +13,9 @@ export class StatisticToApiAction extends IAction {
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     private readonly debridgeApiService: DebrdigeApiService,
+    readonly lockService: LockService,
   ) {
-    super();
+    super(lockService, StatisticToApiAction.name);
     this.logger = new Logger(StatisticToApiAction.name);
   }
 

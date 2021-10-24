@@ -14,6 +14,7 @@ import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
 import { createProxy } from '../../utils/create.proxy';
+import { LockService } from '../../services/LockService';
 
 @Injectable()
 export class CheckAssetsEventAction extends IAction {
@@ -24,8 +25,9 @@ export class CheckAssetsEventAction extends IAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
+    readonly lockService: LockService,
   ) {
-    super();
+    super(lockService, CheckAssetsEventAction.name);
     this.logger = new Logger(CheckAssetsEventAction.name);
     this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
   }
