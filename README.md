@@ -48,10 +48,9 @@ The script will show the newly generated Ethereum address, private key, password
 
 5. Put the keystore file under `secrets/keystore.json`.
 6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
-7. Make your wallet public address to be whitelisted by deBridge governance (contact the deBridge team for that)
-8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
-9. Run the command `docker-compose up --build -d`.
-10. Backup and do not delete any files from the following directories:
+7. Contact deBridge team  to make your wallet address to be whitelisted by deBridge governance
+8. Run the command `docker-compose up --build -d`.
+9. Backup and do not delete any files from the following directories:
     - `./debridge_node/orbitdb`
     - `./data/ipfs`
 11. Run `docker-compose logs | grep  "started at: /orbitdb/"` command that will show two addresses of orbitdb databases.

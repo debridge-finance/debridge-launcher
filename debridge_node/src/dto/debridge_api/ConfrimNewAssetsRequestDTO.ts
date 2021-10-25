@@ -24,7 +24,4 @@ export class ConfrimNewAssetsRequestDTO {
 
   @IsNumber()
   tokenDecimals: number;
-
-  @IsString()
-  accessKey: string;
 }

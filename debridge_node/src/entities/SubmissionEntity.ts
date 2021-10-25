@@ -12,7 +12,6 @@ export class SubmissionEntity {
   @Column()
   txHash: string;
 
-
   @Column()
   chainFrom: number;
 

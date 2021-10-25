@@ -36,17 +36,17 @@ export class ConfirmNewAssetEntity {
   submissionChainTo: number;
 
   @Column({
-      nullable: true,
+    nullable: true,
   })
   signature: string;
 
   @Column({
-      nullable: true,
+    nullable: true,
   })
   ipfsLogHash: string;
 
   @Column({
-      nullable: true,
+    nullable: true,
   })
   ipfsKeyHash: string;
 

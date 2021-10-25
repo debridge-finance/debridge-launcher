@@ -3,26 +3,26 @@ import { Interval, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
-import ChainsConfig from '../config/chains_config.json';
 import { AddNewEventsAction } from './actions/AddNewEventsAction';
 import { SignAction } from './actions/SignAction';
-import { UpdadToIPFSAction } from './actions/UpdadToIPFSAction';
+import { UploadToIPFSAction } from './actions/UploadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
+import { StatisticToApiAction } from './actions/StatisticToApiAction';
 
 @Injectable()
 export class SubscribeHandler {
   private readonly logger = new Logger(SubscribeHandler.name);
-  private isWorking = false;
 
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly addNewEventsAction: AddNewEventsAction,
     private readonly signAction: SignAction,
-    private readonly updadToIPFSAction: UpdadToIPFSAction,
+    private readonly uploadToIPFSAction: UploadToIPFSAction,
     private readonly uploadToApiAction: UploadToApiAction,
     private readonly checkAssetsEventAction: CheckAssetsEventAction,
+    private readonly statisticToApiAction: StatisticToApiAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
   ) {
@@ -69,7 +69,7 @@ export class SubscribeHandler {
         }
       };
 
-      const chainDetail = ChainsConfig.find(item => {
+      const chainDetail = chainConfigs.find(item => {
         return item.chainId === chain.chainId;
       });
 
@@ -80,24 +80,26 @@ export class SubscribeHandler {
 
   @Interval(3000)
   async Sign() {
-     await this.signAction.action();
+    await this.signAction.action();
   }
 
-
-   @Interval(3000)
-   async UpdadToIPFSAction() {
-      await this.updadToIPFSAction.action();
-   }
-
+  @Interval(3000)
+  async UploadToIPFSAction() {
+    await this.uploadToIPFSAction.action();
+  }
 
   @Interval(3000)
   async UploadToApiAction() {
-     await this.uploadToApiAction.action();
+    await this.uploadToApiAction.action();
   }
-
 
   @Interval(3000)
   async checkAssetsEvent() {
     await this.checkAssetsEventAction.action();
+  }
+
+  @Interval(60000)
+  async UploadStatisticToApiAction() {
+    await this.statisticToApiAction.action();
   }
 }
