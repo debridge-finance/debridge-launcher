@@ -55,7 +55,7 @@ export class OrbitDbService {
       type: 'submission',
     };
     this.logger.verbose(value);
-    const hash = await this.orbitLogsDb.add(value, { pin: true }); //, { pin: true });
+    const hash = await this.orbitLogsDb.add(value, { pin: true });
     this.logger.log(`addLogSignedSubmission hash: ${hash}`);
     return hash;
   }
@@ -68,7 +68,7 @@ export class OrbitDbService {
       type: 'confirmNewAsset',
     };
     this.logger.verbose(value);
-    const hash = await this.orbitLogsDb.add(value, { pin: true }); //, { pin: true });
+    const hash = await this.orbitLogsDb.add(value, { pin: true });
     this.logger.log(`addLogConfirmNewAssets hash: ${hash}`);
     return hash;
   }
@@ -82,7 +82,7 @@ export class OrbitDbService {
     };
     this.logger.verbose(value);
     // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-    const hash = await this.orbitDocsDb.put(value, { pin: true }); //, { pin: true });
+    const hash = await this.orbitDocsDb.put(value, { pin: true });
     this.logger.log(`addDocsSignedSubmission hash: ${hash}`);
     return hash;
   }
@@ -96,7 +96,7 @@ export class OrbitDbService {
     };
     this.logger.verbose(value);
     // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-    const hash = await this.orbitDocsDb.put(value, { pin: true }); //, { pin: true });
+    const hash = await this.orbitDocsDb.put(value, { pin: true });
     this.logger.log(`addDocsConfirmNewAssets hash: ${hash}`);
     return hash;
   }
