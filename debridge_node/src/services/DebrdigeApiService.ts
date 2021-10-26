@@ -29,11 +29,11 @@ export class DebrdigeApiService {
   }
 
   async updateOrbitDb(requestBody: UpdateOrbirDbDTO) {
-    this.logger.log(`uploadToApi is started`);
+    this.logger.log(`updateOrbitDb is started`);
     const httpResult = await this.authRequest('/Validator/updateOrbitDb', requestBody);
 
     this.logger.verbose(`response: ${httpResult.data}`);
-    this.logger.log(`uploadToApi is finished`);
+    this.logger.log(`updateOrbitDb is finished`);
   }
 
   async uploadToApi(submissions: SubmissionEntity[]): Promise<SubmissionConfirmationResponse[]> {
