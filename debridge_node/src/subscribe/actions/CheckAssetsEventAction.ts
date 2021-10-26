@@ -119,7 +119,7 @@ export class CheckAssetsEventAction extends IAction {
           } as ConfirmNewAssetEntity);
           newSubmitionIds.push(submission.submissionId);
         } catch (e) {
-          this.logger.error(`Error processing ${submission.submissionId}`);
+          this.logger.error(`Error processing ${submission.submissionId} ${e.message}`);
           this.logger.error(e);
         }
       } else {

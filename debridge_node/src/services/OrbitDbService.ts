@@ -20,36 +20,49 @@ export class OrbitDbService implements OnModuleInit {
   }
 
   async init() {
-    this.logger.log(`OrbitDbService init`);
-    const ipfs = await IPFS.create(IPFSConfig.ipfsConfig);
+    try {
+      this.logger.log(`OrbitDbService init`);
+      const ipfs = await IPFS.create(IPFSConfig.ipfsConfig);
+      this.logger.log(`IPFS is created`);
 
-    // await ipfs.swarm.connect(PINNER_ADDRESS);
-    const orbitdb = await OrbitDB.createInstance(ipfs, {
-      directory: './orbitdb',
-    });
-    const options = {
-      // Give write access to ourselves
-      accessController: {
-        write: [orbitdb.identity.id],
-      },
-      overwrite: false, // whether we should overwrite the existing database if it exists
-    };
-    this.orbitLogsDb = await orbitdb.eventlog('debridgeLogs', options);
-    await this.orbitLogsDb.load();
-    this.logger.log(`OrbitDB logs started at: ${this.orbitLogsDb.address}`);
+      // await ipfs.swarm.connect(PINNER_ADDRESS);
+      const orbitdb = await OrbitDB.createInstance(ipfs, {
+        directory: './orbitdb',
+      });
+      const options = {
+        // Give write access to ourselves
+        accessController: {
+          write: [orbitdb.identity.id],
+        },
+        overwrite: false, // whether we should overwrite the existing database if it exists
+      };
+      this.orbitLogsDb = await orbitdb.eventlog('debridgeLogs', options);
+      await this.orbitLogsDb.load();
+      this.logger.log(`OrbitDB logs started at: ${this.orbitLogsDb.address}`);
 
-    this.orbitDocsDb = await orbitdb.docs('debridgeDocs', options);
-    await this.orbitDocsDb.load();
-    this.logger.log(`OrbitDB docs started at: ${this.orbitDocsDb.address}`);
+      this.orbitDocsDb = await orbitdb.docs('debridgeDocs', options);
+      await this.orbitDocsDb.load();
+      this.logger.log(`OrbitDB docs started at: ${this.orbitDocsDb.address}`);
 
-    const updateOrbitDbInterval = setInterval(async () => {
-      const orbitDocsDb = this.orbitDocsDb.address?.toString();
-      const orbitLogsDb = this.orbitLogsDb.address?.toString();
-      if (orbitDocsDb && orbitLogsDb) {
-        await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb });
-        clearInterval(updateOrbitDbInterval);
-      }
-    }, this.UPDATE_ORBITDB_INTERVAL);
+      this.logger.log(`updateOrbitDbInterval interval is started`);
+      const updateOrbitDbInterval = setInterval(async () => {
+        this.logger.verbose(`updateOrbitDbInterval is working`);
+        const orbitDocsDb = this.orbitDocsDb.address?.toString();
+        const orbitLogsDb = this.orbitLogsDb.address?.toString();
+        if (orbitDocsDb && orbitLogsDb) {
+          try {
+            await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb });
+            clearInterval(updateOrbitDbInterval);
+            this.logger.log(`working updateOrbitDbInterval is finished`);
+          } catch (e) {
+            this.logger.error(`Error in update orbitdb request ${e.message()}`);
+          }
+        }
+      }, this.UPDATE_ORBITDB_INTERVAL);
+    } catch (e) {
+      this.logger.error(`Error in initialization orbitdb service ${e.message}`);
+      process.exit(1);
+    }
   }
 
   async addSignedSubmission(submissionId: string, signature: string, sendEvent: any): Promise<[string, string]> {
