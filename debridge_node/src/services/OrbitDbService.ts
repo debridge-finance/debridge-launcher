@@ -22,7 +22,7 @@ export class OrbitDbService implements OnModuleInit {
   async init() {
     try {
       this.logger.log(`OrbitDbService init`);
-      const ipfs = await IPFS.create(config.IPFSNodeAddress);
+      const ipfs = IPFS.create(config.IPFSNodeAddress);
       this.logger.log(`IPFS is created`);
 
       // await ipfs.swarm.connect(PINNER_ADDRESS);
