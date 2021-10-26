@@ -61,14 +61,7 @@ import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
     CheckAssetsEventAction,
     SubscribeHandler,
     GetSupportedChainsService,
-    {
-      provide: OrbitDbService,
-      useFactory: async () => {
-        const service = new OrbitDbService();
-        await service.init();
-        return service;
-      },
-    },
+    OrbitDbService,
     DebrdigeApiService,
     StatisticToApiAction,
     // {
