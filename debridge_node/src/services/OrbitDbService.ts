@@ -1,14 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import IPFSConfig from '../config/ipfs_config.json';
+import { DebrdigeApiService } from './DebrdigeApiService';
 
 const IPFS = require('ipfs');
 const OrbitDB = require('orbit-db');
 
 @Injectable()
-export class OrbitDbService {
+export class OrbitDbService implements OnModuleInit {
+  private readonly UPDATE_ORBITDB_INTERVAL = 5000; //5s
+
   private readonly logger = new Logger(OrbitDbService.name);
   private orbitLogsDb;
   private orbitDocsDb;
+
+  constructor(private readonly debrdigeApiService: DebrdigeApiService) {}
+
+  async onModuleInit() {
+    await this.init();
+  }
 
   async init() {
     this.logger.log(`OrbitDbService init`);
@@ -32,6 +41,15 @@ export class OrbitDbService {
     this.orbitDocsDb = await orbitdb.docs('debridgeDocs', options);
     await this.orbitDocsDb.load();
     this.logger.log(`OrbitDB docs started at: ${this.orbitDocsDb.address}`);
+
+    const updateOrbitDbInterval = setInterval(async () => {
+      const orbitDocsDb = this.orbitDocsDb.address?.toString();
+      const orbitLogsDb = this.orbitLogsDb.address?.toString();
+      if (orbitDocsDb && orbitLogsDb) {
+        await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb });
+        clearInterval(updateOrbitDbInterval);
+      }
+    }, this.UPDATE_ORBITDB_INTERVAL);
   }
 
   async addSignedSubmission(submissionId: string, signature: string, sendEvent: any): Promise<[string, string]> {
