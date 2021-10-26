@@ -37,6 +37,7 @@
     "dotenv": "10.0.0",
     "fastify-swagger": "4.12.4",
     "ipfs": "0.59.1",
+    "ipfs-http-client": "53.0.1",
     "orbit-db": "0.27.2",
     "passport": "0.4.1",
     "passport-jwt": "4.0.0",

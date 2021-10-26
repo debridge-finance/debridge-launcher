@@ -1,9 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import IPFSConfig from '../config/ipfs_config.json';
+import config from '../config/ipfs_client_config.json';
 import { DebrdigeApiService } from './DebrdigeApiService';
 
-const IPFS = require('ipfs');
-const OrbitDB = require('orbit-db');
+const IPFS = require("ipfs-http-client");
+const OrbitDB = require('orbit-db')
 
 @Injectable()
 export class OrbitDbService implements OnModuleInit {
@@ -22,7 +22,7 @@ export class OrbitDbService implements OnModuleInit {
   async init() {
     try {
       this.logger.log(`OrbitDbService init`);
-      const ipfs = await IPFS.create(IPFSConfig.ipfsConfig);
+      const ipfs = IPFS.create(config.IPFSNodeAddress);
       this.logger.log(`IPFS is created`);
 
       // await ipfs.swarm.connect(PINNER_ADDRESS);
@@ -87,7 +87,7 @@ export class OrbitDbService implements OnModuleInit {
       type: 'submission',
     };
     this.logger.verbose(value);
-    const hash = await this.orbitLogsDb.add(value); //, { pin: true });
+    const hash = await this.orbitLogsDb.add(value, { pin: true });
     this.logger.log(`addLogSignedSubmission hash: ${hash}`);
     return hash;
   }
@@ -100,7 +100,7 @@ export class OrbitDbService implements OnModuleInit {
       type: 'confirmNewAsset',
     };
     this.logger.verbose(value);
-    const hash = await this.orbitLogsDb.add(value); //, { pin: true });
+    const hash = await this.orbitLogsDb.add(value, { pin: true });
     this.logger.log(`addLogConfirmNewAssets hash: ${hash}`);
     return hash;
   }
@@ -114,7 +114,7 @@ export class OrbitDbService implements OnModuleInit {
     };
     this.logger.verbose(value);
     // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-    const hash = await this.orbitDocsDb.put(value); //, { pin: true });
+    const hash = await this.orbitDocsDb.put(value, { pin: true });
     this.logger.log(`addDocsSignedSubmission hash: ${hash}`);
     return hash;
   }
@@ -128,7 +128,7 @@ export class OrbitDbService implements OnModuleInit {
     };
     this.logger.verbose(value);
     // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-    const hash = await this.orbitDocsDb.put(value); //, { pin: true });
+    const hash = await this.orbitDocsDb.put(value, { pin: true });
     this.logger.log(`addDocsConfirmNewAssets hash: ${hash}`);
     return hash;
   }

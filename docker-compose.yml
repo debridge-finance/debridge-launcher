@@ -11,6 +11,17 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge
+  ipfs_daemon:
+    image: ipfs/go-ipfs
+    container_name: ipfs_daemon${DOCKER_ID}
+    command: daemon --writable --enable-pubsub-experiment 
+    restart: on-failure
+    volumes:
+      - ./data/ipfs:/data/ipfs
+      - ./data/export:/export
+    networks:
+      - debridge
+
   debridge_node:
     build: ./debridge_node
     image: debridge_node
@@ -21,7 +32,6 @@ services:
         target: /home/node/keystore.json
     volumes:
       - ./config:/home/node/src/config
-      - ./debridge_node/ipfs:/home/node/ipfs
       - ./debridge_node/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
@@ -38,6 +48,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - postgres
+      - ipfs_daemon
     networks:
       - debridge
 networks:

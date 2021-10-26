@@ -52,11 +52,13 @@ The script will show the newly generated Ethereum address, private key, password
 8. Run the command `docker-compose up --build -d`.
 9. Backup and do not delete any files from the following directories:
     - `./debridge_node/orbitdb`
-    - `./debridge_node/ipfs`
-10. Run `docker-compose logs | grep  "started at: /orbitdb/"` command that will show two addresses of orbitdb databases.
+    - `./data/ipfs`
+11. Run `docker-compose logs | grep  "started at: /orbitdb/"` command that will show two addresses of orbitdb databases.
 Send the output to deBridge team so that your database addresses can be reflected in deBridge explorer and be pinned by other nodes for persistency
 
-11. If there is a need to start multiple instances of the launcher (e.g. one for testnet and one for mainnet) on one server you can:
+12. Run `docker-compose exec ipfs_daemon ipfs swarm peering add "/ip4/${PINNER_HOST}/tcp/${PINNER_PORT}/p2p/${PINNER_PEER_ID}"` command that will add pinner node address to the ipfs swarm peering list.
+
+13. If there is a need to start multiple instances of the launcher (e.g. one for testnet and one for mainnet) on one server you can:
   - checkout or copy repo to the new directory
   - change DOCKER_ID variable in .env
   - start as described above
