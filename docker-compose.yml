@@ -20,16 +20,15 @@ services:
       - source: keystore
         target: /home/node/keystore.json
     volumes:
-      - ./config:/home/node/src/config
       - ./debridge_node/ipfs:/home/node/ipfs
       - ./debridge_node/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
-      - DATABASE_USER=${POSTGRES_USER}
-      - DATABASE_HOST=${POSTGRES_HOST}
-      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE_SCHEMA=${EI_DATABASE}
-      - DATABASE_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - POSTGRES_PORT=${POSTGRES_PORT}
       - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}      
       - JWT_SECRET=${JWT_SECRET}
       - API_BASE_URL=${API_BASE_URL}
