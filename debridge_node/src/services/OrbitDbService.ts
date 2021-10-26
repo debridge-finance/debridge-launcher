@@ -61,7 +61,7 @@ export class OrbitDbService implements OnModuleInit {
       }, this.UPDATE_ORBITDB_INTERVAL);
     } catch (e) {
       this.logger.error(`Error in initialization orbitdb service ${e.message}`);
-      process.exit(1);
+      //process.exit(1);
     }
   }
 
