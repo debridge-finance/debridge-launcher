@@ -14,6 +14,7 @@ import { lastValueFrom } from 'rxjs';
 import keystore from '../../keystore.json';
 import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/ValidationProgressDTO';
 import { createProxy } from '../utils/create.proxy';
+import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
 
 @Injectable()
 export class DebrdigeApiService {
@@ -25,6 +26,14 @@ export class DebrdigeApiService {
   constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) {
     this.web3 = createProxy(new Web3(), { logger: this.logger });
     this.account = this.web3.eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
+  }
+
+  async updateOrbitDb(requestBody: UpdateOrbirDbDTO) {
+    this.logger.log(`uploadToApi is started`);
+    const httpResult = await this.authRequest('/Validator/updateOrbitDb', requestBody);
+
+    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.log(`uploadToApi is finished`);
   }
 
   async uploadToApi(submissions: SubmissionEntity[]): Promise<SubmissionConfirmationResponse[]> {
