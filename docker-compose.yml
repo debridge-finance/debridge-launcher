@@ -14,7 +14,7 @@ services:
   ipfs_daemon:
     image: ipfs/go-ipfs
     container_name: ipfs_daemon${DOCKER_ID}
-    command: daemon --writable --enable-pubsub-experiment 
+    command: daemon --writable --enable-pubsub-experiment
     restart: on-failure
     volumes:
       - ./data/ipfs:/data/ipfs
@@ -32,7 +32,7 @@ services:
         target: /home/node/keystore.json
     volumes:
       - ./config:/home/node/src/config
-      - ./debridge_node/orbitdb:/home/node/orbitdb
+      - ./data/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - DATABASE_USER=${POSTGRES_USER}
