@@ -36,7 +36,7 @@
         "provider": "https://rpc-mumbai.maticvigil.com",
         "interval": 10000,
         "blockConfirmation": 100,
-        "maxBlockRange": 5000
+        "maxBlockRange": 1000
     },
     {
         "chainId": 421611,
