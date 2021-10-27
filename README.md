@@ -101,9 +101,8 @@ docker-compose down -v
 # remove old directories with ipfs and orbitdb data
 rm -r ./debridge_node/ipfs/ ./debridge_node/orbitdb/
 
-# checkout to the develop branch
-git fetch
-git checkout develop
+# get the latest changes
+git pull
 
 # run containers
 docker-compose up --build -d
@@ -112,6 +111,10 @@ docker-compose up --build -d
 docker-compose exec ipfs_daemon ipfs config profile apply server
 
 # add all pinners addresses to the IPFS bootstrap list. You can find full pinners list in the `pinners list` section.
+docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk"
+docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k"
+docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP"
+
 
 # restart containers
 docker-compose restart
