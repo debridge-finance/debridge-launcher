@@ -66,6 +66,7 @@ The script will show the newly generated Ethereum address, private key, password
   - `/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk`
   - `/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k`
   - `/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP`
+  - `/dnsaddr/londonswarm.debridge.io/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk`
   
 Please add all pinners to the IPFS bootstrap list. To do it, you can use the command:
 ```shell
@@ -90,39 +91,9 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
-## 27.10.2021
+## v1.0.0 (27.10.2021)
  - Change javascript instance of IPFS to separate service, which runs [go-IPFS](https://github.com/ipfs/go-ipfs) daemon.
  - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.
  - Added ARBITRUM testnet to [config/chains_config.json](https://github.com/debridge-finance/debridge-launcher/tree/master/config)
  - Added Sentry. If you are using sentry, please update SENTRY_DSN at .env file.
  - Removed DEBRIDGE_API_ACCESS_KEY. We support validators auth by singing message with private key
- 
-### How to migrate
-```shell
-# stop running containers 
-docker-compose down -v
-
-# remove old directories with ipfs and orbitdb data
-rm -r ./debridge_node/ipfs/ ./debridge_node/orbitdb/
-
-# get the latest changes
-git pull
-
-# run containers
-docker-compose up --build -d
-
-# update config for IPFS daemon
-docker-compose exec ipfs_daemon ipfs config profile apply server
-
-# add all pinners addresses to the IPFS bootstrap list. You can find full pinners list in the `pinners list` section.
-docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk"
-docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k"
-docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP"
-
-
-# restart containers
-docker-compose restart
-
-# check if any errors occured
-docker-compose logs -f | grep -i "error"
-```
