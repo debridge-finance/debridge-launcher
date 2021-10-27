@@ -15,7 +15,7 @@
 
 More information about the project can be also found in the [documentation portal](https://docs.debridge.finance/)
 
-deBridge launcher is a software that is run by deBridge validators who were elected by the protocol governance and perform validation of all cross-chain transactions passed through the protocol. All active validators are listening for events emitted by transactions that pass through deBridge smart contract and once an event achieves its finality validator signs the unique id of the event by private key and stores signature to Orbitdb -  public IPFS database. In order to have transaction executed in the target chain user or arbitrary keeper needs to collect minimal required signatures of deBridge validators from IPFS and pass them alongside all transaction parameters to the deBridge smart contract in the target chain. The smart contract will validate all signatures and execute message/data passed in the transaction
+deBridge node is a software that is run by deBridge validators who were elected by the protocol governance and perform validation of all cross-chain transactions passed through the protocol. All active validators are listening for events emitted by transactions that pass through deBridge smart contract and once an event achieves its finality validator signs the unique id of the event by private key and stores signature to Orbitdb -  public IPFS database. In order to have transaction executed in the target chain user or arbitrary keeper needs to collect minimal required signatures of deBridge validators from IPFS and pass them alongside all transaction parameters to the deBridge smart contract in the target chain. The smart contract will validate all signatures and execute message/data passed in the transaction
 
 In order to set up the validation node, the following steps should be performed:
 
@@ -39,7 +39,7 @@ In order to set up the validation node, the following steps should be performed:
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
 2. Update HTTP RPC URL in /config/chains_config.json
 3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
-deBridge launcher has an embedded API that is implemented to send internal commands to the launcher. The set of methods for this API will be expanded in the future (e.g. query last scanned blocks, rescan blockchain from the specific block). By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET to randomly generated one. Change API_LOGIN and API_PASSWORD to authorize in debridge_node public API. If you are using sentry, please update SENTRY_DSN at .env file.
+deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, and API_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
 
 4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
   - npm i
@@ -56,7 +56,7 @@ The script will show the newly generated Ethereum address, private key, password
     - `./data/ipfs`
 10. Run `docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/${PINNER_HOST}/tcp/4001/p2p/${PINNER_PEER_ID}"` command that will add pinner node address to the ipfs bootstrap list. You can find full list of pinner multiaddresses in the [pinners list](#pinners-list). Please add all pinners to the IPFS bootstrap list.
 11. Run `docker-compose exec ipfs_daemon ipfs config profile apply server` command that will apply [server profile](https://docs.ipfs.io/how-to/configure-node/#profiles) which disables local host discovery and recommended when running IPFS on machines with public IPv4 addresses.
-12. If there is a need to start multiple instances of the launcher (e.g. one for testnet and one for mainnet) on one server you can:
+12. If there is a need to start multiple instances of the node (e.g. one for testnet and one for mainnet) on one server you can:
   - checkout or copy repo to the new directory
   - change DOCKER_ID variable in .env
   - start as described above
