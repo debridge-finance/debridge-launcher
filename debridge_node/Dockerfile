@@ -8,5 +8,4 @@ COPY nest-cli.json /home/node
 WORKDIR /home/node
 RUN npm install
 COPY src/  /home/node/src
-COPY config/ /home/node/src/config
 CMD npm start
