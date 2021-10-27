@@ -96,4 +96,4 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
  - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.
  - Added ARBITRUM testnet to [config/chains_config.json](https://github.com/debridge-finance/debridge-launcher/tree/master/config)
  - Added Sentry. If you are using sentry, please update SENTRY_DSN at .env file.
- - Removed DEBRIDGE_API_ACCESS_KEY. We support validators auth by singing message with private key
+ - Removed DEBRIDGE_API_ACCESS_KEY. We support validators auth by signing message with private key
