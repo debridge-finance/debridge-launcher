@@ -21,7 +21,7 @@ services:
     networks:
       - debridge
 
-  debridge_node:
+      debridge_node:
     build: ./debridge_node
     image: debridge_node
     container_name: debridge_node${DOCKER_ID}

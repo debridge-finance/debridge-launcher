@@ -39,8 +39,9 @@ In order to set up the validation node, the following steps should be performed:
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
 2. Update HTTP RPC URL in /config/chains_config.json
 3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
-deBridge launcher has an embedded API that is implemented to send internal commands to the launcher. The set of methods for this API will be expanded in the future (e.g. query last scanned blocks, rescan blockchain from the specific block). By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET to randomly generated one
-5. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
+deBridge launcher has an embedded API that is implemented to send internal commands to the launcher. The set of methods for this API will be expanded in the future (e.g. query last scanned blocks, rescan blockchain from the specific block). By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET to randomly generated one. Change API_LOGIN and API_PASSWORD to authorize in debridge_node public API. If you are using sentry, please update SENTRY_DSN at .env file.
+
+4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
   - npm i
   - node index.js
 
