@@ -1,16 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IAction } from './IAction';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
-import { OrbitDbService } from '../../services/OrbitDbService';
 import Web3 from 'web3';
 import keystore from 'keystore.json';
 import { Account } from 'web3-core';
+import { ConfigService } from '@nestjs/config';
+import { createProxy } from '../../utils/create.proxy';
 
 //Simple action that sign submissionId and save signatures to DB
 @Injectable()
@@ -23,11 +22,12 @@ export class SignAction extends IAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
+    private readonly configService: ConfigService,
   ) {
     super();
     this.logger = new Logger(SignAction.name);
-    this.web3 = new Web3();
-    this.account = this.web3.eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
+    this.web3 = createProxy(new Web3(), { logger: this.logger });
+    this.account = this.web3.eth.accounts.decrypt(keystore, configService.get('KEYSTORE_PASSWORD'));
   }
 
   async process(): Promise<void> {
@@ -47,7 +47,7 @@ export class SignAction extends IAction {
         },
         {
           signature: signature,
-          status: SubmisionStatusEnum.SIGNED
+          status: SubmisionStatusEnum.SIGNED,
         },
       );
     }

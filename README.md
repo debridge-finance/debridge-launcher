@@ -38,9 +38,10 @@ In order to set up the validation node, the following steps should be performed:
   - Arbitrum
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
 2. Update HTTP RPC URL in /config/chains_config.json
-3. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
-deBridge launcher has an embedded API that is implemented to send internal commands to the launcher. The set of methods for this API will be expanded in the future (e.g. query last scanned blocks, rescan blockchain from the specific block). By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET to randomly generated one
-5. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
+3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
+deBridge launcher has an embedded API that is implemented to send internal commands to the launcher. The set of methods for this API will be expanded in the future (e.g. query last scanned blocks, rescan blockchain from the specific block). By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET to randomly generated one. Change API_LOGIN and API_PASSWORD to authorize in debridge_node public API. If you are using sentry, please update SENTRY_DSN at .env file.
+
+4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
   - npm i
   - node index.js
 
@@ -48,19 +49,28 @@ The script will show the newly generated Ethereum address, private key, password
 
 5. Put the keystore file under `secrets/keystore.json`.
 6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
-7. Make your wallet public address to be whitelisted by deBridge governance (contact the deBridge team for that)
-8. Contact deBridge team to get DEBRIDGE_API_ACCESS_KEY. Put it in .env
-9. Run the command `docker-compose up --build -d`.
-10. Backup and do not delete any files from the following directories:
-    - `./debridge_node/orbitdb`
-    - `./debridge_node/ipfs`
-11. Run `docker-compose logs | grep  "started at: /orbitdb/"` command that will show two addresses of orbitdb databases.
-Send the output to deBridge team so that your database addresses can be reflected in deBridge explorer and be pinned by other nodes for persistency
-
-11. If there is a need to start multiple instances of the launcher (e.g. one for testnet and one for mainnet) on one server you can:
+7. Contact deBridge team  to make your wallet address to be whitelisted by deBridge governance
+8. Run the command `docker-compose up --build -d`.
+9. Backup and do not delete any files from the following directories:
+    - `./data/orbitdb`
+    - `./data/ipfs`
+10. Run `docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/${PINNER_HOST}/tcp/4001/p2p/${PINNER_PEER_ID}"` command that will add pinner node address to the ipfs bootstrap list. You can find full list of pinner multiaddresses in the [pinners list](#pinners-list). Please add all pinners to the IPFS bootstrap list.
+11. Run `docker-compose exec ipfs_daemon ipfs config profile apply server` command that will apply [server profile](https://docs.ipfs.io/how-to/configure-node/#profiles) which disables local host discovery and recommended when running IPFS on machines with public IPv4 addresses.
+12. If there is a need to start multiple instances of the launcher (e.g. one for testnet and one for mainnet) on one server you can:
   - checkout or copy repo to the new directory
   - change DOCKER_ID variable in .env
   - start as described above
+
+
+# Pinners list
+  - `/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk`
+  - `/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k`
+  - `/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP`
+  
+Please add all pinners to the IPFS bootstrap list. To do it, you can use the command:
+```shell
+docker-compose exec ipfs_daemon ipfs bootstrap add "$PINNER_ADDRESS"
+```
 
 # Miscellaneous
 
@@ -78,3 +88,41 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
   - database
   - deBridge node
 3. It's recommended to check `docker-compose logs` for ERROR
+
+# Changelog
+## 27.10.2021
+ - Change javascript instance of IPFS to separate service, which runs [go-IPFS](https://github.com/ipfs/go-ipfs) daemon.
+ - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.
+ - Added ARBITRUM testnet to [config/chains_config.json](https://github.com/debridge-finance/debridge-launcher/tree/master/config)
+ - Added Sentry. If you are using sentry, please update SENTRY_DSN at .env file.
+ - Removed DEBRIDGE_API_ACCESS_KEY. We support validators auth by singing message with private key
+ 
+### How to migrate
+```shell
+# stop running containers 
+docker-compose down -v
+
+# remove old directories with ipfs and orbitdb data
+rm -r ./debridge_node/ipfs/ ./debridge_node/orbitdb/
+
+# get the latest changes
+git pull
+
+# run containers
+docker-compose up --build -d
+
+# update config for IPFS daemon
+docker-compose exec ipfs_daemon ipfs config profile apply server
+
+# add all pinners addresses to the IPFS bootstrap list. You can find full pinners list in the `pinners list` section.
+docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk"
+docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k"
+docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP"
+
+
+# restart containers
+docker-compose restart
+
+# check if any errors occured
+docker-compose logs -f | grep -i "error"
+```

@@ -1,3 +1,4 @@
+.env
 secrets/*
 pgdata/
 
@@ -8,3 +9,5 @@ dist/
 /debridge_node/ipfs
 /debridge_node/test/orbitdb/orbitdb
 /debridge_node/test/orbitdb/ipfs
+data
+/debridge_node/keystore.json

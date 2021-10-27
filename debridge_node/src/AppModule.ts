@@ -2,13 +2,13 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './AppController';
+import { AppController } from './api/AppController';
 import { SubmissionEntity } from './entities/SubmissionEntity';
 import { SupportedChainEntity } from './entities/SupportedChainEntity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './auth/jwt.strategy';
-import { AuthService } from './auth/auth.service';
+import { JwtStrategy } from './api/auth/jwt.strategy';
+import { AuthService } from './api/auth/auth.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
 import { SignAction } from './subscribe/actions/SignAction';
@@ -18,7 +18,10 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
-import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
+import { RescanService } from './api/services/RescanService';
+import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
+import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
+import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 
 @Module({
   imports: [
@@ -48,23 +51,19 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
   ],
   controllers: [AppController],
   providers: [
+    RescanService,
     JwtStrategy,
     AuthService,
     AddNewEventsAction,
     SignAction,
-    UpdadToIPFSAction,
+    UploadToIPFSAction,
     UploadToApiAction,
     CheckAssetsEventAction,
     SubscribeHandler,
-    {
-      provide: OrbitDbService,
-      useFactory: async () => {
-        const service = new OrbitDbService();
-        await service.init();
-        return service;
-      }
-    },
+    GetSupportedChainsService,
+    OrbitDbService,
     DebrdigeApiService,
+    StatisticToApiAction,
     // {
     //   provide: DebrdigeApiService,
     //   useFactory: async () => {
@@ -75,4 +74,4 @@ import { UpdadToIPFSAction } from './subscribe/actions/UpdadToIPFSAction';
     // },
   ],
 })
-export class AppModule { }
+export class AppModule {}

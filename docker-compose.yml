@@ -11,9 +11,17 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge
+  ipfs_daemon:
+    image: ipfs/go-ipfs
+    container_name: ipfs_daemon${DOCKER_ID}
+    command: daemon --writable --enable-pubsub-experiment
+    restart: on-failure
+    volumes:
+      - ./data/ipfs:/data/ipfs
+    networks:
+      - debridge
   debridge_node:
-    build: ./debridge_node
-    image: debridge_node
+    image: debridgefinance/debridge-node:v1.0.0
     container_name: debridge_node${DOCKER_ID}
     restart: on-failure
     secrets:
@@ -21,8 +29,7 @@ services:
         target: /home/node/keystore.json
     volumes:
       - ./config:/home/node/src/config
-      - ./debridge_node/ipfs:/home/node/ipfs
-      - ./debridge_node/orbitdb:/home/node/orbitdb
+      - ./data/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - DATABASE_USER=${POSTGRES_USER}
@@ -30,12 +37,15 @@ services:
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_SCHEMA=${EI_DATABASE}
       - DATABASE_PORT=${POSTGRES_PORT}
-      - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}      
+      - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - API_BASE_URL=${API_BASE_URL}
-      - DEBRIDGE_API_ACCESS_KEY=${DEBRIDGE_API_ACCESS_KEY}
+      - API_LOGIN=${API_LOGIN}
+      - API_PASSWORD=${API_PASSWORD}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - postgres
+      - ipfs_daemon
     networks:
       - debridge
 networks:
