@@ -21,8 +21,7 @@ services:
     networks:
       - debridge
   debridge_node:
-    build: ./debridge_node
-    image: debridge_node
+    image: debridgefinance/debridge-node:v1.0.0
     container_name: debridge_node${DOCKER_ID}
     restart: on-failure
     secrets:
