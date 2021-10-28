@@ -54,9 +54,7 @@ The script will show the newly generated Ethereum address, private key, password
 9. Backup and do not delete any files from the following directories:
     - `./data/orbitdb`
     - `./data/ipfs`
-10. Run `docker-compose exec ipfs_daemon ipfs bootstrap add "/ip4/${PINNER_HOST}/tcp/4001/p2p/${PINNER_PEER_ID}"` command that will add pinner node address to the ipfs bootstrap list. You can find full list of pinner multiaddresses in the [pinners list](#pinners-list). Please add all pinners to the IPFS bootstrap list.
-11. Run `docker-compose exec ipfs_daemon ipfs config profile apply server` command that will apply [server profile](https://docs.ipfs.io/how-to/configure-node/#profiles) which disables local host discovery and recommended when running IPFS on machines with public IPv4 addresses.
-12. If there is a need to start multiple instances of the node (e.g. one for testnet and one for mainnet) on one server you can:
+10. If there is a need to start multiple instances of the node (e.g. one for testnet and one for mainnet) on one server you can:
   - checkout or copy repo to the new directory
   - change DOCKER_ID variable in .env
   - start as described above
@@ -68,7 +66,7 @@ The script will show the newly generated Ethereum address, private key, password
   - `/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP`
   - `/dnsaddr/londonswarm.debridge.io/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk`
   
-Please add all pinners to the IPFS bootstrap list. To do it, you can use the command:
+To add node to the bootstrap list manually, you can use the command:
 ```shell
 docker-compose exec ipfs_daemon ipfs bootstrap add "$PINNER_ADDRESS"
 ```
