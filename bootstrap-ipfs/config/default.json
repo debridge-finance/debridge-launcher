@@ -1,0 +1,11 @@
+{
+  "daemonUrl": "http://ipfs_daemon:5001/api/v0",
+  "ipfs": {
+    "Bootstrap": [
+      "/ip4/164.90.237.82/tcp/4001/p2p/12D3KooWLpw1YcyGx9qJ32YG79St3GPuARcpr37ue5zqoFqGo9wZ",
+      "/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt",
+      "/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
+      "/ip4/104.131.131.81/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"
+    ]
+  }
+}

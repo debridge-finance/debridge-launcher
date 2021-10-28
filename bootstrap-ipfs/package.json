@@ -1,0 +1,15 @@
+{
+  "name": "bootstrap-ipfs-daemon",
+  "version": "1.0.0",
+  "description": "bootstrap configs, backup keystore and restart ipfs_daemon",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "author": "debridge-finance",
+  "license": "ISC",
+  "dependencies": {
+    "config": "^3.3.6",
+    "ipfs-http-client": "^53.0.1"
+  }
+}

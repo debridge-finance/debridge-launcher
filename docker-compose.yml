@@ -14,12 +14,25 @@ services:
   ipfs_daemon:
     image: ipfs/go-ipfs
     container_name: ipfs_daemon${DOCKER_ID}
-    command: daemon --writable --enable-pubsub-experiment
-    restart: on-failure
+    command: daemon --writable --enable-pubsub-experiment --migrate=true --agent-version-suffix=docker
+    restart: always
     volumes:
       - ./data/ipfs:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
     networks:
-      - debridge
+      - debridge 
+  ipfs_daemon_bootstrap:
+    build: ./bootstrap-ipfs
+    container_name: ipfs_daemon_bootstrap${DOCKER_ID}
+    restart: on-failure
+    depends_on:
+      - ipfs_daemon 
+    environment:
+      - IPFS_DAEMON_HOST=ipfs_daemon
+      - IPFS_DAEMON_PORT=5001
+    networks:
+      - debridge 
   debridge_node:
     image: debridgefinance/debridge-node:v1.0.0
     container_name: debridge_node${DOCKER_ID}
