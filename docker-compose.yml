@@ -25,7 +25,6 @@ services:
   ipfs_daemon_bootstrap:
     build: ./bootstrap-ipfs
     container_name: ipfs_daemon_bootstrap${DOCKER_ID}
-    restart: on-failure
     depends_on:
       - ipfs_daemon 
     environment:
