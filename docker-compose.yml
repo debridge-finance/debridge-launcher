@@ -14,7 +14,6 @@ services:
   ipfs_daemon:
     image: ipfs/go-ipfs
     container_name: ipfs_daemon${DOCKER_ID}
-    profiles: ["bootstrap"]
     command: daemon --writable --enable-pubsub-experiment --migrate=true --agent-version-suffix=docker
     restart: always
     volumes:
