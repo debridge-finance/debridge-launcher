@@ -10,16 +10,31 @@ services:
       - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
-      - debridge
+      - debridge-node
   ipfs_daemon:
     image: ipfs/go-ipfs
     container_name: ipfs_daemon${DOCKER_ID}
-    command: daemon --writable --enable-pubsub-experiment
-    restart: on-failure
+    command: daemon --writable --enable-pubsub-experiment --migrate=true --agent-version-suffix=docker
+    restart: always
     volumes:
       - ./data/ipfs:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
     networks:
-      - debridge
+      - debridge-node
+  bootstrap_ipfs_daemon:
+    build: ./bootstrap-ipfs
+    profiles: ["bootstrap"]
+    container_name: bootstrap_ipfs_daemon${DOCKER_ID}
+    depends_on:
+      - ipfs_daemon
+    environment:
+      - IPFS_DAEMON_HOST=ipfs_daemon
+      - IPFS_DAEMON_PORT=5001
+    volumes:
+      - ./bootstrap-ipfs/config:/home/node/config
+    networks:
+      - debridge-node
   debridge_node:
     image: debridgefinance/debridge-node:v1.0.0
     container_name: debridge_node${DOCKER_ID}
@@ -45,12 +60,11 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - postgres
-      - ipfs_daemon
     networks:
-      - debridge
+      - debridge-node
 networks:
-  debridge:
-    name: debridge
+  debridge-node:
+    name: debridge-node
 secrets:
   keystore:
     file: ./secrets/keystore.json
