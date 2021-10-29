@@ -59,6 +59,17 @@ The script will show the newly generated Ethereum address, private key, password
   - change DOCKER_ID variable in .env
   - start as described above
 
+## Update debridge node to the latest version
+```shell
+# Stop the node
+docker-compose down -v
+
+# Get latest changes from git
+git pull
+
+# Bootstrap and run debridge node
+docker-compose up bootstrap_ipfs_daemon && docker-compose down -v && docker-compose up -d
+```
 
 # Pinners list
   - `/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk`

@@ -14,6 +14,7 @@ services:
   ipfs_daemon:
     image: ipfs/go-ipfs
     container_name: ipfs_daemon${DOCKER_ID}
+    profiles: ["bootstrap"]
     command: daemon --writable --enable-pubsub-experiment --migrate=true --agent-version-suffix=docker
     restart: always
     volumes:
@@ -21,17 +22,21 @@ services:
     environment:
       - IPFS_PROFILE=server
     networks:
-      - debridge 
-  ipfs_daemon_bootstrap:
+      - debridge
+      - bootstrap
+  bootstrap_ipfs_daemon:
     build: ./bootstrap-ipfs
-    container_name: ipfs_daemon_bootstrap${DOCKER_ID}
+    profiles: ["bootstrap"]
+    container_name: bootstrap_ipfs_daemon${DOCKER_ID}
     depends_on:
-      - ipfs_daemon 
+      - ipfs_daemon
     environment:
       - IPFS_DAEMON_HOST=ipfs_daemon
       - IPFS_DAEMON_PORT=5001
+    volumes:
+      - ./bootstrap-ipfs/config:/home/node/config
     networks:
-      - debridge 
+      - bootstrap
   debridge_node:
     image: debridgefinance/debridge-node:v1.0.0
     container_name: debridge_node${DOCKER_ID}
@@ -57,12 +62,13 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - postgres
-      - ipfs_daemon
     networks:
       - debridge
 networks:
   debridge:
     name: debridge
+  bootstrap:
+    name: bootstrap
 secrets:
   keystore:
     file: ./secrets/keystore.json

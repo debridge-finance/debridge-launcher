@@ -23,7 +23,7 @@ async function stopIPFS() {
 function main() {
   setConfig(ipfsConfig);
   stopIPFS();
-  console.log("Stop IPFS");
+  console.log("Shutdown IPFS daemon and quit");
 }
 
 main();
