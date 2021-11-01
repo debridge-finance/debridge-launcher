@@ -16,12 +16,31 @@ services:
     container_name: ipfs_daemon${DOCKER_ID}
     command: daemon --writable --enable-pubsub-experiment
     restart: on-failure
+    ports:
+      - 5001:5001
     volumes:
       - ./data/ipfs:/data/ipfs
       - ./data/export:/export
     networks:
       - debridge
-
+  orbitdb:
+    build: ./orbitdb
+    image: orbitdb
+    container_name: orbitdb{DOCKER_ID}
+    restart: on-failure
+    volumes:
+      - ./config:/home/node/src/config
+      - ./data/orbitdb:/home/node/orbitdb
+    environment:
+      - PORT=${ORBITDB_PORT}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - JWT_SECRET=${ORBITDB_JWT_SECRET}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+    depends_on:
+      - ipfs_daemon
+    networks:
+      - debridge
   debridge_node:
     build: ./debridge_node
     image: debridge_node
@@ -46,9 +65,12 @@ services:
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
       - SENTRY_DSN=${SENTRY_DSN}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - ORBITDB_URL=${ORBITDB_URL}
     depends_on:
       - postgres
-      - ipfs_daemon
+      - orbitdb
     networks:
       - debridge
 networks:
