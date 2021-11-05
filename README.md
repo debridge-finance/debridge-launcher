@@ -68,7 +68,7 @@ docker-compose down -v
 git pull
 
 # Bootstrap and run debridge node
-docker-compose up bootstrap_ipfs_daemon && docker-compose down -v && docker-compose up -d
+docker-compose up --build -d
 ```
 
 # Pinners list
