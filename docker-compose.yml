@@ -10,18 +10,16 @@ services:
       - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
-      - debridge-node
+      - debridge-node-network
   ipfs-daemon:
     build: ./ipfs-daemon
     container_name: ipfs-daemon${DOCKER_ID}
-    command: daemon --writable --enable-pubsub-experiment --agent-version-suffix=docker
+    command: daemon --writable --enable-pubsub-experiment
     restart: always
     volumes:
       - ./data/ipfs:/data/ipfs
-    environment:
-      - IPFS_PROFILE=server
     networks:
-      - debridge-node
+      - debridge-node-network
   debridge-node:
     image: debridgefinance/debridge-node:v1.0.0
     container_name: debridge-node${DOCKER_ID}
@@ -48,10 +46,10 @@ services:
     depends_on:
       - postgres
     networks:
-      - debridge-node
+      - debridge-node-network
 networks:
-  debridge-node:
-    name: debridge-node
+  debridge-node-network:
+    name: debridge-node-network
 secrets:
   keystore:
     file: ./secrets/keystore.json
