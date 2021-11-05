@@ -79,7 +79,7 @@ docker-compose up --build -d
   
 To add node to the bootstrap list manually, you can use the command:
 ```shell
-docker-compose exec ipfs_daemon ipfs bootstrap add "$PINNER_ADDRESS"
+docker-compose exec ipfs-daemon ipfs bootstrap add "$PINNER_ADDRESS"
 ```
 
 # Miscellaneous
