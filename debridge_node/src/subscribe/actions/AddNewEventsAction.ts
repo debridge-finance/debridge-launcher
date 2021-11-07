@@ -65,9 +65,9 @@ export class AddNewEventsAction {
         continue;
       }
 
-      const token = sendEvent.returnValues.debridgeId;
+      const debridgeId = sendEvent.returnValues.debridgeId;
       const balance = await transactionManager.findOne(TokenBalanceHistory, {
-        token,
+        debridgeId,
       });
       const isNativeToken = sendEvent.returnValues.feeParams[3]; //isNativeToken
       const amount = sendEvent.returnValues.amount;
@@ -82,7 +82,7 @@ export class AddNewEventsAction {
         await transactionManager.update(
           TokenBalanceHistory,
           {
-            token,
+            debridgeId,
           },
           {
             amount: newAmount,
@@ -94,7 +94,7 @@ export class AddNewEventsAction {
           newAmount = `-${newAmount}`;
         }
         await transactionManager.save(TokenBalanceHistory, {
-          token,
+          debridgeId,
           amount: newAmount,
           chainId: chainIdFrom.toString(),
         });
@@ -106,7 +106,7 @@ export class AddNewEventsAction {
           txHash: sendEvent.transactionHash,
           chainFrom: chainIdFrom,
           chainTo: sendEvent.returnValues.chainIdTo,
-          debridgeId: sendEvent.returnValues.debridgeId,
+          debridgeId,
           receiverAddr: sendEvent.returnValues.receiver,
           amount,
           status: SubmisionStatusEnum.NEW,

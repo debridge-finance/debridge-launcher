@@ -1,10 +1,10 @@
 import { Column, Entity, PrimaryColumn, Unique } from 'typeorm';
 
 @Entity('token_balance_history')
-@Unique(['token'])
+@Unique(['debridgeId'])
 export class TokenBalanceHistory {
   @PrimaryColumn()
-  token: string;
+  debridgeId: string;
 
   @Column()
   chainId: string;
