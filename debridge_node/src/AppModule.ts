@@ -22,6 +22,7 @@ import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
+import { TokenBalanceHistory } from './entities/TokenBalanceHistory';
 
 @Module({
   imports: [
@@ -40,10 +41,10 @@ import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
         password: configService.get('DATABASE_PASSWORD', 'password'),
         database: configService.get('DATABASE_SCHEMA', 'postgres'),
         synchronize: true,
-        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
+        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, TokenBalanceHistory],
       }),
     }),
-    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity]),
+    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, TokenBalanceHistory]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,

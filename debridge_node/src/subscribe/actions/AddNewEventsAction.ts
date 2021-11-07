@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { Repository } from 'typeorm';
+import { Connection, EntityManager, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
@@ -9,6 +9,8 @@ import Web3 from 'web3';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
+import { TokenBalanceHistory } from '../../entities/TokenBalanceHistory';
+import { BigNumber } from 'bignumber.js';
 
 @Injectable()
 export class AddNewEventsAction {
@@ -18,8 +20,8 @@ export class AddNewEventsAction {
   constructor(
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
-    @InjectRepository(SubmissionEntity)
-    private readonly submissionsRepository: Repository<SubmissionEntity>,
+    @InjectConnection()
+    private readonly connection: Connection,
   ) {
     this.logger = new Logger(AddNewEventsAction.name);
   }
@@ -43,18 +45,19 @@ export class AddNewEventsAction {
 
   /**
    * Process new transfers
+   * @param transactionManager
    * @param {EventData[]} events
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(events: any[], chainIdFrom: number) {
+  async processNewTransfers(transactionManager: EntityManager, events: any[], chainIdFrom: number) {
     if (!events) return true;
     const isOk = true;
     for (const sendEvent of events) {
       this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${sendEvent.returnValues.submissionId}`);
       //this.logger.debug(JSON.stringify(sentEvents));
       const submissionId = sendEvent.returnValues.submissionId;
-      const submission = await this.submissionsRepository.findOne({
+      const submission = await transactionManager.findOne(SubmissionEntity, {
         submissionId,
       });
       if (submission) {
@@ -62,15 +65,50 @@ export class AddNewEventsAction {
         continue;
       }
 
+      const token = sendEvent.returnValues.debridgeId;
+      const balance = await transactionManager.findOne(TokenBalanceHistory, {
+        token,
+      });
+      const isNativeToken = sendEvent.returnValues.feeParams[3]; //isNativeToken
+      const amount = sendEvent.returnValues.amount;
+      //TODO: YARO add executionFee to calculation
+      if (balance) {
+        let newAmount: string;
+        if (isNativeToken) {
+          newAmount = new BigNumber(balance.amount).plus(amount).toString();
+        } else {
+          newAmount = new BigNumber(balance.amount).minus(amount).toString();
+        }
+        await transactionManager.update(
+          TokenBalanceHistory,
+          {
+            token,
+          },
+          {
+            amount: newAmount,
+          },
+        );
+      } else {
+        let newAmount = amount;
+        if (!isNativeToken) {
+          newAmount = `-${newAmount}`;
+        }
+        await transactionManager.save(TokenBalanceHistory, {
+          token,
+          amount: newAmount,
+          chainId: chainIdFrom.toString(),
+        });
+      }
+
       try {
-        await this.submissionsRepository.save({
+        await transactionManager.save(SubmissionEntity, {
           submissionId: submissionId,
           txHash: sendEvent.transactionHash,
           chainFrom: chainIdFrom,
           chainTo: sendEvent.returnValues.chainIdTo,
           debridgeId: sendEvent.returnValues.debridgeId,
           receiverAddr: sendEvent.returnValues.receiver,
-          amount: sendEvent.returnValues.amount,
+          amount,
           status: SubmisionStatusEnum.NEW,
           ipfsStatus: UploadStatusEnum.NEW,
           apiStatus: UploadStatusEnum.NEW,
@@ -128,25 +166,38 @@ export class AddNewEventsAction {
 
     this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
 
-    for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
-      const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
-      this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      await queryRunner.connect();
+      const transactionManager = queryRunner.manager;
 
-      const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
-      const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+      for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
+        const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
+        this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
-      /* update lattest viewed block */
-      if (processSuccess) {
-        if (supportedChain.latestBlock != lastBlockOfPage) {
-          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
-          await this.supportedChainRepository.update(chainId, {
-            latestBlock: lastBlockOfPage,
-          });
+        const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
+        await queryRunner.startTransaction();
+        const processSuccess = await this.processNewTransfers(transactionManager, sentEvents, supportedChain.chainId);
+
+        /* update lattest viewed block */
+        if (processSuccess) {
+          if (supportedChain.latestBlock !== lastBlockOfPage) {
+            this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
+            await transactionManager.update(SupportedChainEntity, chainId, {
+              latestBlock: lastBlockOfPage,
+            });
+            await queryRunner.commitTransaction();
+          }
+        } else {
+          this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
+          break;
         }
-      } else {
-        this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
-        break;
       }
+    } catch (e) {
+      this.logger.error(`Error in processing ${chainId} from ${fromBlock} to ${toBlock} with ${e.message} ${e}`);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
     }
   }
 }
