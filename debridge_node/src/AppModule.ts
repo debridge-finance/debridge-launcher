@@ -25,7 +25,9 @@ import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 
 @Module({
   imports: [
-    HttpModule,
+    HttpModule.register({
+      timeout: 30000, //30s
+    }),
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({

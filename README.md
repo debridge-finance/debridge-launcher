@@ -68,11 +68,7 @@ docker-compose down -v
 git pull
 
 # Bootstrap and run debridge node
-docker-compose up bootstrap_ipfs_daemon && docker-compose down -v && docker-compose up -d
-
-# **Important**
-# **before run boostrap command you always need to stop active ipfs_daemon container**
-
+docker-compose up --build -d
 ```
 
 # Pinners list
@@ -83,7 +79,7 @@ docker-compose up bootstrap_ipfs_daemon && docker-compose down -v && docker-comp
   
 To add node to the bootstrap list manually, you can use the command:
 ```shell
-docker-compose exec ipfs_daemon ipfs bootstrap add "$PINNER_ADDRESS"
+docker-compose exec ipfs-daemon ipfs bootstrap add "$PINNER_ADDRESS"
 ```
 
 # Miscellaneous
