@@ -1,3 +1,3 @@
 {
-    "IPFSNodeAddress": "http://ipfs_daemon:5001/api/v0"
+  "IPFSNodeAddress": "http://ipfs-daemon:5001/api/v0"
 }
