@@ -1,8 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { DebrdigeApiService } from './DebrdigeApiService';
+import { ConfigService } from '@nestjs/config';
 
-const IPFS = require("ipfs-http-client");
-const OrbitDB = require('orbit-db')
+const IPFS = require('ipfs-http-client');
+const OrbitDB = require('orbit-db');
 
 @Injectable()
 export class OrbitDbService implements OnModuleInit {
@@ -12,7 +13,7 @@ export class OrbitDbService implements OnModuleInit {
   private orbitLogsDb;
   private orbitDocsDb;
 
-  constructor(private readonly debrdigeApiService: DebrdigeApiService) {}
+  constructor(private readonly debrdigeApiService: DebrdigeApiService, private readonly configService: ConfigService) {}
 
   async onModuleInit() {
     await this.init();
