@@ -58,6 +58,7 @@ fi
 ipfs config profile apply server
 ipfs config profile apply flatfs
 ipfs config --json -- Bootstrap "[\"/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk\",
+\"/ip4/95.217.159.8/tcp/4001/p2p/12D3KooWS4RTzHrtEY1VcdccxAFzQ5L8wQmsoVFyPTq8uAJCqebG\",
 \"/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k\",
 \"/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP\",
 \"/dnsaddr/londonswarm.debridge.io/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk\",
