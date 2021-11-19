@@ -1,3 +1,5 @@
+.env
+debridge_node/.env
 secrets/*
 pgdata/
 

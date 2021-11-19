@@ -43,7 +43,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
             clearInterval(updateOrbitDbInterval);
             this.logger.log(`working updateOrbitDbInterval is finished`);
           } catch (e) {
-            this.logger.error(`Error in update orbitdb request ${e.message()}`);
+            this.logger.error(`Error in update orbitdb request ${e.message}`);
           }
         }
       }, this.UPDATE_ORBITDB_INTERVAL);
