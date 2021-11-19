@@ -1,9 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import config from '../config/ipfs_client_config.json';
 import { DebrdigeApiService } from './DebrdigeApiService';
+import { ConfigService } from '@nestjs/config';
 
-const IPFS = require("ipfs-http-client");
-const OrbitDB = require('orbit-db')
+const IPFS = require('ipfs-http-client');
+const OrbitDB = require('orbit-db');
 
 @Injectable()
 export class OrbitDbService implements OnModuleInit {
@@ -13,7 +13,7 @@ export class OrbitDbService implements OnModuleInit {
   private orbitLogsDb;
   private orbitDocsDb;
 
-  constructor(private readonly debrdigeApiService: DebrdigeApiService) {}
+  constructor(private readonly debrdigeApiService: DebrdigeApiService, private readonly configService: ConfigService) {}
 
   async onModuleInit() {
     await this.init();
@@ -22,7 +22,7 @@ export class OrbitDbService implements OnModuleInit {
   async init() {
     try {
       this.logger.log(`OrbitDbService init`);
-      const ipfs = IPFS.create(config.IPFSNodeAddress);
+      const ipfs = IPFS.create(this.configService.get('IPFS_URL'));
       this.logger.log(`IPFS is created`);
 
       // await ipfs.swarm.connect(PINNER_ADDRESS);

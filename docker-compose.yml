@@ -21,27 +21,27 @@ services:
     networks:
       - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v1.0.1
+    image: debridgefinance/debridge-node:v1.0.2
     container_name: debridge-node${DOCKER_ID}
     restart: always
     secrets:
       - source: keystore
         target: /home/node/keystore.json
     volumes:
-      - ./config:/home/node/src/config
       - ./data/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
-      - DATABASE_USER=${POSTGRES_USER}
-      - DATABASE_HOST=${POSTGRES_HOST}
-      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE_SCHEMA=${EI_DATABASE}
-      - DATABASE_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - POSTGRES_PORT=${POSTGRES_PORT}
       - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - API_BASE_URL=${API_BASE_URL}
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
+      - IPFS_URL=${IPFS_URL}
       - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - postgres
