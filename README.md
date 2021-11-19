@@ -100,6 +100,12 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.0.2 (20.11.2021)
+ - debridge-node: add timeout for http requests
+ - ipfs-daemon: config node with entrypoint.sh script
+ - docker-compose.yml: update env vars for debridge-node service
+ - .env: update vars for postgres and add variable `IPFS_URL`
+
 ## v1.0.0 (27.10.2021)
  - Change javascript instance of IPFS to separate service, which runs [go-IPFS](https://github.com/ipfs/go-ipfs) daemon.
  - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.
