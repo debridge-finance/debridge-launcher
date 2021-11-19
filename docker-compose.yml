@@ -23,10 +23,9 @@ services:
   orbitdb:
     build: ./orbitdb
     image: orbitdb
-    container_name: orbitdb{DOCKER_ID}
+    container_name: orbitdb${DOCKER_ID}
     restart: on-failure
     volumes:
-      - ./config:/home/node/src/config
       - ./data/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${ORBITDB_PORT}
@@ -35,11 +34,12 @@ services:
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
     depends_on:
-      - ipfs_daemon
+      - ipfs-daemon
     networks:
       - debridge-node-network
-  debridge_node:
-    image: debridgefinance/debridge-node:v1.0.1
+  debridge-node:
+    build: ./debridge_node
+    image: debridge-node
     container_name: debridge-node${DOCKER_ID}
     restart: always
     secrets:

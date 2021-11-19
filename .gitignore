@@ -17,3 +17,5 @@ data
 /orbitdb/dist/*
 /orbitdb/node_modules/*
 /orbitdb/orbitdb/*
+
+.DS_Store
