@@ -105,7 +105,20 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
  - ipfs-daemon: config node with entrypoint.sh script
  - docker-compose.yml: update env vars for debridge-node service
  - .env: update vars for postgres and add variable `IPFS_URL`
+### How to update
+```shell
+# pull the latest version
+git pull
 
+# update .env file as on the screenshot:
+# 1. remove  `EI_DATABASE`
+# 2. change `POSTGRES_MULTIPLE_DATABASES=${EI_DATABASE}` to `POSTGRES_DATABASE=ei${PG_RANDOM_ID}` 
+# 3. add env var `IPFS_URL=http://ipfs-daemon${DOCKER_ID}:5001/api/v0`
+
+# run new version
+docker-compose up —build -d
+```
+![change env vars](./assets/change-env-vars.png)
 ## v1.0.0 (27.10.2021)
  - Change javascript instance of IPFS to separate service, which runs [go-IPFS](https://github.com/ipfs/go-ipfs) daemon.
  - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.
