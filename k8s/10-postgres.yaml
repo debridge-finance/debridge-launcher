@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      hostname: postgres
+      containers:
+      - name: postgres
+        image: postgres:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /docker-entrypoint-initdb.d/create-postgresql-databases.sh
+          subPath: create-postgresql-databases.sh
+          name: debridge-node-postgres-init-scripts
+        envFrom:
+          - configMapRef:
+              name: configs
+          - secretRef:
+              name: secrets
+      volumes:
+        - name: debridge-node-postgres-init-scripts
+          configMap:
+            name: debridge-node-postgres-init-scripts
+            defaultMode: 0755
+        - name: data
+          hostPath:
+            path: /opt/postgres/
+            type: DirectoryOrCreate
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: postgres

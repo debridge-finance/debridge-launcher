@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configs
+data:
+  POSTGRES_DATABASE: "ei"
+  POSTGRES_HOST_AUTH_METHOD: "md5"
+  POSTGRES_USER: "postgres"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  PORT: "3001"
+  API_BASE_URL: "https://testnetvalidatorsapi.debridge.io"
+  DEBRIDGE_NODE_PORT: "3001"
+  IPFS_URL: "http://ipfs-daemon:5001/api/v0"
+  IPFS_DAEMON_HOST: "ipfs-daemon"
+  API_LOGIN: "login"
