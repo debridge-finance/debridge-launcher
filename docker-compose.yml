@@ -29,6 +29,7 @@ services:
         target: /home/node/keystore.json
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
+      - ./config:/home/node/src/config
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
