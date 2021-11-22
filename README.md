@@ -119,6 +119,11 @@ git pull
 # 2. change `POSTGRES_MULTIPLE_DATABASES=${EI_DATABASE}` to `POSTGRES_DATABASE=ei${PG_RANDOM_ID}` 
 # 3. add env var `IPFS_URL=http://ipfs-daemon${DOCKER_ID}:5001/api/v0`
 
+
+# create ./config/chains_config.json from ./config/chains_config_default.json
+cp ./config/chains_config_default.json ./config/chains_config.json
+# update ./config/chains_config.json with your values
+
 # run new version
 docker-compose up —build -d
 ```
