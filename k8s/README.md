@@ -11,7 +11,7 @@ Please use your cloud provider postgres(postgres as service) and persistent volu
 ## How to run:
 1. Please read main README from this repo.
 2. Create a keystore file for the validation node.
-3. Build ipfs-daemon and debridge-node images. Do not forget refact `debridge_node/src/config/chains_config.json` before building.
+3. Build ipfs-daemon and debridge-node images. **Do not forget refact `debridge_node/src/config/chains_config.json` before building**.
 4. Gen secrets with base64 like 'echo -e `8a4b8a1b-82e9-4497-b2d2-68b447aa9c14` | base64' for 01-secrets.yaml
 5. Check and fix configs in 00-configs.yaml
 6. Deploy configs ands secrets:

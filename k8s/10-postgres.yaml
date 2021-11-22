@@ -14,20 +14,20 @@ spec:
     spec:
       hostname: postgres
       containers:
-      - name: postgres
-        image: postgres:latest
-        imagePullPolicy: IfNotPresent
-        volumeMounts:
-        - mountPath: /var/lib/postgresql/data
-          name: data
-        - mountPath: /docker-entrypoint-initdb.d/create-postgresql-databases.sh
-          subPath: create-postgresql-databases.sh
-          name: debridge-node-postgres-init-scripts
-        envFrom:
-          - configMapRef:
-              name: configs
-          - secretRef:
-              name: secrets
+        - name: postgres
+          image: postgres:13
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: data
+            - mountPath: /docker-entrypoint-initdb.d/create-postgresql-databases.sh
+              subPath: create-postgresql-databases.sh
+              name: debridge-node-postgres-init-scripts
+          envFrom:
+            - configMapRef:
+                name: configs
+            - secretRef:
+                name: secrets
       volumes:
         - name: debridge-node-postgres-init-scripts
           configMap:
@@ -40,7 +40,6 @@ spec:
       restartPolicy: Always
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
