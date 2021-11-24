@@ -21,7 +21,7 @@ export class AuthService {
 
     if (res) {
       return {
-        jwt: this.jwtServices.sign({ login }),
+        accessToken: this.jwtServices.sign({ login }),
       };
     }
 

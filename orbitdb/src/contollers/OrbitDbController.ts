@@ -36,7 +36,7 @@ export class OrbitDbController {
     return this.authService.login(userLoginDto.login, userLoginDto.password);
   }
 
-  @Get('/names')
+  @Post('/names')
   @ApiBearerAuth()
   @UseGuards(AuthGuard())
   getNames(): Promise<GetNamesResponseDTO> {

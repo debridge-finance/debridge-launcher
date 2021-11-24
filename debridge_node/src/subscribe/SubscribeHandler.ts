@@ -35,6 +35,7 @@ export class SubscribeHandler {
   }
 
   private async uploadConfig() {
+    const t = chainConfigs;
     for (const config of chainConfigs) {
       const configInDd = await this.supportedChainRepository.findOne({
         chainId: config.chainId,

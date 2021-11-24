@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './contollers/auth/auth.service';
 import { JwtStrategy } from './contollers/auth/jwt.strategy';
+import { MonitoringModule } from './monitoring/MonitoringModule';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { JwtStrategy } from './contollers/auth/jwt.strategy';
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
+    MonitoringModule,
   ],
   controllers: [OrbitDbController],
   providers: [OrbitDbService, AuthService, JwtStrategy],
