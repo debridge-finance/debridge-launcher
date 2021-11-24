@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Interval, SchedulerRegistry } from '@nestjs/schedule';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
@@ -79,27 +79,27 @@ export class SubscribeHandler {
     });
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async Sign() {
     await this.signAction.action();
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async UploadToIPFSAction() {
     await this.uploadToIPFSAction.action();
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async UploadToApiAction() {
     await this.uploadToApiAction.action();
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async checkAssetsEvent() {
     await this.checkAssetsEventAction.action();
   }
 
-  @Interval(60000)
+  @Cron('* * * * *')
   async UploadStatisticToApiAction() {
     await this.statisticToApiAction.action();
   }

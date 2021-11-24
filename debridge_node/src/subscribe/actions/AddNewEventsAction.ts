@@ -100,7 +100,7 @@ export class AddNewEventsAction {
       //}
     );
 
-    this.logger.debug('getEvents: ' + JSON.stringify(sentEvents));
+    // this.logger.debug('getEvents: ' + JSON.stringify(sentEvents));
 
     return sentEvents;
   }

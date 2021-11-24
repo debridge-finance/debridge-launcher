@@ -34,9 +34,14 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       this.logger.log(`updateOrbitDbInterval interval is started`);
       const updateOrbitDbInterval = setInterval(async () => {
         this.logger.verbose(`updateOrbitDbInterval is working`);
-        const response = (await this.authRequest('/names', {})).data as GetNamesResponseDTO;
-        const orbitDocsDb = response.orbitDocsDb;
-        const orbitLogsDb = response.orbitLogsDb;
+        let response:GetNamesResponseDTO;
+        try {
+          response = (await this.authRequest('/names', {})).data as GetNamesResponseDTO;
+        } catch  (e) {
+          this.logger.error(`Error in getNames orbitdb request ${e.message}`);
+        }
+        const orbitDocsDb = response?.orbitDocsDb;
+        const orbitLogsDb = response?.orbitLogsDb;
         if (orbitDocsDb && orbitLogsDb) {
           try {
             await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb });

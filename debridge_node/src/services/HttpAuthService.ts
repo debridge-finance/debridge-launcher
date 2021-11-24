@@ -26,7 +26,7 @@ export class HttpAuthService {
       });
     } catch (e) {
       const response = e.response;
-      if (response.status === 401) {
+      if (response?.status === 401) {
         this.accessToken = await this.getAuthToken(loginDto);
         httpResult = await this.request(api, requestBody, {
           headers: {
