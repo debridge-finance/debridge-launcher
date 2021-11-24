@@ -21,9 +21,10 @@ services:
     networks:
       - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v1.0.1
+    build: debridge_node
+    image: debridge-node
     container_name: debridge-node${DOCKER_ID}
-    restart: always
+    restart: on-failure:10
     secrets:
       - source: keystore
         target: /home/node/keystore.json
