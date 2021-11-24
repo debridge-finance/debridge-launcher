@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debridge-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debridge-node
+  template:
+    metadata:
+      labels:
+        app: debridge-node
+    spec:
+      containers:
+      - name: debridge-node
+        image: debridge-node
+        imagePullPolicy: Never
+        volumeMounts:
+        - mountPath: /nome/node/orbitdb
+          name: orbitdb
+        - mountPath: /home/node/keystore.json
+          subPath: keystore.json
+          name: keystore
+        envFrom:
+          - configMapRef:
+              name: configs
+          - secretRef:
+              name: secrets
+      volumes:
+        - name: orbitdb
+          hostPath:
+            path: /opt/debridge-node/orbtidb
+            type: DirectoryOrCreate
+        - name: keystore
+          secret:
+            secretName: secrets
+            items:
+              - key: keystore.json
+                path: keystore.json
+      restartPolicy: Always
