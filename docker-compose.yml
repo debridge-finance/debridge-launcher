@@ -10,26 +10,22 @@ services:
       - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
-      - debridge
-  ipfs_daemon:
-    image: ipfs/go-ipfs
-    container_name: ipfs_daemon${DOCKER_ID}
+      - debridge-node-network
+  ipfs-daemon:
+    build: ./ipfs-daemon
+    container_name: ipfs-daemon${DOCKER_ID}
     command: daemon --writable --enable-pubsub-experiment
-    restart: on-failure
-    ports:
-      - 5001:5001
+    restart: always
     volumes:
       - ./data/ipfs:/data/ipfs
-      - ./data/export:/export
     networks:
-      - debridge
+      - debridge-node-network
   orbitdb:
     build: ./orbitdb
     image: orbitdb
-    container_name: orbitdb{DOCKER_ID}
+    container_name: orbitdb${DOCKER_ID}
     restart: on-failure
     volumes:
-      - ./config:/home/node/src/config
       - ./data/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${ORBITDB_PORT}
@@ -37,45 +33,46 @@ services:
       - JWT_SECRET=${ORBITDB_JWT_SECRET}
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - IPFS_URL=${IPFS_URL}
     depends_on:
-      - ipfs_daemon
+      - ipfs-daemon
     networks:
-      - debridge
-  debridge_node:
+      - debridge-node-network
+  debridge-node:
     build: ./debridge_node
-    image: debridge_node
-    container_name: debridge_node${DOCKER_ID}
-    restart: on-failure
+    image: debridge-node
+    container_name: debridge-node${DOCKER_ID}
+    restart: always
     secrets:
       - source: keystore
         target: /home/node/keystore.json
     volumes:
-      - ./config:/home/node/src/config
       - ./data/orbitdb:/home/node/orbitdb
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
-      - DATABASE_USER=${POSTGRES_USER}
-      - DATABASE_HOST=${POSTGRES_HOST}
-      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE_SCHEMA=${EI_DATABASE}
-      - DATABASE_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - POSTGRES_PORT=${POSTGRES_PORT}
       - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - API_BASE_URL=${API_BASE_URL}
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
+      - IPFS_URL=${IPFS_URL}
       - SENTRY_DSN=${SENTRY_DSN}
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - ORBITDB_URL=${ORBITDB_URL}
     depends_on:
       - postgres
-      - orbitdb
+      # - orbitdb
     networks:
-      - debridge
+      - debridge-node-network
 networks:
-  debridge:
-    name: debridge
+  debridge-node-network:
+    name: debridge-node-network
 secrets:
   keystore:
     file: ./secrets/keystore.json

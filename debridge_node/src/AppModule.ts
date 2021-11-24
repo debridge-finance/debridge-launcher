@@ -25,7 +25,9 @@ import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 
 @Module({
   imports: [
-    HttpModule,
+    HttpModule.register({
+      timeout: 30000, //30s
+    }),
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
@@ -34,11 +36,11 @@ import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
       useFactory: async (configService: ConfigService) => ({
         logging: true,
         type: 'postgres',
-        host: configService.get('DATABASE_HOST', 'host'),
-        port: configService.get<number>('DATABASE_PORT', 5432),
-        username: configService.get('DATABASE_USER', 'user'),
-        password: configService.get('DATABASE_PASSWORD', 'password'),
-        database: configService.get('DATABASE_SCHEMA', 'postgres'),
+        host: configService.get('POSTGRES_HOST', 'localhost'),
+        port: configService.get<number>('POSTGRES_PORT', 5432),
+        username: configService.get('POSTGRES_USER', 'user'),
+        password: configService.get('POSTGRES_PASSWORD', 'password'),
+        database: configService.get('POSTGRES_DATABASE', 'postgres'),
         synchronize: true,
         entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
       }),

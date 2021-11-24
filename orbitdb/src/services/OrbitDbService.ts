@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { IPFSNodeAddress } from '../config/ipfs_client_config.json';
+import { ConfigService } from '@nestjs/config';
 import { GetNamesResponseDTO } from '../dto/output/GetNamesResponseDTO';
 import { AddSignedSubmissionResponseDTO } from '../dto/output/AddSignedSubmissionResponseDTO';
 
@@ -12,6 +12,8 @@ export class OrbitDbService implements OnModuleInit {
   private orbitLogsDb;
   private orbitDocsDb;
 
+  constructor(private readonly configService: ConfigService) {}
+
   async onModuleInit() {
     await this.init();
   }
@@ -19,7 +21,7 @@ export class OrbitDbService implements OnModuleInit {
   async init() {
     try {
       this.logger.log(`OrbitDbService init`);
-      const ipfs = IPFS.create(IPFSNodeAddress);
+      const ipfs = IPFS.create(this.configService.get('IPFS_URL'));
       this.logger.log(`IPFS is created`);
 
       // await ipfs.swarm.connect(PINNER_ADDRESS);
@@ -40,6 +42,10 @@ export class OrbitDbService implements OnModuleInit {
       this.orbitDocsDb = await orbitdb.docs('debridgeDocs', options);
       await this.orbitDocsDb.load();
       this.logger.log(`OrbitDB docs started at: ${this.orbitDocsDb.address}`);
+      const all = this.orbitDocsDb.get("")
+      console.log(`all >>:>>`, all)
+      this.logger.log(`OrbitDB docs values: ${all}`, all);
+
     } catch (e) {
       this.logger.error(`Error in initialization orbitdb service ${e.message}`);
       //process.exit(1);

@@ -1,3 +1,5 @@
+.env
+debridge_node/.env
 secrets/*
 pgdata/
 
@@ -15,3 +17,5 @@ data
 /orbitdb/dist/*
 /orbitdb/node_modules/*
 /orbitdb/orbitdb/*
+
+.DS_Store
