@@ -19,3 +19,4 @@ data
 /orbitdb/orbitdb/*
 
 .DS_Store
+heap_info.json

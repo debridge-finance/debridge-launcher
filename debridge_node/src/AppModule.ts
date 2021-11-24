@@ -36,7 +36,7 @@ import { MonitoringModule } from './monitoring/MonitoringModule';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        logging: true,
+        logging: false,
         type: 'postgres',
         host: configService.get('POSTGRES_HOST', 'localhost'),
         port: configService.get<number>('POSTGRES_PORT', 5432),

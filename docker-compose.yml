@@ -27,6 +27,7 @@ services:
     restart: on-failure
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
+      - ./stats/orbitdb:/home/node/stats
     environment:
       - PORT=${ORBITDB_PORT}
       - SENTRY_DSN=${SENTRY_DSN}
@@ -48,6 +49,7 @@ services:
         target: /home/node/keystore.json
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
+      - ./stats/debridge-node:/home/node/stats
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -60,14 +62,13 @@ services:
       - API_BASE_URL=${API_BASE_URL}
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
-      - IPFS_URL=${IPFS_URL}
       - SENTRY_DSN=${SENTRY_DSN}
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - ORBITDB_URL=${ORBITDB_URL}
     depends_on:
       - postgres
-      # - orbitdb
+      - orbitdb
     networks:
       - debridge-node-network
 networks:

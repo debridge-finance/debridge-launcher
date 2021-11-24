@@ -25,7 +25,7 @@ export class MonitoringHandler {
       heapCodeStatistics,
       heapSpaceStatistics,
     };
-    writeFile('heap_info.json', JSON.stringify(heapInfo), (err) => {
+    writeFile('./stats/heap_info.json', JSON.stringify(heapInfo), (err) => {
       const endDateInfo = new Date().getTime();
       if (err) {
         this.logger.error(`getting heap info is failed`);
