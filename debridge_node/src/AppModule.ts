@@ -22,12 +22,14 @@ import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
+import { MonitoringModule } from './monitoring/MonitoringModule';
 
 @Module({
   imports: [
     HttpModule.register({
       timeout: 30000, //30s
     }),
+    MonitoringModule,
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
