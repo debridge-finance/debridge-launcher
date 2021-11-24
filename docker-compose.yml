@@ -33,6 +33,7 @@ services:
       - JWT_SECRET=${ORBITDB_JWT_SECRET}
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - IPFS_URL=${IPFS_URL}
     depends_on:
       - ipfs-daemon
     networks:
@@ -66,7 +67,7 @@ services:
       - ORBITDB_URL=${ORBITDB_URL}
     depends_on:
       - postgres
-      - orbitdb
+      # - orbitdb
     networks:
       - debridge-node-network
 networks:

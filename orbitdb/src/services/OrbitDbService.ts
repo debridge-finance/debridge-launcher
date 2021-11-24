@@ -42,6 +42,10 @@ export class OrbitDbService implements OnModuleInit {
       this.orbitDocsDb = await orbitdb.docs('debridgeDocs', options);
       await this.orbitDocsDb.load();
       this.logger.log(`OrbitDB docs started at: ${this.orbitDocsDb.address}`);
+      const all = this.orbitDocsDb.get("")
+      console.log(`all >>:>>`, all)
+      this.logger.log(`OrbitDB docs values: ${all}`, all);
+
     } catch (e) {
       this.logger.error(`Error in initialization orbitdb service ${e.message}`);
       //process.exit(1);

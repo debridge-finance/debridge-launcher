@@ -65,8 +65,8 @@ export class HttpAuthService {
     } catch (e) {
       const response = e.response;
       this.logger.error(
-        `Error in getting auth token from ${url} (status: ${response.status}, message: ${response.statusText}, data: ${JSON.stringify(
-          response.data,
+        `Error in getting auth token from ${url} (status: ${response?.status}, message: ${response?.statusText}, data: ${JSON.stringify(
+          response?.data,
         )})`,
       );
       throw new Error(`Error in getting auth token`);
