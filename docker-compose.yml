@@ -20,8 +20,28 @@ services:
       - ./data/ipfs:/data/ipfs
     networks:
       - debridge-node-network
+  orbitdb:
+    build: ./orbitdb
+    image: orbitdb
+    container_name: orbitdb${DOCKER_ID}
+    restart: on-failure
+    volumes:
+      - ./data/orbitdb:/home/node/orbitdb
+      - ./stats/orbitdb:/home/node/stats
+    environment:
+      - PORT=${ORBITDB_PORT}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - JWT_SECRET=${ORBITDB_JWT_SECRET}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - IPFS_URL=${IPFS_URL}
+    depends_on:
+      - ipfs-daemon
+    networks:
+      - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v1.0.2
+    build: ./debridge_node
+    image: debridge-node
     container_name: debridge-node${DOCKER_ID}
     restart: always
     secrets:
@@ -29,7 +49,7 @@ services:
         target: /home/node/keystore.json
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
-      - ./config:/home/node/src/config
+      - ./stats/debridge-node:/home/node/stats
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -44,9 +64,13 @@ services:
       - API_PASSWORD=${API_PASSWORD}
       - IPFS_URL=${IPFS_URL}
       - SENTRY_DSN=${SENTRY_DSN}
-      - NODE_OPTIONS=--max_old_space_size=8192
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - ORBITDB_URL=${ORBITDB_URL}
+			- NODE_OPTIONS=--max_old_space_size=8192
     depends_on:
       - postgres
+      - orbitdb
     networks:
       - debridge-node-network
 networks:

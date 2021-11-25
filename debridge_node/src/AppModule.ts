@@ -22,19 +22,21 @@ import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
+import { MonitoringModule } from './monitoring/MonitoringModule';
 
 @Module({
   imports: [
     HttpModule.register({
       timeout: 30000, //30s
     }),
+    MonitoringModule,
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        logging: true,
+        logging: false,
         type: 'postgres',
         host: configService.get('POSTGRES_HOST', 'localhost'),
         port: configService.get<number>('POSTGRES_PORT', 5432),

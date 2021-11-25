@@ -12,3 +12,11 @@ dist/
 /debridge_node/test/orbitdb/ipfs
 data
 /debridge_node/keystore.json
+
+/orbitdb/.idea/*
+/orbitdb/dist/*
+/orbitdb/node_modules/*
+/orbitdb/orbitdb/*
+
+.DS_Store
+heap_info.json
