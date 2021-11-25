@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: debridge-node
 spec:
@@ -7,6 +7,7 @@ spec:
   selector:
     matchLabels:
       app: debridge-node
+  serviceName: debridge-node
   template:
     metadata:
       labels:
@@ -22,6 +23,8 @@ spec:
         - mountPath: /home/node/keystore.json
           subPath: keystore.json
           name: keystore
+        - name: chains-config
+          mountPath: /home/node/src
         envFrom:
           - configMapRef:
               name: configs
@@ -29,13 +32,30 @@ spec:
               name: secrets
       volumes:
         - name: orbitdb
-          hostPath:
-            path: /opt/debridge-node/orbtidb
-            type: DirectoryOrCreate
+          persistentVolumeClaim:
+            claimName: orbitdb
         - name: keystore
           secret:
             secretName: secrets
             items:
               - key: keystore.json
                 path: keystore.json
+        - name: chains-config
+          configMap:
+            name: configs
+            items:
+            - key: chains_config.json
+              path: chains_config.json
       restartPolicy: Always
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "orbitdb"
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "50Gi"

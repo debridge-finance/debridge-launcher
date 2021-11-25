@@ -1,5 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
+
+---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: postgres
 spec:
@@ -7,6 +20,7 @@ spec:
   selector:
     matchLabels:
       app: postgres
+  serviceName: postgres
   template:
     metadata:
       labels:
@@ -34,20 +48,18 @@ spec:
             name: debridge-node-postgres-init-scripts
             defaultMode: 0755
         - name: data
-          hostPath:
-            path: /opt/postgres/
-            type: DirectoryOrCreate
+          persistentVolumeClaim:
+            claimName: pgdata
       restartPolicy: Always
 
 ---
 apiVersion: v1
-kind: Service
+kind: PersistentVolumeClaim
 metadata:
-  name: postgres
-  labels:
-    app: postgres
+  name: "pgdata"
 spec:
-  ports:
-    - port: 5432
-  selector:
-    app: postgres
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "40Gi"
