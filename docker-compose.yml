@@ -62,10 +62,12 @@ services:
       - API_BASE_URL=${API_BASE_URL}
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
+      - IPFS_URL=${IPFS_URL}
       - SENTRY_DSN=${SENTRY_DSN}
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - ORBITDB_URL=${ORBITDB_URL}
+			- NODE_OPTIONS=--max_old_space_size=8192
     depends_on:
       - postgres
       - orbitdb

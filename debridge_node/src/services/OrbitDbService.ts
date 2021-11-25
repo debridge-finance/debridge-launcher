@@ -10,6 +10,7 @@ import { AddDocsSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddDocsS
 import { AddLogConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddLogConfirmNewAssetsRequestDTO';
 import { AddLogSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddLogSignedSubmissionRequestDTO';
 
+
 @Injectable()
 export class OrbitDbService extends HttpAuthService implements OnModuleInit {
   private readonly UPDATE_ORBITDB_INTERVAL = 5000; //5s
@@ -24,6 +25,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       password: configService.get('ORBITDB_PASSWORD'),
     } as UserLoginDto);
   }
+
 
   async onModuleInit() {
     await this.init();

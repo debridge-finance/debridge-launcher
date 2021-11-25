@@ -37,7 +37,14 @@ In order to set up the validation node, the following steps should be performed:
   - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
   - Arbitrum
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
-2. Update HTTP RPC URL in /config/chains_config.json
+
+2. Update configs
+   1. Make a copy of the default config:
+    ```shell
+    cp /config/chains_config_default.json /config/chains_config.json
+    ```
+   2. Update HTTP RPC URL in /config/chains_config.json
+
 3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
 deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, and API_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
 
@@ -100,6 +107,30 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.0.2 (20.11.2021)
+ - debridge-node: add timeout for http requests
+ - ipfs-daemon: config node with entrypoint.sh script
+ - docker-compose.yml: update env vars for debridge-node service
+ - .env: update vars for postgres and add variable `IPFS_URL`
+### How to update
+```shell
+# pull the latest version
+git pull
+
+# update .env file as on the screenshot:
+# 1. remove  `EI_DATABASE`
+# 2. change `POSTGRES_MULTIPLE_DATABASES=${EI_DATABASE}` to `POSTGRES_DATABASE=ei${PG_RANDOM_ID}` 
+# 3. add env var `IPFS_URL=http://ipfs-daemon${DOCKER_ID}:5001/api/v0`
+
+
+# create ./config/chains_config.json from ./config/chains_config_default.json
+cp ./config/chains_config_default.json ./config/chains_config.json
+# update ./config/chains_config.json with your values
+
+# run new version
+docker-compose up —build -d
+```
+![change env vars](./assets/change-env-vars.png)
 ## v1.0.0 (27.10.2021)
  - Change javascript instance of IPFS to separate service, which runs [go-IPFS](https://github.com/ipfs/go-ipfs) daemon.
  - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.
