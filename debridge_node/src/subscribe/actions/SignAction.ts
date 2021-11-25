@@ -6,7 +6,7 @@ import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import Web3 from 'web3';
-import keystore from 'keystore.json';
+import { readFileSync } from 'fs';
 import { Account } from 'web3-core';
 import { ConfigService } from '@nestjs/config';
 import { createProxy } from '../../utils/create.proxy';
@@ -27,7 +27,7 @@ export class SignAction extends IAction {
     super();
     this.logger = new Logger(SignAction.name);
     this.web3 = createProxy(new Web3(), { logger: this.logger });
-    this.account = this.web3.eth.accounts.decrypt(keystore, configService.get('KEYSTORE_PASSWORD'));
+    this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), configService.get('KEYSTORE_PASSWORD'));
   }
 
   async process(): Promise<void> {

@@ -11,7 +11,7 @@ import ChainsConfig from '../../config/chains_config.json';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { abi as ERC20Abi } from '../../assets/ERC20.json';
 import Web3 from 'web3';
-import keystore from 'keystore.json';
+import { readFileSync } from 'fs';
 import { Account } from 'web3-core';
 import { createProxy } from '../../utils/create.proxy';
 import { getTokenName } from '../../utils/get.token.name';
@@ -28,7 +28,7 @@ export class CheckAssetsEventAction extends IAction {
   ) {
     super();
     this.logger = new Logger(CheckAssetsEventAction.name);
-    this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
+    this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
   }
 
   async process() {

@@ -41,7 +41,7 @@ In order to set up the validation node, the following steps should be performed:
 2. Update configs
    1. Make a copy of the default config:
     ```shell
-    cp /config/chains_config_default.json /config/chains_config.json
+    cp ./config/chains_config_default.json ./config/chains_config.json
     ```
    2. Update HTTP RPC URL in /config/chains_config.json
 
@@ -107,12 +107,38 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.1.0 (25.11.2021)
+- Move orbitdb to a separate service
+- Add checker for chains_config RPC correctness
+- Add monitorings (mounts to the stats directory at host)
+- Add node options env for debridge-node and orbitdb services to the .env
+- Disable postgres logging for debridge-node
+
+### How to update to v1.1.0
+```shell
+# pull the latest version
+git pull
+git checkout v1.1.0
+
+# update .env file:
+# 1. add env var `ORBITDB_NODE_OPTION=--max_old_space_size=8192`
+# 2. add env var `DEBRIDGE_NODE_NODE_OPTION=--max_old_space_size=8192`
+# you can find the full list of env vars at `.default.env` 
+
+# if `./config/chains_config.json` doesn't exist create it from `./config/chains_config_default.json`
+cp ./config/chains_config_default.json ./config/chains_config.json
+#  and update ./config/chains_config.json with your values
+
+# run new version
+docker-compose up —build -d
+```
+
 ## v1.0.2 (20.11.2021)
  - debridge-node: add timeout for http requests
  - ipfs-daemon: config node with entrypoint.sh script
  - docker-compose.yml: update env vars for debridge-node service
  - .env: update vars for postgres and add variable `IPFS_URL`
-### How to update
+### How to update to v1.0.2
 ```shell
 # pull the latest version
 git pull
@@ -131,6 +157,7 @@ cp ./config/chains_config_default.json ./config/chains_config.json
 docker-compose up —build -d
 ```
 ![change env vars](./assets/change-env-vars.png)
+
 ## v1.0.0 (27.10.2021)
  - Change javascript instance of IPFS to separate service, which runs [go-IPFS](https://github.com/ipfs/go-ipfs) daemon.
  - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.

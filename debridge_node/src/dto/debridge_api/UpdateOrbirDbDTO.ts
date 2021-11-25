@@ -3,9 +3,9 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class UpdateOrbirDbDTO {
   @IsString()
   @IsNotEmpty()
-  orbitLogsDb: number;
+  orbitLogsDb: string;
 
   @IsString()
   @IsNotEmpty()
-  orbitDocsDb: number;
+  orbitDocsDb: string;
 }
