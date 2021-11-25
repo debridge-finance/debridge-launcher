@@ -35,6 +35,8 @@ services:
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - IPFS_URL=${IPFS_URL}
+      - IPFS_DAEMON_HOST=ipfs-daemon
+      - IPFS_DAEMON_PORT=5001
       - NODE_OPTIONS=${ORBITDB_NODE_OPTIONS}
     depends_on:
       - ipfs-daemon
@@ -44,7 +46,7 @@ services:
     image: debridge-finance/debridge-node:v1.1.0
     container_name: debridge-node${DOCKER_ID}
     command: node dist/main ${DEBRIDGE_NODE_NODE_OPTIONS}
-    restart: always
+    restart: on-failure
     secrets:
       - source: keystore
         target: /home/node/keystore.json
