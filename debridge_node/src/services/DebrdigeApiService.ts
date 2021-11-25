@@ -9,8 +9,7 @@ import { ConfrimNewAssetsRequestDTO } from 'src/dto/debridge_api/ConfrimNewAsset
 import { ConfrimNewAssetsResponseDTO } from 'src/dto/debridge_api/ConfrimNewAssetsResponseDTO';
 import { Account } from 'web3-core';
 import Web3 from 'web3';
-
-import keystore from '../../keystore.json';
+import { readFileSync } from 'fs';
 import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/ValidationProgressDTO';
 import { createProxy } from '../utils/create.proxy';
 import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
@@ -24,7 +23,7 @@ export class DebrdigeApiService extends HttpAuthService {
   constructor(readonly httpService: HttpService, private readonly configService: ConfigService) {
     super(httpService, new Logger(DebrdigeApiService.name), configService.get('API_BASE_URL'), '/Account/authenticate');
     this.web3 = createProxy(new Web3(), { logger: this.logger });
-    this.account = this.web3.eth.accounts.decrypt(keystore, process.env.KEYSTORE_PASSWORD);
+    this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
   }
 
   private getLoginDto() {

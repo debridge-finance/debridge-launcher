@@ -24,6 +24,7 @@ services:
     build: ./orbitdb
     image: orbitdb
     container_name: orbitdb${DOCKER_ID}
+    command: node dist/main ${ORBITDB_NODE_OPTIONS}
     restart: on-failure
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
@@ -35,6 +36,7 @@ services:
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - IPFS_URL=${IPFS_URL}
+      - NODE_OPTIONS=${ORBITDB_NODE_OPTIONS}
     depends_on:
       - ipfs-daemon
     networks:
@@ -43,6 +45,7 @@ services:
     build: ./debridge_node
     image: debridge-node
     container_name: debridge-node${DOCKER_ID}
+    command: node dist/main ${DEBRIDGE_NODE_NODE_OPTIONS}
     restart: always
     secrets:
       - source: keystore
@@ -67,7 +70,7 @@ services:
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - ORBITDB_URL=${ORBITDB_URL}
-      - NODE_OPTIONS=--max_old_space_size=8192
+      - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
     depends_on:
       - postgres
       - orbitdb
