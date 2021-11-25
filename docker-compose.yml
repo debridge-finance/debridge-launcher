@@ -67,7 +67,7 @@ services:
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - ORBITDB_URL=${ORBITDB_URL}
-			- NODE_OPTIONS=--max_old_space_size=8192
+      - NODE_OPTIONS=--max_old_space_size=8192
     depends_on:
       - postgres
       - orbitdb
