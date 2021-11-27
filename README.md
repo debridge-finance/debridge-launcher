@@ -108,7 +108,8 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 
 # Changelog
 ## v1.1.1 (27.11.2021)
- - 
+ - Fix LogConfirmNewAssets sending to orbitdb
+ - Update .default.env to use specific sections for each service
 ### How to update to v1.1.1
 ```shell
 # Fetch and checkout to the right tag
