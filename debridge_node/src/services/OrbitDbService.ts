@@ -10,7 +10,6 @@ import { AddDocsSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddDocsS
 import { AddLogConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddLogConfirmNewAssetsRequestDTO';
 import { AddLogSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddLogSignedSubmissionRequestDTO';
 
-
 @Injectable()
 export class OrbitDbService extends HttpAuthService implements OnModuleInit {
   private readonly UPDATE_ORBITDB_INTERVAL = 5000; //5s
@@ -26,7 +25,6 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
     } as UserLoginDto);
   }
 
-
   async onModuleInit() {
     await this.init();
   }
@@ -36,10 +34,10 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       this.logger.log(`updateOrbitDbInterval interval is started`);
       const updateOrbitDbInterval = setInterval(async () => {
         this.logger.verbose(`updateOrbitDbInterval is working`);
-        let response:GetNamesResponseDTO;
+        let response: GetNamesResponseDTO;
         try {
           response = (await this.authRequest('/names', {})).data as GetNamesResponseDTO;
-        } catch  (e) {
+        } catch (e) {
           this.logger.error(`Error in getNames orbitdb request ${e.message}`);
         }
         const orbitDocsDb = response?.orbitDocsDb;
@@ -93,7 +91,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       sendEvent,
     } as AddLogConfirmNewAssetsRequestDTO;
     this.logger.verbose(value);
-    const hash = (await this.authRequest('/addDocsSignedSubmission', value)).data;
+    const hash = (await this.authRequest('/addLogConfirmNewAssets', value)).data;
     this.logger.log(`addLogConfirmNewAssets hash: ${hash}`);
     return hash;
   }

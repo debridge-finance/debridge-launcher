@@ -107,6 +107,26 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.1.1 (27.11.2021)
+ - Fix LogConfirmNewAssets sending to orbitdb
+ - Update .default.env to use specific sections for each service
+### How to update to v1.1.1
+```shell
+# Fetch and checkout to the right tag
+git fetch && git checkout v1.1.1
+
+# Update your .env file to be consist with .default.env. The following env vars were added:
+ - ORBITDB_JWT_SECRET
+ - ORBITDB_LOGIN
+ - ORBITDB_PASSWORD
+ - ORBITDB_NODE_OPTIONS
+ - DEBRIDGE_NODE_NODE_OPTIONS
+ - ORBITDB_URL
+# Note: you can find the full list of env vars that you should need to set at the .default.env file.
+
+# Restart changed services
+docker-compose up -d
+```
 ## v1.1.0 (25.11.2021)
 - Move orbitdb to a separate service
 - Add checker for chains_config RPC correctness
