@@ -20,17 +20,39 @@ services:
       - ./data/ipfs:/data/ipfs
     networks:
       - debridge-node-network
+  orbitdb:
+    image: debridgefinance/orbitdb:v1.1.1
+    container_name: orbitdb${DOCKER_ID}
+    command: node dist/main ${ORBITDB_NODE_OPTIONS}
+    restart: on-failure
+    volumes:
+      - ./data/orbitdb:/home/node/orbitdb
+      - ./stats/orbitdb:/home/node/stats
+    environment:
+      - PORT=${ORBITDB_PORT}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - JWT_SECRET=${ORBITDB_JWT_SECRET}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - IPFS_URL=${IPFS_URL}
+      - IPFS_DAEMON_HOST=ipfs-daemon
+      - IPFS_DAEMON_PORT=5001
+      - NODE_OPTIONS=${ORBITDB_NODE_OPTIONS}
+    depends_on:
+      - ipfs-daemon
+    networks:
+      - debridge-node-network
   debridge-node:
-    build: debridge_node
-    image: debridge-node
+    image: debridgefinance/debridge-node:v1.1.1
     container_name: debridge-node${DOCKER_ID}
-    restart: on-failure:10
+    command: node dist/main ${DEBRIDGE_NODE_NODE_OPTIONS}
+    restart: on-failure
     secrets:
       - source: keystore
         target: /home/node/keystore.json
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
-      - ./config:/home/node/src/config
+      - ./stats/debridge-node:/home/node/stats
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -45,8 +67,13 @@ services:
       - API_PASSWORD=${API_PASSWORD}
       - IPFS_URL=${IPFS_URL}
       - SENTRY_DSN=${SENTRY_DSN}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - ORBITDB_URL=${ORBITDB_URL}
+      - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
     depends_on:
       - postgres
+      - orbitdb
     networks:
       - debridge-node-network
 networks:

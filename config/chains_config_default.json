@@ -1,0 +1,51 @@
+[{
+        "chainId": 97,
+        "name": "BSC",
+        "debridgeAddr": "0x68D936Cb4723BdD38C488FD50514803f96789d2D",
+        "firstStartBlock": 13166523,
+        "provider": "https://data-seed-prebsc-1-s1.binance.org:8545/",
+        "interval": 10000,
+        "blockConfirmation": 12,
+        "maxBlockRange": 5000
+    },
+    {
+        "chainId": 42,
+        "name": "KOVAN",
+        "debridgeAddr": "0x68D936Cb4723BdD38C488FD50514803f96789d2D",
+        "firstStartBlock": 27667253,
+        "provider": "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "interval": 10000,
+        "blockConfirmation": 12,
+        "maxBlockRange": 5000
+    },
+    {
+        "chainId": 256,
+        "name": "HECO",
+        "debridgeAddr": "0x68D936Cb4723BdD38C488FD50514803f96789d2D",
+        "firstStartBlock": 9056329,
+        "provider": "https://http-testnet.hecochain.com",
+        "interval": 10000,
+        "blockConfirmation": 12,
+        "maxBlockRange": 5000
+    },
+    {
+        "chainId": 80001,
+        "name": "MATIC",
+        "debridgeAddr": "0x68D936Cb4723BdD38C488FD50514803f96789d2D",
+        "firstStartBlock": 20097196,
+        "provider": "https://rpc-mumbai.maticvigil.com",
+        "interval": 10000,
+        "blockConfirmation": 100,
+        "maxBlockRange": 1000
+    },
+    {
+        "chainId": 421611,
+        "name": "ARBITRUM",
+        "debridgeAddr": "0x68D936Cb4723BdD38C488FD50514803f96789d2D",
+        "firstStartBlock": 5518867,
+        "provider": "https://rinkeby.arbitrum.io/rpc",
+        "interval": 10000,
+        "blockConfirmation": 12,
+        "maxBlockRange": 1000
+    }
+]

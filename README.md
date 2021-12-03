@@ -37,9 +37,16 @@ In order to set up the validation node, the following steps should be performed:
   - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
   - Arbitrum
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
-2. Update HTTP RPC URL in /config/chains_config.json
+
+2. Update configs
+   1. Make a copy of the default config:
+    ```shell
+    cp ./config/chains_config_default.json ./config/chains_config.json
+    ```
+   2. Update HTTP RPC URL in /config/chains_config.json
+
 3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
-deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, and API_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
+deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, API_PASSWORD, ORBITDB_JWT_SECRET, ORBITDB_LOGIN, ORBITDB_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
 
 4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
   - npm i
@@ -61,14 +68,11 @@ The script will show the newly generated Ethereum address, private key, password
 
 ## Update debridge node to the latest version
 ```shell
-# Stop the node
-docker-compose down -v
-
 # Get latest changes from git
 git pull
 
-# Bootstrap and run debridge node
-docker-compose up --build -d
+# Run debridge node
+docker-compose up -d
 ```
 
 # Pinners list
@@ -100,12 +104,71 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.1.1 (27.11.2021)
+- A component responsible for storing data in IPFS was moved to a separate service - orbitdb
+- Fix LogConfirmNewAssets sending to orbitdb
+- Add new env vars for orbitdb service and update .default.env to use specific sections for each service
+
+### How to update to v1.1.1
+#### 1. Fetch and checkout to the right tag
+```shell
+git fetch && git checkout v1.1.1
+```
+#### 2. Since the new orbitdb service was created, you should add following envs to your .env file:
+```shell
+ - ORBITDB_JWT_SECRET # JWT random string. We recommend using upper and lower case symbols, numbers. The length should be at least 30 characters.
+ - ORBITDB_LOGIN # create a login to orbitdb API authentication
+ - ORBITDB_PASSWORD # create a strong password to orbitdb API authentication
+ - ORBITDB_PORT=3000
+ - ORBITDB_NODE_OPTIONS=--max_old_space_size=8192
+ - DEBRIDGE_NODE_NODE_OPTIONS=--max_old_space_size=8192
+ - ORBITDB_URL=http://orbitdb${DOCKER_ID}:${ORBITDB_PORT} # ORBITDB_PORT and DOCKER_ID should be set before ORBITDB_URL
+ ```
+![changed env vars](./assets/changed-env-vars-v1_1_1.png)
+**Note: you can find the full list of env vars that you should need to setting up at the .default.env file. The simplest way to check if your .env file is up to date is to backup current .env file, recreate it from .default.env and update it with your values from your original .env.backup file**:
+```shell
+cp .env .env.backup
+cp .default.env .env
+vi .env
+```
+
+#### 3. Run
+```shell
+docker-compose up -d
+```
+
+## v1.1.0 (25.11.2021)
+- Move orbitdb to a separate service
+- Add checker for chains_config RPC correctness
+- Add monitorings (mounts to the stats directory at host)
+- Add node options env for debridge-node and orbitdb services to the .env
+- Disable postgres logging for debridge-node
+
+### How to update to v1.1.0
+```shell
+# pull the latest version
+git pull
+git checkout v1.1.0
+
+# update .env file:
+# 1. add env var `ORBITDB_NODE_OPTION=--max_old_space_size=8192`
+# 2. add env var `DEBRIDGE_NODE_NODE_OPTION=--max_old_space_size=8192`
+# you can find the full list of env vars at `.default.env` 
+
+# if `./config/chains_config.json` doesn't exist create it from `./config/chains_config_default.json`
+cp ./config/chains_config_default.json ./config/chains_config.json
+#  and update ./config/chains_config.json with your values
+
+# run new version
+docker-compose up —build -d
+```
+
 ## v1.0.2 (20.11.2021)
  - debridge-node: add timeout for http requests
  - ipfs-daemon: config node with entrypoint.sh script
  - docker-compose.yml: update env vars for debridge-node service
  - .env: update vars for postgres and add variable `IPFS_URL`
-### How to update
+### How to update to v1.0.2
 ```shell
 # pull the latest version
 git pull
@@ -115,10 +178,16 @@ git pull
 # 2. change `POSTGRES_MULTIPLE_DATABASES=${EI_DATABASE}` to `POSTGRES_DATABASE=ei${PG_RANDOM_ID}` 
 # 3. add env var `IPFS_URL=http://ipfs-daemon${DOCKER_ID}:5001/api/v0`
 
+
+# create ./config/chains_config.json from ./config/chains_config_default.json
+cp ./config/chains_config_default.json ./config/chains_config.json
+# update ./config/chains_config.json with your values
+
 # run new version
 docker-compose up —build -d
 ```
-![change env vars](./assets/change-env-vars.png)
+![change env vars](./assets/changed-env-vars-v1_0_2.png)
+
 ## v1.0.0 (27.10.2021)
  - Change javascript instance of IPFS to separate service, which runs [go-IPFS](https://github.com/ipfs/go-ipfs) daemon.
  - Move orbitdb mounting directory on the host to the top level at `./data/orbitdb`.

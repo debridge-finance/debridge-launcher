@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Interval, SchedulerRegistry } from '@nestjs/schedule';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
@@ -13,7 +13,7 @@ import { StatisticToApiAction } from './actions/StatisticToApiAction';
 import Web3 from 'web3';
 
 @Injectable()
-export class SubscribeHandler {
+export class SubscribeHandler implements OnModuleInit {
   private readonly logger = new Logger(SubscribeHandler.name);
 
   constructor(
@@ -26,14 +26,7 @@ export class SubscribeHandler {
     private readonly statisticToApiAction: StatisticToApiAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
-  ) {
-    this.init();
-  }
-
-  async init() {
-    await this.uploadConfig();
-    await this.setupCheckEventsTimeout();
-  }
+  ) {}
 
   private async uploadConfig() {
     for (const config of chainConfigs) {
@@ -93,28 +86,33 @@ export class SubscribeHandler {
     }
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async Sign() {
     await this.signAction.action();
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async UploadToIPFSAction() {
     await this.uploadToIPFSAction.action();
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async UploadToApiAction() {
     await this.uploadToApiAction.action();
   }
 
-  @Interval(3000)
+  @Cron('*/3 * * * * *')
   async checkAssetsEvent() {
     await this.checkAssetsEventAction.action();
   }
 
-  @Interval(60000)
+  @Cron('* * * * *')
   async UploadStatisticToApiAction() {
     await this.statisticToApiAction.action();
+  }
+
+  async onModuleInit() {
+    await this.uploadConfig();
+    await this.setupCheckEventsTimeout();
   }
 }
