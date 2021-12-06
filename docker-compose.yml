@@ -21,7 +21,7 @@ services:
     networks:
       - debridge-node-network
   orbitdb:
-    image: debridgefinance/orbitdb:v1.1.1
+    image: debridgefinance/orbitdb:v1.1.2
     container_name: orbitdb${DOCKER_ID}
     command: node dist/main ${ORBITDB_NODE_OPTIONS}
     restart: on-failure
@@ -44,7 +44,7 @@ services:
     networks:
       - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v1.1.1
+    image: debridgefinance/debridge-node:v1.1.2
     container_name: debridge-node${DOCKER_ID}
     command: node dist/main ${DEBRIDGE_NODE_NODE_OPTIONS}
     restart: on-failure
