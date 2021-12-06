@@ -5,8 +5,8 @@
 </a>
 </p>
 <br/>
-This is a example config files for k8s.<br/>
-Please use your cloud provider postgres(postgres as service) and persistent volumes for ipfs-daemon and debridge-node.
+This is example config files for k8s.<br/>
+Please use your cloud provider postgres(postgres as service) on production environment.
 
 ## How to run:
 1. Please read main README from this repo.
@@ -20,12 +20,14 @@ Please use your cloud provider postgres(postgres as service) and persistent volu
 `kubectl apply -f 03-persistent-volumes.yaml`
 6. Deploy postgres:
 `kubectl apply -f 10-postgres.yaml`
-7. Deploy ipfs-daemon:
+7. Build ipfs-daemon image(you can use docker-registry for save image):
+`cd ..ipfs-daemon; docker build . -t ipfs-daemon; cd k8s`
+deploy ipfs-daemon:
 `kubectl apply -f 20-ipfs-daemon.yaml`
 8. Deploy debridge-node:
 `kubectl apply -f 30-debridge-node.yaml`
 
-## Clean persistent volume claim:
+## Clean persistent volume claim(for local kuber cluster only):
 If you want to clean pgdata or any other persistent data:
 `kubectl delete statefulset.apps/postgres statefulset.apps/ipfs-daemon statefulset.apps/debridge-node`
 `kubectl delete pvc orbitdb pgdata postgres`
