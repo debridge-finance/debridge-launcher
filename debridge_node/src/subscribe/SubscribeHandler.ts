@@ -10,6 +10,7 @@ import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
 import { StatisticToApiAction } from './actions/StatisticToApiAction';
+import Web3 from 'web3';
 
 @Injectable()
 export class SubscribeHandler implements OnModuleInit {
@@ -25,7 +26,7 @@ export class SubscribeHandler implements OnModuleInit {
     private readonly statisticToApiAction: StatisticToApiAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
-  ) {}
+  ) { }
 
   private async uploadConfig() {
     for (const config of chainConfigs) {
@@ -52,7 +53,21 @@ export class SubscribeHandler implements OnModuleInit {
 
   private async setupCheckEventsTimeout() {
     const chains = await this.supportedChainRepository.find();
-    chains.forEach(chain => {
+    for (const chain of chains) {
+      const chainDetail = chainConfigs.find(item => {
+        return item.chainId === chain.chainId;
+      });
+
+      const web3 = new Web3(chainDetail.provider);
+
+      const web3ChainId = await web3.eth.getChainId();
+      if (web3ChainId !== chainDetail.chainId) {
+        this.logger.error(`Checking correct RPC from config is failed (in config ${chainDetail.chainId} in rpc ${web3ChainId})`);
+        process.exit(1);
+      }
+    }
+
+    for (const chain of chains) {
       const intervalName = `interval_${chain.chainId}`;
       const callback = async () => {
         try {
@@ -68,7 +83,7 @@ export class SubscribeHandler implements OnModuleInit {
 
       const interval = setInterval(callback, chainDetail.interval);
       this.schedulerRegistry.addInterval(intervalName, interval);
-    });
+    }
   }
 
   @Cron('*/3 * * * * *')
