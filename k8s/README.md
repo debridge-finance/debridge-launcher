@@ -27,8 +27,8 @@ Please use your cloud provider postgres(postgres as service) and persistent volu
 
 ## Clean persistent volume claim:
 If you want to clean pgdata or any other persistent data:
-`kubectl delete statefulset.apps/postgres`
-`kubectl delete pvc/pgdata`
-`kubectl delete pv/pgdata`
-`kubectl apply -f 03-persistent-volumes.yaml`
-`kubectl apply -f 10-postgres.yaml`
+`kubectl delete statefulset.apps/postgres statefulset.apps/ipfs-daemon statefulset.apps/debridge-node`
+`kubectl delete pvc orbitdb pgdata`
+`kubectl delete pv orbitdb pgdata`
+`kubectl apply -f 99-pv-recycle.yaml`
+
