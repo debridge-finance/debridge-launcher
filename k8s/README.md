@@ -5,14 +5,14 @@
 </a>
 </p>
 <br/>
-This is a example config files for k8s.<br/>
-Please use your cloud provider postgres(postgres as service) and persistent volumes for ipfs-daemon and debridge-node.
+This is a example manifests for k8s.<br/>
+Please use your cloud provider postgres(postgres as service) and persistent volumes for ipfs-daemon, debridge-node and orbitdb.
 
 ## How to run:
 1. Please read main README from this repo.
 2. Create a keystore file for the validation node.
-3. Gen secrets with base64 like 'echo -e `8a4b8a1b-82e9-4497-b2d2-68b447aa9c14` | base64' for 01-secrets.yaml
-4. Check and fix configs in 00-configs.yaml and persistent volumes in 03-persistent-volumes.yaml
+3. Generate secrets with base64 like 'echo -e `8a4b8a1b-82e9-4497-b2d2-68b447aa9c14` | base64' for 01-secrets.yaml
+4. Check and fix configs in `00-configs.yaml` and persistent volumes in `03-persistent-volumes.yaml`
 5. Deploy configs, secrets and pv:
 `kubectl apply -f 00-configs.yaml`
 `kubectl apply -f 01-secrets.yaml`
@@ -20,15 +20,12 @@ Please use your cloud provider postgres(postgres as service) and persistent volu
 `kubectl apply -f 03-persistent-volumes.yaml`
 6. Deploy postgres:
 `kubectl apply -f 10-postgres.yaml`
-7. Deploy ipfs-daemon:
+7. Build ipfs-daemon image(you can use your own docker-registry):
+`cd ..ipfs-daemon; docker build . -t ipfs-daemon; cd k8s`
+8. Deploy ipfs-daemon:
 `kubectl apply -f 20-ipfs-daemon.yaml`
-8. Deploy debridge-node:
-`kubectl apply -f 30-debridge-node.yaml`
-
-## Clean persistent volume claim:
-If you want to clean pgdata or any other persistent data:
-`kubectl delete statefulset.apps/postgres statefulset.apps/ipfs-daemon statefulset.apps/debridge-node`
-`kubectl delete pvc orbitdb pgdata`
-`kubectl delete pv orbitdb pgdata`
-`kubectl apply -f 99-pv-recycle.yaml`
+9. Deploy orbitdb:
+`kubectl apply -f 30-orbitdb.yaml`
+10. Deploy debridge-node:
+`kubectl apply -f 40-debridge-node.yaml`
 
