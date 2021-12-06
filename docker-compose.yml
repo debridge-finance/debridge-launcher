@@ -28,6 +28,7 @@ services:
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
       - ./stats/orbitdb:/home/node/stats
+      - ./config:/home/node/dist/config
     environment:
       - PORT=${ORBITDB_PORT}
       - SENTRY_DSN=${SENTRY_DSN}
