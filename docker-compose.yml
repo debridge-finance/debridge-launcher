@@ -18,8 +18,6 @@ services:
     restart: always
     volumes:
       - ./data/ipfs:/data/ipfs
-      - ./config:/home/node/dist/config
-      - ./stats/orbitdb:/home/node/stats
     networks:
       - debridge-node-network
   orbitdb:
@@ -55,6 +53,7 @@ services:
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
       - ./stats/debridge-node:/home/node/stats
+      - ./config:/home/node/dist/config
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
