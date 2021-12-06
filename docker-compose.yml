@@ -18,6 +18,8 @@ services:
     restart: always
     volumes:
       - ./data/ipfs:/data/ipfs
+      - ./config:/home/node/dist/config
+      - ./stats/orbitdb:/home/node/stats
     networks:
       - debridge-node-network
   orbitdb:
@@ -28,7 +30,6 @@ services:
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
       - ./stats/orbitdb:/home/node/stats
-      - ./config:/home/node/dist/config
     environment:
       - PORT=${ORBITDB_PORT}
       - SENTRY_DSN=${SENTRY_DSN}
