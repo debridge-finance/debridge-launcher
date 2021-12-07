@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: orbitdb
-          image: debridgefinance/orbitdb:v1.1.1
+          image: debridgefinance/orbitdb:v1.1.2
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /nome/node/orbitdb

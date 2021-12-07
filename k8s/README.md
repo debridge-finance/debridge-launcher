@@ -20,12 +20,10 @@ Please use your cloud provider postgres(postgres as service) and persistent volu
 `kubectl apply -f 03-persistent-volumes.yaml`
 6. Deploy postgres:
 `kubectl apply -f 10-postgres.yaml`
-7. Build ipfs-daemon image(you can use your own docker-registry):
-`cd ..ipfs-daemon; docker build . -t ipfs-daemon; cd k8s`
-8. Deploy ipfs-daemon:
+7. Deploy ipfs-daemon:
 `kubectl apply -f 20-ipfs-daemon.yaml`
-9. Deploy orbitdb:
+8. Deploy orbitdb:
 `kubectl apply -f 30-orbitdb.yaml`
-10. Deploy debridge-node:
+9. Deploy debridge-node:
 `kubectl apply -f 40-debridge-node.yaml`
 

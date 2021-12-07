@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: debridge-node
-          image: debridgefinance/debridge-node:v1.1.1
+          image: debridgefinance/debridge-node:v1.1.2
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /home/node/keystore.json

@@ -27,16 +27,16 @@ spec:
         app: ipfs-daemon
     spec:
       containers:
-      - name: ipfs-daemon
-        image: ipfs-daemon
-        args: ["daemon", "--writable", "--enable-pubsub-experiment"]
-        imagePullPolicy: Never
-        volumeMounts:
-        - mountPath: /data/ipfs
-          name: ipfs
-        env:
-          - name: IPFS_PROFILE
-            value: server
+        - name: ipfs-daemon
+          image: debridgefinance/ipfs-daemon:v1.1.2
+          args: ["daemon", "--writable", "--enable-pubsub-experiment"]
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /data/ipfs
+              name: ipfs
+          env:
+            - name: IPFS_PROFILE
+              value: server
       volumes:
         - name: ipfs
           persistentVolumeClaim:
