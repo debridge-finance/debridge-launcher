@@ -12,7 +12,7 @@ services:
     networks:
       - debridge-node-network
   ipfs-daemon:
-    build: ./ipfs-daemon
+    image: debridgefinance/ipfs-daemon:v1.1.2
     container_name: ipfs-daemon${DOCKER_ID}
     command: daemon --writable --enable-pubsub-experiment
     restart: always
