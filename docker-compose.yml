@@ -44,7 +44,8 @@ services:
     networks:
       - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v1.1.2
+    build: debridge_node
+    # image: debridgefinance/debridge-node:v1.1.2
     container_name: debridge-node${DOCKER_ID}
     command: node dist/src/main ${DEBRIDGE_NODE_NODE_OPTIONS}
     restart: on-failure
@@ -54,7 +55,7 @@ services:
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
       - ./stats/debridge-node:/home/node/stats
-      - ./config:/home/node/dist/config
+      - ./config:/home/node/dist/src/config
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}

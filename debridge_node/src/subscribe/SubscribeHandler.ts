@@ -57,7 +57,10 @@ export class SubscribeHandler implements OnModuleInit {
       const chainDetail = chainConfigs.find(item => {
         return item.chainId === chain.chainId;
       });
-
+      if (!chainDetail) {
+        this.logger.error(`ChainId from chains_config are not the same with the value from db`);
+        process.exit(1);
+      }
       const web3 = new Web3(chainDetail.provider);
 
       const web3ChainId = await web3.eth.getChainId();
