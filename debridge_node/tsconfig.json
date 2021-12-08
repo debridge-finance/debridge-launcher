@@ -19,8 +19,6 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-
-
     "moduleResolution": "node",
     "pretty": true,
     "allowJs": true,
