@@ -12,7 +12,7 @@ services:
     networks:
       - debridge-node-network
   ipfs-daemon:
-    build: ./ipfs-daemon
+    image: debridgefinance/ipfs-daemon:v1.1.2
     container_name: ipfs-daemon${DOCKER_ID}
     command: daemon --writable --enable-pubsub-experiment
     restart: always
@@ -28,6 +28,7 @@ services:
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
       - ./stats/orbitdb:/home/node/stats
+      - ./config:/home/node/dist/config
     environment:
       - PORT=${ORBITDB_PORT}
       - SENTRY_DSN=${SENTRY_DSN}
@@ -45,7 +46,7 @@ services:
   debridge-node:
     image: debridgefinance/debridge-node:v1.1.2
     container_name: debridge-node${DOCKER_ID}
-    command: node dist/main ${DEBRIDGE_NODE_NODE_OPTIONS}
+    command: node dist/src/main ${DEBRIDGE_NODE_NODE_OPTIONS}
     restart: on-failure
     secrets:
       - source: keystore
@@ -53,7 +54,7 @@ services:
     volumes:
       - ./data/orbitdb:/home/node/orbitdb
       - ./stats/debridge-node:/home/node/stats
-      - ./config:/home/node/dist/config
+      - ./config:/home/node/dist/src/config
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
