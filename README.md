@@ -104,6 +104,25 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.1.2 (10.12.2021)
+* add checker for chains_config
+* fix config volume mounting
+* send debridge-node version to the debridge
+* create public ipfs-daemon image
+
+**Full Changelog**: https://github.com/debridge-finance/debridge-launcher/compare/v1.1.1...v1.1.2
+
+## How to update to v1.1.2
+### 1. Pull latest changes
+```shell
+git checkout master
+git pull
+```
+### 2. Run
+```shell
+docker-compose up -d
+```
+
 ## v1.1.1 (27.11.2021)
 - A component responsible for storing data in IPFS was moved to a separate service - orbitdb
 - Fix LogConfirmNewAssets sending to orbitdb
