@@ -18,6 +18,7 @@ import { version } from './../../package.json';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
+  private readonly updateVersionInterval = 60000; //1m
   private account: Account;
   private web3: Web3;
 
@@ -28,7 +29,15 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
   }
 
   async onModuleInit() {
-    await this.updateVersion(version);
+    const updateVersionInterval = setInterval(async () => {
+      try {
+        await this.updateVersion(version);
+        this.logger.log(`Sending event to update node version is finished`);
+        clearInterval(updateVersionInterval);
+      } catch (e) {
+        this.logger.warn(`Error in sending event to update node version`);
+      }
+    }, this.updateVersionInterval);
   }
 
   private getLoginDto() {
