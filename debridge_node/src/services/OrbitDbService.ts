@@ -9,6 +9,7 @@ import { AddDocsConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddDocsC
 import { AddDocsSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddDocsSignedSubmissionRequestDTO';
 import { AddLogConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddLogConfirmNewAssetsRequestDTO';
 import { AddLogSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddLogSignedSubmissionRequestDTO';
+import { version } from './../../package.json';
 
 @Injectable()
 export class OrbitDbService extends HttpAuthService implements OnModuleInit {
@@ -44,7 +45,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
         const orbitLogsDb = response?.orbitLogsDb;
         if (orbitDocsDb && orbitLogsDb) {
           try {
-            await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb });
+            await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb, nodeVersion: version });
             clearInterval(updateOrbitDbInterval);
             this.logger.log(`working updateOrbitDbInterval is finished`);
           } catch (e) {

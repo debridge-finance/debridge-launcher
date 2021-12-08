@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SubmissionEntity } from 'src/entities/SubmissionEntity';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -14,9 +14,10 @@ import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/Vali
 import { createProxy } from '../utils/create.proxy';
 import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
 import { HttpAuthService } from './HttpAuthService';
+import { version } from './../../package.json';
 
 @Injectable()
-export class DebrdigeApiService extends HttpAuthService {
+export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
   private account: Account;
   private web3: Web3;
 
@@ -24,6 +25,10 @@ export class DebrdigeApiService extends HttpAuthService {
     super(httpService, new Logger(DebrdigeApiService.name), configService.get('API_BASE_URL'), '/Account/authenticate');
     this.web3 = createProxy(new Web3(), { logger: this.logger });
     this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
+  }
+
+  async onModuleInit() {
+    await this.updateVersion(version);
   }
 
   private getLoginDto() {
@@ -39,9 +44,16 @@ export class DebrdigeApiService extends HttpAuthService {
   async updateOrbitDb(requestBody: UpdateOrbirDbDTO) {
     this.logger.log(`updateOrbitDb ${requestBody} is started`);
     const httpResult = await this.authRequest('/Validator/updateOrbitDb', requestBody, this.getLoginDto());
-
     this.logger.verbose(`response: ${httpResult.data}`);
     this.logger.log(`updateOrbitDb is finished`);
+  }
+
+  async updateVersion(version: string) {
+    this.logger.log(`updateVersion ${version} is started`);
+    const httpResult = await this.authRequest('/Validator/setNodeVersion', { version }, this.getLoginDto());
+
+    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.log(`updateVersion is finished`);
   }
 
   async uploadToApi(submissions: SubmissionEntity[]): Promise<SubmissionConfirmationResponse[]> {

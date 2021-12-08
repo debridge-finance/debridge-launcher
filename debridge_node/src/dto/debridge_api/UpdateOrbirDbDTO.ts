@@ -8,4 +8,8 @@ export class UpdateOrbirDbDTO {
   @IsString()
   @IsNotEmpty()
   orbitDocsDb: string;
+
+  @IsString()
+  @IsNotEmpty()
+  nodeVersion: string;
 }
