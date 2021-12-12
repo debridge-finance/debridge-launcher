@@ -1,0 +1,27 @@
+{
+    "AvailabilityZone": "eu-central-1a",
+    "CreateTime": "2021-12-12T11:50:10+00:00",
+    "Encrypted": false,
+    "Size": 10,
+    "SnapshotId": "",
+    "State": "creating",
+    "VolumeId": "vol-0b16a5e7ed6d6a9b9",
+    "Iops": 100,
+    "Tags": [],
+    "VolumeType": "gp2",
+    "MultiAttachEnabled": false
+}
+{
+    "AvailabilityZone": "eu-central-1c",
+    "CreateTime": "2021-12-12T12:07:26+00:00",
+    "Encrypted": false,
+    "Size": 10,
+    "SnapshotId": "",
+    "State": "creating",
+    "VolumeId": "vol-03113349e923cf8f7",
+    "Iops": 100,
+    "Tags": [],
+    "VolumeType": "gp2",
+    "MultiAttachEnabled": false
+}
+

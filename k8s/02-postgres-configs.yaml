@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: debridge-node-postgres-init-scripts
+data:
+  create-postgresql-databases.sh: "#!/bin/bash\n
+    set -e\n
+    set -u\n
+    echo \"Creating user and database $POSTGRES_DATABASE\"\n
+    psql -Atx postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@/?sslmode=disable -c \"CREATE DATABASE $POSTGRES_DATABASE\""

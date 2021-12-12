@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ipfs-daemon
+  labels:
+    app: ipfs-daemon
+spec:
+  ports:
+    - port: 5001
+  selector:
+    app: ipfs-daemon
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ipfs-daemon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ipfs-daemon
+  serviceName: ipfs-daemon
+  template:
+    metadata:
+      labels:
+        app: ipfs-daemon
+    spec:
+      containers:
+        - name: ipfs-daemon
+          image: debridgefinance/ipfs-daemon:v1.1.2
+          args: ["daemon", "--writable", "--enable-pubsub-experiment"]
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /data/ipfs
+              name: ipfs
+          env:
+            - name: IPFS_PROFILE
+              value: server
+      volumes:
+        - name: ipfs
+          persistentVolumeClaim:
+            claimName: ipfs
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "ipfs"
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "10Gi"

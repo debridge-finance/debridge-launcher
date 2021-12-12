@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: debridge-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debridge-node
+  serviceName: debridge-node
+  template:
+    metadata:
+      labels:
+        app: debridge-node
+    spec:
+      containers:
+        - name: debridge-node
+          image: debridgefinance/debridge-node:v1.1.2
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /home/node/keystore.json
+              subPath: keystore.json
+              name: keystore
+            - name: chains-config
+              mountPath: /home/node/src
+          envFrom:
+            - configMapRef:
+                name: configs
+            - secretRef:
+                name: secrets
+      volumes:
+        - name: keystore
+          secret:
+            secretName: secrets
+            items:
+              - key: keystore.json
+                path: keystore.json
+        - name: chains-config
+          configMap:
+            name: configs
+            items:
+              - key: chains_config.json
+                path: chains_config.json
+      restartPolicy: Always
