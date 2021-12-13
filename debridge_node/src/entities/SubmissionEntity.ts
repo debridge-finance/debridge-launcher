@@ -10,6 +10,9 @@ export class SubmissionEntity {
   submissionId: string;
 
   @Column()
+  blockNumber: number;
+
+  @Column()
   txHash: string;
 
   @Column()
@@ -67,4 +70,8 @@ export class SubmissionEntity {
   @Column()
   @Index()
   assetsStatus: SubmisionAssetsStatusEnum;
+
+  @Column()
+  @Index()
+  nonce: string;
 }

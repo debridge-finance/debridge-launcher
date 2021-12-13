@@ -23,6 +23,7 @@ import { GetSupportedChainsService } from './api/services/GetSupportedChainsServ
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 import { MonitoringModule } from './monitoring/MonitoringModule';
+import { RescanNonceAction } from './subscribe/actions/RescanNonceAction';
 
 @Module({
   imports: [
@@ -68,14 +69,7 @@ import { MonitoringModule } from './monitoring/MonitoringModule';
     OrbitDbService,
     DebrdigeApiService,
     StatisticToApiAction,
-    // {
-    //   provide: DebrdigeApiService,
-    //   useFactory: async () => {
-    //     const service = new DebrdigeApiService();
-    //     await service.init();
-    //     return service;
-    //   }
-    // },
+    RescanNonceAction,
   ],
 })
 export class AppModule {}

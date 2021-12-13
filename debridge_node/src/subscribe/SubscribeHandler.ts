@@ -11,6 +11,7 @@ import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
 import { StatisticToApiAction } from './actions/StatisticToApiAction';
 import Web3 from 'web3';
+import { RescanNonceAction } from './actions/RescanNonceAction';
 
 @Injectable()
 export class SubscribeHandler implements OnModuleInit {
@@ -24,9 +25,10 @@ export class SubscribeHandler implements OnModuleInit {
     private readonly uploadToApiAction: UploadToApiAction,
     private readonly checkAssetsEventAction: CheckAssetsEventAction,
     private readonly statisticToApiAction: StatisticToApiAction,
+    private readonly rescanNonceAction: RescanNonceAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
-  ) { }
+  ) {}
 
   private async uploadConfig() {
     for (const config of chainConfigs) {
@@ -112,6 +114,11 @@ export class SubscribeHandler implements OnModuleInit {
   @Cron('* * * * *')
   async UploadStatisticToApiAction() {
     await this.statisticToApiAction.action();
+  }
+
+  @Cron('* * * * *')
+  async RescanNonce() {
+    await this.rescanNonceAction.action();
   }
 
   async onModuleInit() {

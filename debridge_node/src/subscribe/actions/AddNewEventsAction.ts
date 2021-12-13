@@ -65,6 +65,7 @@ export class AddNewEventsAction {
       try {
         await this.submissionsRepository.save({
           submissionId: submissionId,
+          blockNumber: sendEvent.blockNumber,
           txHash: sendEvent.transactionHash,
           chainFrom: chainIdFrom,
           chainTo: sendEvent.returnValues.chainIdTo,
@@ -76,6 +77,7 @@ export class AddNewEventsAction {
           apiStatus: UploadStatusEnum.NEW,
           assetsStatus: SubmisionAssetsStatusEnum.NEW,
           rawEvent: JSON.stringify(sendEvent),
+          nonce: sendEvent.returnValues.nonce,
         } as SubmissionEntity);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
