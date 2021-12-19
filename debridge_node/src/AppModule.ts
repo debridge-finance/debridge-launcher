@@ -23,6 +23,7 @@ import { GetSupportedChainsService } from './api/services/GetSupportedChainsServ
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 import { MonitoringModule } from './monitoring/MonitoringModule';
+import { Web3Service } from './services/Web3Service';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { MonitoringModule } from './monitoring/MonitoringModule';
   ],
   controllers: [AppController],
   providers: [
+    Web3Service,
     RescanService,
     JwtStrategy,
     AuthService,

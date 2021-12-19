@@ -15,6 +15,7 @@ import { readFileSync } from 'fs';
 import { Account } from 'web3-core';
 import { createProxy } from '../../utils/create.proxy';
 import { getTokenName } from '../../utils/get.token.name';
+import { Web3Service } from '../../services/Web3Service';
 
 @Injectable()
 export class CheckAssetsEventAction extends IAction {
@@ -25,10 +26,14 @@ export class CheckAssetsEventAction extends IAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
     private readonly confirmNewAssetEntityRepository: Repository<ConfirmNewAssetEntity>,
+    private readonly web3Service: Web3Service,
   ) {
     super();
     this.logger = new Logger(CheckAssetsEventAction.name);
-    this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
+    this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(
+      JSON.parse(readFileSync('./keystore.json', 'utf-8')),
+      process.env.KEYSTORE_PASSWORD,
+    );
   }
 
   async process() {
@@ -55,7 +60,7 @@ export class CheckAssetsEventAction extends IAction {
           });
           this.logger.log(chainDetail.provider);
 
-          const web3 = new Web3(chainDetail.provider);
+          const web3 = this.web3Service.web3HttpProvider(chainDetail.provider);
           const deBridgeGateInstance = createProxy(new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr), { logger: this.logger });
           // struct DebridgeInfo {
           //   uint256 chainId; // native chain id
@@ -77,7 +82,7 @@ export class CheckAssetsEventAction extends IAction {
           const tokenChainDetail = ChainsConfig.find(item => {
             return item.chainId === parseInt(nativeTokenInfo.nativeChainId);
           });
-          const tokenWeb3 = new Web3(tokenChainDetail.provider);
+          const tokenWeb3 = this.web3Service.web3HttpProvider(tokenChainDetail.provider);
           this.logger.log(tokenChainDetail.provider);
           const nativeTokenInstance = createProxy(new tokenWeb3.eth.Contract(ERC20Abi as any, nativeTokenInfo.nativeAddress), {
             logger: this.logger,
