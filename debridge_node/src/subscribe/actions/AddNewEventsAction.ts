@@ -120,7 +120,11 @@ export class AddNewEventsAction {
       return item.chainId === chainId;
     });
 
-    const web3 = new Web3(chainDetail.provider);
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider(chainDetail.provider, {
+        timeout: 30000,
+      }),
+    );
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
 
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
