@@ -75,7 +75,7 @@ services:
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
     depends_on:
       - postgres
-      - orbitdb
+      #- orbitdb
     networks:
       - debridge-node-network
 networks:
