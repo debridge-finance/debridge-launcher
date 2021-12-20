@@ -72,7 +72,7 @@ export class SubscribeHandler implements OnModuleInit {
           process.exit(1);
         }
       } catch (e) {
-        this.logger.error(`Error in validation configs for chain ${chain}: ${e.message}`);
+        this.logger.error(`Error in validation configs for chain ${chain.chainId}: ${e.message}`);
         process.exit(1);
       }
     }
