@@ -46,7 +46,8 @@ services:
   debridge-node:
     image: debridgefinance/debridge-node:v2.0.1
     container_name: debridge-node${DOCKER_ID}
-    command: node dist/src/main ${DEBRIDGE_NODE_NODE_OPTIONS}
+    #command: node dist/src/main ${DEBRIDGE_NODE_NODE_OPTIONS}
+    build: ./debridge_node
     restart: unless-stopped
     secrets:
       - source: keystore
