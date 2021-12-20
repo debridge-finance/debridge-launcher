@@ -54,8 +54,9 @@ export class SubscribeHandler implements OnModuleInit {
 
   private async setupCheckEventsTimeout() {
     const chains = await this.supportedChainRepository.find();
-    try {
-      for (const chain of chains) {
+
+    for (const chain of chains) {
+      try {
         const chainDetail = chainConfigs.find(item => {
           return item.chainId === chain.chainId;
         });
@@ -70,10 +71,10 @@ export class SubscribeHandler implements OnModuleInit {
           this.logger.error(`Checking correct RPC from config is failed (in config ${chainDetail.chainId} in rpc ${web3ChainId})`);
           process.exit(1);
         }
+      } catch (e) {
+        this.logger.error(`Error in validation configs for chain ${chain}: ${e.message}`);
+        process.exit(1);
       }
-    } catch (e) {
-      this.logger.error(`Error in validation configs for chains: ${e.message}`);
-      process.exit(1);
     }
 
     for (const chain of chains) {
