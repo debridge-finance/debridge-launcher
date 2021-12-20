@@ -104,6 +104,21 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.1.3 (20.12.2021)
+* add timeout for Web3 requests
+
+**Full Changelog**: https://github.com/debridge-finance/debridge-launcher/compare/v1.1.2...v1.1.3
+
+## How to update to v1.1.3
+### 1. Pull latest changes
+```shell
+git checkout master
+git pull
+```
+### 2. Run
+```shell
+docker-compose up -d
+```
 ## v1.1.2 (10.12.2021)
 * add checker for chains_config
 * fix config volume mounting

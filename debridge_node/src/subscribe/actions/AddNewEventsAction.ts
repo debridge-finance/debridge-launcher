@@ -5,10 +5,10 @@ import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
-import Web3 from 'web3';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
+import { Web3Service } from '../../services/Web3Service';
 
 @Injectable()
 export class AddNewEventsAction {
@@ -20,6 +20,7 @@ export class AddNewEventsAction {
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
+    private readonly web3Service: Web3Service,
   ) {
     this.logger = new Logger(AddNewEventsAction.name);
   }
@@ -120,7 +121,8 @@ export class AddNewEventsAction {
       return item.chainId === chainId;
     });
 
-    const web3 = new Web3(chainDetail.provider);
+    const web3 = this.web3Service.web3HttpProvider(chainDetail.provider);
+
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
 
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
