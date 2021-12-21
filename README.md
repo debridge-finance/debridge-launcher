@@ -29,6 +29,13 @@ In order to set up the validation node, the following steps should be performed:
     - https://github.com/nodesource/distributions/blob/master/README.md
   5. psql
     ``` sudo apt-get install postgresql-client```
+    
+### Check that your version of docker-compose not older than
+
+```
+docker-compose --version
+docker-compose version 1.29.2
+```
 
 ## Set up the blockchain infrastructure:
 1. Install full testnet nodes
