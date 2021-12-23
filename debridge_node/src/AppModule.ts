@@ -24,11 +24,17 @@ import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 import { MonitoringModule } from './monitoring/MonitoringModule';
 import { Web3Service } from './services/Web3Service';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     HttpModule.register({
       timeout: 30000, //30s
+    }),
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
     }),
     MonitoringModule,
     ConfigModule.forRoot(),
@@ -70,14 +76,10 @@ import { Web3Service } from './services/Web3Service';
     OrbitDbService,
     DebrdigeApiService,
     StatisticToApiAction,
-    // {
-    //   provide: DebrdigeApiService,
-    //   useFactory: async () => {
-    //     const service = new DebrdigeApiService();
-    //     await service.init();
-    //     return service;
-    //   }
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

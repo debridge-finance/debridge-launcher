@@ -37,7 +37,7 @@ describe('CheckNewEvensAction', () => {
             find: async () => {
               return [{ chainFrom: 1, chainTo: 2, submissionId: 'test' } as SubmissionEntity];
             },
-            update: async (any, entity: Partial<SubmissionEntity>) => {
+            update: async () => {
               return { affected: 1 };
             },
           },
@@ -56,7 +56,7 @@ describe('CheckNewEvensAction', () => {
             save: async (entity: ConfirmNewAssetEntity) => {
               return entity;
             },
-            update: async (any, entity: Partial<ConfirmNewAssetEntity>) => {
+            update: async () => {
               return { affected: 0 };
             },
           },
