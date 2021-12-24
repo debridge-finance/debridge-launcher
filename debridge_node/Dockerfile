@@ -1,13 +1,29 @@
-FROM node:14
+FROM node:14 as builder
 RUN npm install npm@7 -g
 RUN npm install -g typescript@4.5.4 @nestjs/cli@8.1.6
-COPY package.json /home/node
-COPY package-lock.json /home/node
-COPY tsconfig.json /home/node
-COPY tsconfig.build.json /home/node
-COPY nest-cli.json /home/node
-WORKDIR /home/node
+RUN mkdir /build
+
+COPY package.json /build
+COPY package-lock.json /build
+COPY tsconfig.json /build
+COPY tsconfig.build.json /build
+COPY nest-cli.json /build
+COPY src  /build/src
+
+WORKDIR /build
+
+RUN mkdir stats
+
 RUN npm install
-COPY src/  /home/node/src
 RUN npm run build
-CMD npm start
+
+FROM node:14
+RUN mkdir /app
+WORKDIR /app
+COPY --from=builder /build/dist /app/dist
+COPY --from=builder /build/node_modules /app/node_modules
+COPY --from=builder /build/stats /app/stats
+COPY --from=builder /build/package.json /app
+COPY --from=builder /build/package-lock.json /app
+
+CMD npm run start:prod
