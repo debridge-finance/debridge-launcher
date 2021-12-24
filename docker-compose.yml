@@ -11,48 +11,14 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
-  # ipfs-daemon:
-  #   image: debridgefinance/ipfs-daemon:v1.1.2
-  #   container_name: ipfs-daemon${DOCKER_ID}
-  #   command: daemon --writable --enable-pubsub-experiment
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./data/ipfs:/data/ipfs
-  #   networks:
-  #     - debridge-node-network
-  # orbitdb:
-  #   image: debridgefinance/orbitdb:v1.1.2
-  #   container_name: orbitdb${DOCKER_ID}
-  #   command: node dist/main ${ORBITDB_NODE_OPTIONS}
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./data/orbitdb:/home/node/orbitdb
-  #     - ./stats/orbitdb:/home/node/stats
-  #     - ./config:/home/node/dist/config
-  #   environment:
-  #     - PORT=${ORBITDB_PORT}
-  #     - SENTRY_DSN=${SENTRY_DSN}
-  #     - JWT_SECRET=${ORBITDB_JWT_SECRET}
-  #     - ORBITDB_LOGIN=${ORBITDB_LOGIN}
-  #     - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
-  #     - IPFS_URL=${IPFS_URL}
-  #     - IPFS_DAEMON_HOST=ipfs-daemon
-  #     - IPFS_DAEMON_PORT=5001
-  #     - NODE_OPTIONS=${ORBITDB_NODE_OPTIONS}
-  #   depends_on:
-  #     - ipfs-daemon
-  #   networks:
-  #     - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v2.0.1
+    build: ./debridge_node
     container_name: debridge-node${DOCKER_ID}
-    command: node dist/src/main ${DEBRIDGE_NODE_NODE_OPTIONS}
     restart: unless-stopped
     secrets:
       - source: keystore
         target: /home/node/keystore.json
     volumes:
-      - ./data/orbitdb:/home/node/orbitdb
       - ./stats/debridge-node:/home/node/stats
       - ./config:/home/node/dist/src/config
     environment:
@@ -67,15 +33,10 @@ services:
       - API_BASE_URL=${API_BASE_URL}
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
-      - IPFS_URL=${IPFS_URL}
       - SENTRY_DSN=${SENTRY_DSN}
-      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
-      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
-      - ORBITDB_URL=${ORBITDB_URL}
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
     depends_on:
       - postgres
-      - orbitdb
     networks:
       - debridge-node-network
 networks:
