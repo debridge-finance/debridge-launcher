@@ -1,7 +1,7 @@
 version: "3.6"
 services:
   postgres:
-    image: postgres:14.1
+    image: postgres:13
     container_name: postgres${DOCKER_ID}
     restart: unless-stopped
     environment:
