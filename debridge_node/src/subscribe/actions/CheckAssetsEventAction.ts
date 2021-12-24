@@ -50,7 +50,9 @@ export class CheckAssetsEventAction extends IAction {
         continue;
       }
       const confirmNewAction = await this.confirmNewAssetEntityRepository.findOne({
-        debridgeId: submission.debridgeId,
+        where: {
+          debridgeId: submission.debridgeId,
+        },
       });
       if (!confirmNewAction) {
         try {

@@ -56,7 +56,9 @@ export class AddNewEventsAction {
       //this.logger.debug(JSON.stringify(sentEvents));
       const submissionId = sendEvent.returnValues.submissionId;
       const submission = await this.submissionsRepository.findOne({
-        submissionId,
+        where: {
+          submissionId,
+        },
       });
       if (submission) {
         this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
@@ -115,7 +117,9 @@ export class AddNewEventsAction {
   async process(chainId: number, from: number = undefined, to: number = undefined) {
     this.logger.verbose(`checkNewEvents ${chainId}`);
     const supportedChain = await this.supportedChainRepository.findOne({
-      chainId,
+      where: {
+        chainId,
+      },
     });
     const chainDetail = ChainsConfig.find(item => {
       return item.chainId === chainId;

@@ -32,7 +32,9 @@ export class SubscribeHandler implements OnModuleInit {
   private async uploadConfig() {
     for (const config of chainConfigs) {
       const configInDd = await this.supportedChainRepository.findOne({
-        chainId: config.chainId,
+        where: {
+          chainId: config.chainId,
+        },
       });
       if (config.maxBlockRange <= 100) {
         this.logger.error(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
