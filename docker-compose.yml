@@ -23,10 +23,10 @@ services:
     restart: unless-stopped
     secrets:
       - source: keystore
-        target: /home/node/keystore.json
+        target: /app/keystore.json
     volumes:
-      - ./stats/debridge-node:/home/node/stats
-      - ./config:/home/node/dist/src/config
+      - ./stats/debridge-node:/app/stats
+      - ./config:/app/config
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}

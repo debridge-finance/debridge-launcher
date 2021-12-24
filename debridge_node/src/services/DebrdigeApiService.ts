@@ -14,7 +14,6 @@ import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/Vali
 import { createProxy } from '../utils/create.proxy';
 import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
 import { HttpAuthService } from './HttpAuthService';
-import { version } from './../../package.json';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
@@ -29,6 +28,7 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
   }
 
   async onModuleInit() {
+    const { version } = JSON.parse(readFileSync('./package.json', { encoding: 'utf8' }));
     const updateVersionInterval = setInterval(async () => {
       try {
         await this.updateVersion(version);
