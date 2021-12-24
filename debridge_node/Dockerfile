@@ -1,4 +1,5 @@
 FROM node:14
+RUN npm install npm@7 -g
 RUN npm install -g typescript@4.5.4 @nestjs/cli@8.1.6
 COPY package.json /home/node
 COPY package-lock.json /home/node
