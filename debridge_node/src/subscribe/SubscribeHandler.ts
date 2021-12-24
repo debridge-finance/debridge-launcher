@@ -32,7 +32,9 @@ export class SubscribeHandler implements OnModuleInit {
   private async uploadConfig() {
     for (const config of chainConfigs) {
       const configInDd = await this.supportedChainRepository.findOne({
-        chainId: config.chainId,
+        where: {
+          chainId: config.chainId,
+        },
       });
       if (config.maxBlockRange <= 100) {
         this.logger.error(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
@@ -101,10 +103,11 @@ export class SubscribeHandler implements OnModuleInit {
     await this.signAction.action();
   }
 
-  @Cron('*/3 * * * * *')
-  async UploadToIPFSAction() {
-    await this.uploadToIPFSAction.action();
-  }
+  //TODO: comment out when go orbitDb will ready
+  // @Cron('*/3 * * * * *')
+  // async UploadToIPFSAction() {
+  //   await this.uploadToIPFSAction.action();
+  // }
 
   @Cron('*/3 * * * * *')
   async UploadToApiAction() {

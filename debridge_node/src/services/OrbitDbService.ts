@@ -9,7 +9,7 @@ import { AddDocsConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddDocsC
 import { AddDocsSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddDocsSignedSubmissionRequestDTO';
 import { AddLogConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddLogConfirmNewAssetsRequestDTO';
 import { AddLogSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddLogSignedSubmissionRequestDTO';
-import { version } from './../../package.json';
+import { readFileSync } from 'fs';
 
 @Injectable()
 export class OrbitDbService extends HttpAuthService implements OnModuleInit {
@@ -27,7 +27,8 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.init();
+    //TODO: comment out when go orbitDb will ready
+    // await this.init();
   }
 
   async init() {
@@ -43,6 +44,8 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
         }
         const orbitDocsDb = response?.orbitDocsDb;
         const orbitLogsDb = response?.orbitLogsDb;
+        const { version } = JSON.parse(readFileSync('./package.json', { encoding: 'utf8' }));
+
         if (orbitDocsDb && orbitLogsDb) {
           try {
             await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb, nodeVersion: version });

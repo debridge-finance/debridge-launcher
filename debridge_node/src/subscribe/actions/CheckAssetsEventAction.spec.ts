@@ -4,7 +4,6 @@ import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { ConfigModule } from '@nestjs/config';
 import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { In, Repository } from 'typeorm';
-import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { HttpModule } from '@nestjs/axios';
 import { CheckAssetsEventAction } from './CheckAssetsEventAction';
@@ -37,7 +36,7 @@ describe('CheckAssetsEventAction', () => {
                 } as SubmissionEntity,
               ];
             },
-            update: async (any, entity: Partial<SubmissionEntity>) => {
+            update: async () => {
               return { affected: 0 };
             },
           },
@@ -56,7 +55,7 @@ describe('CheckAssetsEventAction', () => {
             save: async (entity: ConfirmNewAssetEntity) => {
               return entity;
             },
-            update: async (any, entity: Partial<ConfirmNewAssetEntity>) => {
+            update: async () => {
               return { affected: 0 };
             },
           },
