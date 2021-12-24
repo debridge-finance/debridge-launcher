@@ -5,7 +5,6 @@ services:
     container_name: postgres${DOCKER_ID}
     restart: unless-stopped
     environment:
-      - POSTGRES_EXTENSIONS=${POSTGRES_EXTENSIONS}
       - PG_RANDOM_ID=${PG_RANDOM_ID}
       - POSTGRES_DATABASE=${POSTGRES_DATABASE}
       - POSTGRES_HOST_AUTH_METHOD=${POSTGRES_HOST_AUTH_METHOD}
