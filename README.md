@@ -107,9 +107,15 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 ### 1. Pull latest changes
 ```shell
 git checkout master
+
 git pull
 ```
-### 2. Run
+### 2. Add env vars to .env file:
+```
+THROTTLER_TTL=60
+THROTTLER_LIMIT=10
+```
+### 3. Run
 ```shell
 docker-compose up -d --remove-orphans
 ```

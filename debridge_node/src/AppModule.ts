@@ -32,9 +32,13 @@ import { APP_GUARD } from '@nestjs/core';
     HttpModule.register({
       timeout: 30000, //30s
     }),
-    ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 10,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        ttl: configService.get('THROTTLER_TTL', 60),
+        limit: configService.get('THROTTLER_LIMIT', 10),
+      }),
     }),
     MonitoringModule,
     ConfigModule.forRoot(),
@@ -82,4 +86,4 @@ import { APP_GUARD } from '@nestjs/core';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
