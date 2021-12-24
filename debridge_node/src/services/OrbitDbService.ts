@@ -27,7 +27,8 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.init();
+    //TODO: comment out when go orbitDb will ready
+    // await this.init();
   }
 
   async init() {
