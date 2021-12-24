@@ -53,7 +53,7 @@ docker-compose version 1.29.2
    2. Update HTTP RPC URL in /config/chains_config.json
 
 3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
-deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, API_PASSWORD, ORBITDB_JWT_SECRET, ORBITDB_LOGIN, ORBITDB_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
+deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, API_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
 
 4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
   - npm i
@@ -65,10 +65,7 @@ The script will show the newly generated Ethereum address, private key, password
 6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
 7. Contact deBridge team  to make your wallet address to be whitelisted by deBridge governance
 8. Run the command `docker-compose up --build -d`.
-9. Backup and do not delete any files from the following directories:
-    - `./data/orbitdb`
-    - `./data/ipfs`
-10. If there is a need to start multiple instances of the node (e.g. one for testnet and one for mainnet) on one server you can:
+9. If there is a need to start multiple instances of the node (e.g. one for testnet and one for mainnet) on one server you can:
   - checkout or copy repo to the new directory
   - change DOCKER_ID variable in .env
   - start as described above
@@ -79,18 +76,7 @@ The script will show the newly generated Ethereum address, private key, password
 git pull
 
 # Run debridge node
-docker-compose up -d
-```
-
-# Pinners list
-  - `/ip4/139.59.164.64/tcp/4001/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk`
-  - `/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k`
-  - `/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP`
-  - `/dnsaddr/londonswarm.debridge.io/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk`
-  
-To add node to the bootstrap list manually, you can use the command:
-```shell
-docker-compose exec ipfs-daemon ipfs bootstrap add "$PINNER_ADDRESS"
+docker-compose up -d --remove-orphans
 ```
 
 # Miscellaneous
@@ -111,6 +97,23 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.1.4 (24.12.2021)
+* temporary removed ipfs and orbitdb service
+* applied halborn security audit
+
+**Full Changelog**: https://github.com/debridge-finance/debridge-launcher/compare/v1.1.3...v1.1.4
+
+## How to update to v1.1.4
+### 1. Pull latest changes
+```shell
+git checkout master
+git pull
+```
+### 2. Run
+```shell
+docker-compose up -d --remove-orphans
+```
+
 ## v1.1.3 (20.12.2021)
 * add timeout for Web3 requests
 
