@@ -4,8 +4,6 @@ services:
     image: postgres
     container_name: postgres${DOCKER_ID}
     restart: on-failure
-    env_file:
-      - .env
     volumes:
       - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
