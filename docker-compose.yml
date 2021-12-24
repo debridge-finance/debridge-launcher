@@ -41,6 +41,8 @@ services:
       - API_PASSWORD=${API_PASSWORD}
       - SENTRY_DSN=${SENTRY_DSN}
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
+      - THROTTLER_TTL=${THROTTLER_TTL}
+      - THROTTLER_LIMIT=${THROTTLER_LIMIT}
     depends_on:
       - postgres
     networks:
