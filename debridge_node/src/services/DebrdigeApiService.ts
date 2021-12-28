@@ -12,7 +12,7 @@ import Web3 from 'web3';
 import { readFileSync } from 'fs';
 import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/ValidationProgressDTO';
 import { createProxy } from '../utils/create.proxy';
-import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
+import { UpdateOrbitDbDTO } from '../dto/debridge_api/UpdateOrbitDbDTO';
 import { HttpAuthService } from './HttpAuthService';
 
 @Injectable()
@@ -50,10 +50,10 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     };
   }
 
-  async updateOrbitDb(requestBody: UpdateOrbirDbDTO) {
-    this.logger.log(`updateOrbitDb ${requestBody} is started`);
+  async updateOrbitDb(requestBody: UpdateOrbitDbDTO) {
+    this.logger.log(`updateOrbitDb ${JSON.stringify(requestBody)} is started`);
     const httpResult = await this.authRequest('/Validator/updateOrbitDb', requestBody, this.getLoginDto());
-    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.verbose(`response: ${JSON.stringify(httpResult.data)}`);
     this.logger.log(`updateOrbitDb is finished`);
   }
 
@@ -92,7 +92,7 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     this.logger.log(`uploadStatisticToApi is started`);
     const httpResult = await this.authRequest('/Validator/updateProgress', requestBody, this.getLoginDto());
 
-    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.verbose(`response: ${JSON.stringify(httpResult.data)}`);
     const result = httpResult.data as SubmissionsConfirmationsResponseDTO;
     this.logger.log(`uploadStatisticToApi is finished`);
     return result.confirmations;

@@ -10,5 +10,5 @@ export class AddDocsConfirmNewAssetsRequestDTO {
   signature: string;
 
   @IsNotEmpty()
-  sendEvent: any;
+  payload: any;
 }

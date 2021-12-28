@@ -103,11 +103,10 @@ export class SubscribeHandler implements OnModuleInit {
     await this.signAction.action();
   }
 
-  //TODO: comment out when go orbitDb will ready
-  // @Cron('*/3 * * * * *')
-  // async UploadToIPFSAction() {
-  //   await this.uploadToIPFSAction.action();
-  // }
+  @Cron('*/3 * * * * *')
+  async UploadToIPFSAction() {
+    await this.uploadToIPFSAction.action();
+  }
 
   @Cron('*/3 * * * * *')
   async UploadToApiAction() {

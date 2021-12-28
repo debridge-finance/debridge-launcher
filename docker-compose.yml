@@ -17,8 +17,24 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
+  orbitdb:
+    image: debridgefinance/orbitdb-go:v0.1.2
+    container_name: orbitdb${DOCKER_ID}
+    ports:
+      - "3000:3000" #TODO: remove port forwarding
+      - "4001:4001"
+    environment:
+      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_USERNAME=${ORBITDB_LOGIN}
+      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_PASSWORD=${ORBITDB_PASSWORD}
+      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_JWT=${ORBITDB_JWT}
+    volumes:
+      - "./data:/app/data"
+      - "./config/ipfs_config:/app/ipfs_config"
+      - "./config/orbitdb_config.yml:/app/config.yml"
+    networks:
+      - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v1.1.4
+    build: ./debridge_node
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
@@ -43,6 +59,9 @@ services:
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
       - THROTTLER_TTL=${THROTTLER_TTL}
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
+      - ORBITDB_URL=${ORBITDB_URL}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
     depends_on:
       - postgres
     networks:

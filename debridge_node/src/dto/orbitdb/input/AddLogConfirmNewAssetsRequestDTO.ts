@@ -10,5 +10,5 @@ export class AddLogConfirmNewAssetsRequestDTO {
   signature: string;
 
   @IsNotEmpty()
-  sendEvent: any;
+  payload: any;
 }

@@ -43,12 +43,8 @@ export class ConfirmNewAssetEntity {
   @Column({
     nullable: true,
   })
-  ipfsLogHash: string;
+  ipfsHash: string;
 
-  @Column({
-    nullable: true,
-  })
-  ipfsKeyHash: string;
 
   //ExternalId of signature in debridge system
   @Column({

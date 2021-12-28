@@ -10,5 +10,5 @@ export class AddDocsSignedSubmissionRequestDTO {
   signature: string;
 
   @IsNotEmpty()
-  sendEvent: any;
+  payload: any;
 }

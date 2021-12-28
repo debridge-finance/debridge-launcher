@@ -51,10 +51,10 @@ export class AddNewEventsAction {
   async processNewTransfers(events: any[], chainIdFrom: number) {
     if (!events) return true;
     const isOk = true;
-    for (const sendEvent of events) {
-      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${sendEvent.returnValues.submissionId}`);
+    for (const payload of events) {
+      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${payload.returnValues.submissionId}`);
       //this.logger.debug(JSON.stringify(sentEvents));
-      const submissionId = sendEvent.returnValues.submissionId;
+      const submissionId = payload.returnValues.submissionId;
       const submission = await this.submissionsRepository.findOne({
         where: {
           submissionId,
@@ -68,17 +68,17 @@ export class AddNewEventsAction {
       try {
         await this.submissionsRepository.save({
           submissionId: submissionId,
-          txHash: sendEvent.transactionHash,
+          txHash: payload.transactionHash,
           chainFrom: chainIdFrom,
-          chainTo: sendEvent.returnValues.chainIdTo,
-          debridgeId: sendEvent.returnValues.debridgeId,
-          receiverAddr: sendEvent.returnValues.receiver,
-          amount: sendEvent.returnValues.amount,
+          chainTo: payload.returnValues.chainIdTo,
+          debridgeId: payload.returnValues.debridgeId,
+          receiverAddr: payload.returnValues.receiver,
+          amount: payload.returnValues.amount,
           status: SubmisionStatusEnum.NEW,
           ipfsStatus: UploadStatusEnum.NEW,
           apiStatus: UploadStatusEnum.NEW,
           assetsStatus: SubmisionAssetsStatusEnum.NEW,
-          rawEvent: JSON.stringify(sendEvent),
+          rawEvent: JSON.stringify(payload),
         } as SubmissionEntity);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
