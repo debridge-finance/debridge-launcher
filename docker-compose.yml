@@ -18,7 +18,7 @@ services:
     networks:
       - debridge-node-network
   orbitdb:
-    image: debridgefinance/orbitdb-go:v0.1.2
+    image: debridgefinance/orbitdb-go:v0.1.3
     container_name: orbitdb${DOCKER_ID}
     ports:
       - "3000:3000" #TODO: remove port forwarding
