@@ -26,7 +26,7 @@ services:
     environment:
       - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_USERNAME=${ORBITDB_LOGIN}
       - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_PASSWORD=${ORBITDB_PASSWORD}
-      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_JWT=${ORBITDB_JWT}
+      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_JWT=${ORBITDB_JWT_SECRET}
     volumes:
       - "./data:/app/data"
       - "./config/ipfs_config:/app/ipfs_config"
