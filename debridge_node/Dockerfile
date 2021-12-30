@@ -11,7 +11,6 @@ RUN npm ci \
 # PRODUCTION 
 FROM node:16
 
-USER node
 WORKDIR /home/node
 
 COPY --from=builder /home/node/package*.json /home/node/
