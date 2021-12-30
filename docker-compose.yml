@@ -26,7 +26,7 @@ services:
         target: /app/keystore.json
     volumes:
       - ./stats/debridge-node:/app/stats
-      - ./config:/app/config
+      - ./config:/app/dist/config
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
