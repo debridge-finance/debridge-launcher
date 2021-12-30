@@ -18,15 +18,15 @@ services:
     networks:
       - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:v1.1.5
+    build: ./debridge_node
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
       - source: keystore
-        target: /app/keystore.json
+        target: /home/node/keystore.json
     volumes:
-      - ./stats/debridge-node:/app/stats
-      - ./config:/app/dist/config
+      - ./stats/debridge-node:/home/node/stats
+      - ./config:/home/node/dist/config
     environment:
       - PORT=${DEBRIDGE_NODE_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
