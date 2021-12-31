@@ -38,11 +38,11 @@ export class SubscribeHandler implements OnModuleInit {
       });
       if (config.maxBlockRange <= 100) {
         this.logger.error(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
-        process.exit();
+        process.exit(1);
       }
       if (config.blockConfirmation <= 8) {
         this.logger.error(`Cant up application maxBlockRange(${config.blockConfirmation}) < 8`);
-        process.exit();
+        process.exit(1);
       }
       if (!configInDd) {
         await this.supportedChainRepository.save({

@@ -28,3 +28,14 @@ async function bootstrap() {
   await app.listen(configService.get('PORT') || 3000);
 }
 bootstrap();
+
+process.on('exit', async exitCode => {
+  if (process.env.SENTRY_DSN) {
+    if (exitCode !== 0) {
+      const message = `App is stopped`;
+      console.log(message);
+      await Sentry.captureMessage(message);
+    }
+  }
+  process.exit();
+});
