@@ -1,9 +1,28 @@
 version: "3.6"
 services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.8.0
+    ports:
+      - ${GELF_PORT}:${GELF_PORT}/udp
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config
+      - ./logstash/pipelines:/usr/share/logstash/pipelines
+    environment:
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
+      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
+      - GELF_PORT=${GELF_PORT}
   postgres:
     image: postgres:14.1
     container_name: postgres${DOCKER_ID}
     restart: unless-stopped
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:22092"
+        tag: "postgres"
     environment:
       - PG_RANDOM_ID=${PG_RANDOM_ID}
       - POSTGRES_DATABASE=${POSTGRES_DATABASE}
@@ -17,10 +36,17 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
+    depends_on:
+      - logstash
   debridge-node:
     image: debridgefinance/debridge-node:v1.1.4
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:${GELF_PORT}"
+        tag: "debridge-node"
     secrets:
       - source: keystore
         target: /app/keystore.json
@@ -39,12 +65,12 @@ services:
       - API_BASE_URL=${API_BASE_URL}
       - API_LOGIN=${API_LOGIN}
       - API_PASSWORD=${API_PASSWORD}
-      - SENTRY_DSN=${SENTRY_DSN}
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
       - THROTTLER_TTL=${THROTTLER_TTL}
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
     depends_on:
       - postgres
+      - logstash
     networks:
       - debridge-node-network
 networks:
