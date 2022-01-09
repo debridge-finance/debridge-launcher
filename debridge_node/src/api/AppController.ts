@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UserLoginDto } from './auth/user.login.dto';
 import { AuthService } from './auth/auth.service';
@@ -62,7 +62,7 @@ export class AppController {
     summary: 'Api for pause chain scanning',
   })
   @ApiQuery({ name: 'chainId', required: true })
-  pauseChainScan(@Query() chainId: number) {
+  pauseChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
     return this.chainScanningService.pause(chainId);
   }
 
@@ -71,7 +71,7 @@ export class AppController {
   @ApiOperation({
     summary: 'Api for start chain scanning',
   })
-  startChainScan(@Query() chainId: number) {
+  startChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
     return this.chainScanningService.start(chainId);
   }
 
@@ -80,7 +80,7 @@ export class AppController {
   @ApiOperation({
     summary: 'Api for status chain scanning',
   })
-  statusChainScan(@Query() chainId: number) {
+  statusChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
     return this.chainScanningService.status(chainId);
   }
 }
