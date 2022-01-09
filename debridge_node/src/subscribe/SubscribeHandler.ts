@@ -11,6 +11,7 @@ import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import chainConfigs from './../config/chains_config.json';
 import { StatisticToApiAction } from './actions/StatisticToApiAction';
 import { Web3Service } from '../services/Web3Service';
+import { ChainScanningService } from '../services/ChainScanningService';
 
 @Injectable()
 export class SubscribeHandler implements OnModuleInit {
@@ -27,6 +28,7 @@ export class SubscribeHandler implements OnModuleInit {
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     private readonly web3Service: Web3Service,
+    private readonly chainScanningService: ChainScanningService,
   ) {}
 
   private async uploadConfig() {
@@ -63,7 +65,7 @@ export class SubscribeHandler implements OnModuleInit {
           return item.chainId === chain.chainId;
         });
         if (!chainDetail) {
-          this.logger.error(`ChainId from chains_config are not the same with the value from db`);
+          this.logger.error(`${chain.chainId} ChainId from chains_config are not the same with the value from db`);
           process.exit(1);
         }
         const web3 = this.web3Service.web3HttpProvider(chainDetail.provider);
@@ -80,21 +82,7 @@ export class SubscribeHandler implements OnModuleInit {
     }
 
     for (const chain of chains) {
-      const intervalName = `interval_${chain.chainId}`;
-      const callback = async () => {
-        try {
-          await this.addNewEventsAction.action(chain.chainId);
-        } catch (e) {
-          this.logger.error(e);
-        }
-      };
-
-      const chainDetail = chainConfigs.find(item => {
-        return item.chainId === chain.chainId;
-      });
-
-      const interval = setInterval(callback, chainDetail.interval);
-      this.schedulerRegistry.addInterval(intervalName, interval);
+      this.chainScanningService.start(chain.chainId);
     }
   }
 

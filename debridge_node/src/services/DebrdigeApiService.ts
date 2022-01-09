@@ -1,12 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { SubmissionEntity } from 'src/entities/SubmissionEntity';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { SubmissionsConfirmationsRequestDTO } from '../dto/debridge_api/SubmissionsConfirmationsRequestDTO';
 import { SubmissionConfirmationResponse, SubmissionsConfirmationsResponseDTO } from '../dto/debridge_api/SubmissionsConfirmationsResponseDTO';
-import { ConfirmNewAssetEntity } from 'src/entities/ConfirmNewAssetEntity';
-import { ConfrimNewAssetsRequestDTO } from 'src/dto/debridge_api/ConfrimNewAssetsRequestDTO';
-import { ConfrimNewAssetsResponseDTO } from 'src/dto/debridge_api/ConfrimNewAssetsResponseDTO';
 import { Account } from 'web3-core';
 import Web3 from 'web3';
 import { readFileSync } from 'fs';
@@ -14,6 +10,10 @@ import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/Vali
 import { createProxy } from '../utils/create.proxy';
 import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
 import { HttpAuthService } from './HttpAuthService';
+import { SubmissionEntity } from '../entities/SubmissionEntity';
+import { ConfirmNewAssetEntity } from '../entities/ConfirmNewAssetEntity';
+import { ConfrimNewAssetsResponseDTO } from '../dto/debridge_api/ConfrimNewAssetsResponseDTO';
+import { ConfrimNewAssetsRequestDTO } from '../dto/debridge_api/ConfrimNewAssetsRequestDTO';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {

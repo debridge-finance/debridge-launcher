@@ -7,8 +7,8 @@ import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
-import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
 import { Web3Service } from '../../services/Web3Service';
+import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 
 @Injectable()
 export class AddNewEventsAction {

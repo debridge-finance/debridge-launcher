@@ -1,11 +1,12 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UserLoginDto } from './auth/user.login.dto';
 import { AuthService } from './auth/auth.service';
 import { RescanDto } from './dto/RescanDto';
 import { RescanService } from './services/RescanService';
 import { AuthGuard } from '@nestjs/passport';
 import { GetSupportedChainsService } from './services/GetSupportedChainsService';
+import { ChainScanningService } from '../services/ChainScanningService';
 
 @Controller()
 export class AppController {
@@ -13,6 +14,7 @@ export class AppController {
     private readonly authService: AuthService,
     private readonly rescanService: RescanService,
     private readonly getSupportedChainsService: GetSupportedChainsService,
+    private readonly chainScanningService: ChainScanningService,
   ) {}
 
   @Get()
@@ -53,5 +55,32 @@ export class AppController {
   })
   getSupportedChains() {
     return this.getSupportedChainsService.get();
+  }
+
+  @Get('/chain/scan/pause')
+  @ApiOperation({
+    summary: 'Api for pause chain scanning',
+  })
+  @ApiQuery({ name: 'chainId', required: true })
+  pauseChainScan(@Query() chainId: number) {
+    return this.chainScanningService.pause(chainId);
+  }
+
+  @Get('/chain/scan/start')
+  @ApiQuery({ name: 'chainId', required: true })
+  @ApiOperation({
+    summary: 'Api for start chain scanning',
+  })
+  startChainScan(@Query() chainId: number) {
+    return this.chainScanningService.start(chainId);
+  }
+
+  @Get('/chain/scan/status')
+  @ApiQuery({ name: 'chainId', required: true })
+  @ApiOperation({
+    summary: 'Api for status chain scanning',
+  })
+  statusChainScan(@Query() chainId: number) {
+    return this.chainScanningService.status(chainId);
   }
 }
