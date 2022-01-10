@@ -62,6 +62,8 @@ export class AppController {
     summary: 'Api for pause chain scanning',
   })
   @ApiQuery({ name: 'chainId', required: true })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   pauseChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
     return this.chainScanningService.pause(chainId);
   }
@@ -71,6 +73,8 @@ export class AppController {
   @ApiOperation({
     summary: 'Api for start chain scanning',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   startChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
     return this.chainScanningService.start(chainId);
   }
@@ -80,6 +84,8 @@ export class AppController {
   @ApiOperation({
     summary: 'Api for status chain scanning',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   statusChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
     return this.chainScanningService.status(chainId);
   }

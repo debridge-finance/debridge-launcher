@@ -35,7 +35,7 @@ export class ChainScanningService {
   pause(chainId: number): boolean {
     const intervalName = ChainScanningService.getIntervalName(chainId);
     if (this.status(chainId) === ChainScanStatus.PAUSE) {
-      const message = `Cann't pause scanning chain ${chainId}`;
+      const message = `Cann't pause scanning chain ${chainId}: already paused`;
       this.logger.warn(message);
       return false;
     }
@@ -53,7 +53,7 @@ export class ChainScanningService {
   start(chainId: number) {
     const intervalName = `interval_${chainId}`;
     if (this.status(chainId) === ChainScanStatus.IN_PROGRESS) {
-      const message = `Cann't start scanning chain ${chainId}`;
+      const message = `Cann't start scanning chain ${chainId}: already started`;
       this.logger.warn(message);
       return false;
     }
