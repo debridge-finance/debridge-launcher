@@ -1,7 +1,7 @@
 import { Column, Entity, Index, PrimaryColumn, Unique } from 'typeorm';
 import { SubmisionStatusEnum } from '../enums/SubmisionStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../enums/SubmisionAssetsStatusEnum';
-import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
+import { UploadStatusEnum } from '../enums/UploadStatusEnum';
 
 @Entity('submissions')
 @Unique(['submissionId'])
