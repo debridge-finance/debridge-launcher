@@ -39,8 +39,7 @@ export class AddNewEventsAction implements OnModuleInit {
 SELECT "chainFrom", MAX(nonce::numeric) FROM public.submissions GROUP BY "chainFrom"
        `);
     for (const { chainFrom, max } of chains) {
-      //this.maxNonceChains.set(chainFrom, max);
-      this.maxNonceChains.set(chainFrom, 9999999999999);
+      this.maxNonceChains.set(chainFrom, max);
       this.logger.verbose(`Max nonce in chain ${chainFrom} is ${max}`);
     }
   }
