@@ -11,6 +11,7 @@ import { Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainScanningService } from '../../services/ChainScanningService';
 import { ChainScanStatus } from '../../enums/ChainScanStatus';
+import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 
 @Injectable()
 export class AddNewEventsAction implements OnModuleInit {
@@ -28,6 +29,7 @@ export class AddNewEventsAction implements OnModuleInit {
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     private readonly web3Service: Web3Service,
+    private readonly debrdigeApiService: DebrdigeApiService,
   ) {
     this.logger = new Logger(AddNewEventsAction.name);
   }
@@ -37,7 +39,9 @@ export class AddNewEventsAction implements OnModuleInit {
 SELECT "chainFrom", MAX(nonce::numeric) FROM public.submissions GROUP BY "chainFrom"
        `);
     for (const { chainFrom, max } of chains) {
-      this.maxNonceChains.set(chainFrom, max);
+      //this.maxNonceChains.set(chainFrom, max);
+      this.maxNonceChains.set(chainFrom, 9999999999999);
+      this.logger.verbose(`Max nonce in chain ${chainFrom} is ${max}`);
     }
   }
 
@@ -71,6 +75,25 @@ SELECT "chainFrom", MAX(nonce::numeric) FROM public.submissions GROUP BY "chainF
       this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${sendEvent.returnValues.submissionId}`);
       //this.logger.debug(JSON.stringify(sentEvents));
       const submissionId = sendEvent.returnValues.submissionId;
+
+      if (!rescan) {
+        const nonce = parseInt(sendEvent.returnValues.nonce);
+        if (!this.maxNonceChains.has(chainIdFrom)) {
+          this.maxNonceChains.set(chainIdFrom, 0);
+        }
+        if (this.maxNonceChains.get(chainIdFrom) >= nonce) {
+          if (this.chainScanningService.status(chainIdFrom) === ChainScanStatus.IN_PROGRESS) {
+            this.chainScanningService.pause(chainIdFrom);
+            const message = `Incorrect nonce ${nonce} in chain ${chainIdFrom}`;
+            this.logger.error(message);
+            //await this.debrdigeApiService.notifyIncorrectNonce(sendEvent.returnValues.nonce, chainIdFrom, submissionId);
+            throw new Error(message);
+          }
+        } else {
+          this.maxNonceChains.set(chainIdFrom, nonce);
+        }
+      }
+
       const submission = await this.submissionsRepository.findOne({
         where: {
           submissionId,
@@ -79,20 +102,6 @@ SELECT "chainFrom", MAX(nonce::numeric) FROM public.submissions GROUP BY "chainF
       if (submission) {
         this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
         continue;
-      }
-
-      if (!rescan) {
-        const nonce = parseInt(sendEvent.returnValues.nonce);
-        if (this.maxNonceChains.get(chainIdFrom) >= nonce) {
-          if (this.chainScanningService.status(chainIdFrom) === ChainScanStatus.IN_PROGRESS) {
-            this.chainScanningService.pause(chainIdFrom);
-            const message = `Incorrect nonce ${nonce} in chain ${chainIdFrom}`;
-            this.logger.error(message);
-            throw new Error(message);
-          }
-        } else {
-          this.maxNonceChains.set(chainIdFrom, nonce);
-        }
       }
 
       try {

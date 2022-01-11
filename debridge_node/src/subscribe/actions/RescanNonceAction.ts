@@ -31,6 +31,9 @@ export class RescanNonceAction extends IAction {
        `)
       )[0];
       this.logger.log(`Scanning from ${min} to ${max} in ${chain.chainId} chain`);
+      if (min === undefined || max === undefined) {
+        continue;
+      }
       const missNonces = await this.entityManager.query(`
  SELECT generate_series::text as nonce FROM generate_series(${min}, ${max})
      EXCEPT
