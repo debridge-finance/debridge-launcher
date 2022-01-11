@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { forwardRef, Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import ChainsConfig from '../../config/chains_config.json';
@@ -9,13 +9,20 @@ import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
+import { ChainScanningService } from '../../services/ChainScanningService';
+import { ChainScanStatus } from '../../enums/ChainScanStatus';
 
 @Injectable()
-export class AddNewEventsAction {
+export class AddNewEventsAction implements OnModuleInit {
   logger: Logger;
-  private locker = new Map();
+  private readonly locker = new Map();
+  private readonly maxNonceChains = new Map();
 
   constructor(
+    @Inject(forwardRef(() => ChainScanningService))
+    private readonly chainScanningService: ChainScanningService,
+    @InjectConnection()
+    private readonly entityManager: EntityManager,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     @InjectRepository(SubmissionEntity)
@@ -23,6 +30,15 @@ export class AddNewEventsAction {
     private readonly web3Service: Web3Service,
   ) {
     this.logger = new Logger(AddNewEventsAction.name);
+  }
+
+  async onModuleInit() {
+    const chains = await this.entityManager.query(`
+SELECT "chainFrom", MAX(nonce::numeric) FROM public.submissions GROUP BY "chainFrom"
+       `);
+    for (const { chainFrom, max } of chains) {
+      this.maxNonceChains.set(chainFrom, max);
+    }
   }
 
   async action(chainId: number) {
@@ -48,7 +64,7 @@ export class AddNewEventsAction {
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(events: any[], chainIdFrom: number) {
+  async processNewTransfers(events: any[], chainIdFrom: number, rescan: boolean) {
     if (!events) return true;
     const isOk = true;
     for (const sendEvent of events) {
@@ -65,10 +81,26 @@ export class AddNewEventsAction {
         continue;
       }
 
+      if (!rescan) {
+        const nonce = parseInt(sendEvent.returnValues.nonce);
+        if (this.maxNonceChains.get(chainIdFrom) >= nonce) {
+          if (this.chainScanningService.status(chainIdFrom) === ChainScanStatus.IN_PROGRESS) {
+            this.chainScanningService.pause(chainIdFrom);
+            const message = `Incorrect nonce ${nonce} in chain ${chainIdFrom}`;
+            this.logger.error(message);
+            throw new Error(message);
+          }
+        } else {
+          this.maxNonceChains.set(chainIdFrom, nonce);
+        }
+      }
+
       try {
         await this.submissionsRepository.save({
           submissionId: submissionId,
           txHash: sendEvent.transactionHash,
+          blockNumber: sendEvent.blockNumber.toString(),
+          nonce: sendEvent.returnValues.nonce,
           chainFrom: chainIdFrom,
           chainTo: sendEvent.returnValues.chainIdTo,
           debridgeId: sendEvent.returnValues.debridgeId,
@@ -113,8 +145,9 @@ export class AddNewEventsAction {
    * @param {string} chainId
    * @param {number} from
    * @param {number} to
+   * @param {boolean} rescan
    */
-  async process(chainId: number, from: number = undefined, to: number = undefined) {
+  async process(chainId: number, from: number = undefined, to: number = undefined, rescan = false) {
     this.logger.verbose(`checkNewEvents ${chainId}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       where: {
@@ -139,7 +172,7 @@ export class AddNewEventsAction {
       this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
-      const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+      const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId, rescan);
 
       /* update lattest viewed block */
       if (processSuccess) {

@@ -67,4 +67,11 @@ export class SubmissionEntity {
   @Column()
   @Index()
   assetsStatus: SubmisionAssetsStatusEnum;
+
+  @Column({ nullable: true })
+  blockNumber: string;
+
+  @Column({ nullable: true })
+  @Index()
+  nonce: string;
 }

@@ -27,6 +27,9 @@ import { Web3Service } from './services/Web3Service';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ChainScanningService } from './services/ChainScanningService';
+import { RescanNonceAction } from './subscribe/actions/RescanNonceAction';
+import { DuplicateNonceEntity } from './entities/DublicatedNonceEntity';
+import { CheckDuplicatedNonceAction } from './subscribe/actions/CheckDuplicatedNonceAction';
 
 @Module({
   imports: [
@@ -56,10 +59,10 @@ import { ChainScanningService } from './services/ChainScanningService';
         password: configService.get('POSTGRES_PASSWORD', 'password'),
         database: configService.get('POSTGRES_DATABASE', 'postgres'),
         synchronize: true,
-        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
+        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, DuplicateNonceEntity],
       }),
     }),
-    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity]),
+    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, DuplicateNonceEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
@@ -82,6 +85,8 @@ import { ChainScanningService } from './services/ChainScanningService';
     DebrdigeApiService,
     StatisticToApiAction,
     ChainScanningService,
+    RescanNonceAction,
+    CheckDuplicatedNonceAction,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
