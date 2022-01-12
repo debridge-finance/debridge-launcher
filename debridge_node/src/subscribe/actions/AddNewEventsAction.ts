@@ -65,6 +65,7 @@ SELECT "chainFrom", MAX(nonce::numeric) FROM public.submissions GROUP BY "chainF
    * Process new transfers
    * @param {EventData[]} events
    * @param {number} chainIdFrom
+   * @param rescan
    * @private
    */
   async processNewTransfers(events: any[], chainIdFrom: number, rescan: boolean) {

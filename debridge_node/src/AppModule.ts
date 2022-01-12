@@ -28,6 +28,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ChainScanningService } from './services/ChainScanningService';
 import { RescanNonceAction } from './subscribe/actions/RescanNonceAction';
+import { FixNotExistsNonceBlocknumber } from './datafixes/FixNotExistsNonceBlocknumber';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { RescanNonceAction } from './subscribe/actions/RescanNonceAction';
     StatisticToApiAction,
     ChainScanningService,
     RescanNonceAction,
+    FixNotExistsNonceBlocknumber,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
