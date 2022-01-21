@@ -97,6 +97,23 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.1.5 (21.01.2022)
+* TODO: add changelog
+
+**Full Changelog**: https://github.com/debridge-finance/debridge-launcher/compare/v1.1.4...v1.1.5
+
+## How to update to v1.1.5
+### 1. Pull latest changes
+```shell
+git checkout master
+
+git pull
+```
+### 2. Run
+```shell
+docker-compose up -d --remove-orphans
+```
+
 ## v1.1.4 (24.12.2021)
 * temporary removed ipfs and orbitdb service
 * applied halborn security audit
