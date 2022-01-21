@@ -98,7 +98,8 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 
 # Changelog
 ## v1.1.5 (21.01.2022)
-* TODO: add changelog
+* add api to control chain scanning
+* fix docker-compose
 
 **Full Changelog**: https://github.com/debridge-finance/debridge-launcher/compare/v1.1.4...v1.1.5
 
