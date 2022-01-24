@@ -104,6 +104,13 @@ export class ChainConfigService {
     return this.chains;
   }
 
+  /**
+   * Get chains
+   */
+  getConfig() {
+    return chainConfigs;
+  }
+
   private generateChainProvides(config: any): ChainProvider {
     const providers = new Map<string, boolean>();
     if (config.providers) {
