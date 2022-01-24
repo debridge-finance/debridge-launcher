@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { readFileSync } from 'fs';
+import chainConfigs from '../config/chains_config.json';
 
 /**
  * Chain provider
@@ -74,7 +74,6 @@ export class ChainConfigService {
   private readonly chains: number[] = [];
 
   constructor() {
-    const chainConfigs = JSON.parse(readFileSync('config/chains_config.json', { encoding: 'utf-8' }));
     chainConfigs.forEach(config => {
       this.chains.push(config.chainId);
       this.configs.set(config.chainId, {
