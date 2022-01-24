@@ -20,7 +20,6 @@ RUN npm run build
 FROM node:14
 RUN mkdir /app
 WORKDIR /app
-RUN mkdir config
 COPY --from=builder /build/dist /app/dist
 COPY --from=builder /build/node_modules /app/node_modules
 COPY --from=builder /build/stats /app/stats
