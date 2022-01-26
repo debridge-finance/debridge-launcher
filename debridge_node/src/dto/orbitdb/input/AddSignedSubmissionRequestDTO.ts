@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
 export class AddSignedSubmissionRequestDTO {
   @IsNotEmpty()
@@ -10,5 +10,26 @@ export class AddSignedSubmissionRequestDTO {
   signature: string;
 
   @IsNotEmpty()
-  sendEvent: any;
+  @IsString()
+  debridgeId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  txHash: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  chainFrom: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  chainTo: number;
+
+  @IsNotEmpty()
+  @IsString()
+  amount: string;
+
+  @IsNotEmpty()
+  @IsString()
+  receiverAddr: string;
 }

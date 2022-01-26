@@ -1,19 +1,23 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SubmissionsConfirmationsRequestDTO } from '../dto/debridge_api/SubmissionsConfirmationsRequestDTO';
-import { SubmissionConfirmationResponse, SubmissionsConfirmationsResponseDTO } from '../dto/debridge_api/SubmissionsConfirmationsResponseDTO';
-import { Account } from 'web3-core';
-import Web3 from 'web3';
 import { readFileSync } from 'fs';
-import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/ValidationProgressDTO';
-import { createProxy } from '../utils/create.proxy';
-import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
-import { HttpAuthService } from './HttpAuthService';
-import { SubmissionEntity } from '../entities/SubmissionEntity';
-import { ConfirmNewAssetEntity } from '../entities/ConfirmNewAssetEntity';
-import { ConfrimNewAssetsResponseDTO } from '../dto/debridge_api/ConfrimNewAssetsResponseDTO';
+import Web3 from 'web3';
+import { Account } from 'web3-core';
+
 import { ConfrimNewAssetsRequestDTO } from '../dto/debridge_api/ConfrimNewAssetsRequestDTO';
+import { ConfrimNewAssetsResponseDTO } from '../dto/debridge_api/ConfrimNewAssetsResponseDTO';
+import { SubmissionsConfirmationsRequestDTO } from '../dto/debridge_api/SubmissionsConfirmationsRequestDTO';
+import {
+  SubmissionConfirmationResponse,
+  SubmissionsConfirmationsResponseDTO,
+} from '../dto/debridge_api/SubmissionsConfirmationsResponseDTO';
+import { UpdateOrbitDbDTO } from '../dto/debridge_api/UpdateOrbitDbDTO';
+import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/ValidationProgressDTO';
+import { ConfirmNewAssetEntity } from '../entities/ConfirmNewAssetEntity';
+import { SubmissionEntity } from '../entities/SubmissionEntity';
+import { createProxy } from '../utils/create.proxy';
+import { HttpAuthService } from './HttpAuthService';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
@@ -50,10 +54,10 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     };
   }
 
-  async updateOrbitDb(requestBody: UpdateOrbirDbDTO) {
-    this.logger.log(`updateOrbitDb ${requestBody} is started`);
+  async updateOrbitDb(requestBody: UpdateOrbitDbDTO) {
+    this.logger.log(`updateOrbitDb ${JSON.stringify(requestBody)} is started`);
     const httpResult = await this.authRequest('/Validator/updateOrbitDb', requestBody, this.getLoginDto());
-    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.verbose(`response: ${JSON.stringify(httpResult.data)}`);
     this.logger.log(`updateOrbitDb is finished`);
   }
 
@@ -92,7 +96,7 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     this.logger.log(`uploadStatisticToApi is started`);
     const httpResult = await this.authRequest('/Validator/updateProgress', requestBody, this.getLoginDto());
 
-    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.verbose(`response: ${JSON.stringify(httpResult.data)}`);
     const result = httpResult.data as SubmissionsConfirmationsResponseDTO;
     this.logger.log(`uploadStatisticToApi is finished`);
     return result.confirmations;

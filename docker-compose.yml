@@ -61,6 +61,9 @@ services:
       - THROTTLER_TTL=${THROTTLER_TTL}
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
       - WEB3_TIMEOUT=${WEB3_TIMEOUT}
+      - ORBITDB_URL=${ORBITDB_URL}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
     depends_on:
       - postgres
     networks:
