@@ -6,8 +6,11 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class Web3Service {
   private readonly logger = new Logger(Web3Service.name);
+  private readonly web3Timeout: number;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+    this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT'));
+  }
 
   async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3> {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
@@ -27,7 +30,7 @@ export class Web3Service {
     let web3 = undefined;
     try {
       const httpProvider = new Web3.providers.HttpProvider(provider, {
-        timeout: this.configService.get<number>('WEB3_TIMEOUT', 5 * 1000),
+        timeout: this.web3Timeout,
       });
       web3 = new Web3(httpProvider);
       this.logger.log(`Connection to ${provider} is started`);
