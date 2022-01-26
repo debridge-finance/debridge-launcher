@@ -60,6 +60,9 @@ services:
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
       - THROTTLER_TTL=${THROTTLER_TTL}
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
+      - ORBITDB_URL=${ORBITDB_URL}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
     depends_on:
       - postgres
     networks:

@@ -30,25 +30,22 @@ export class UploadToIPFSAction extends IAction {
     });
 
     for (const submission of submissions) {
-      const [logHash, doscHash] = await this.orbitDbService.addSignedSubmission(submission.submissionId, submission.signature, {
-        txHash: submission.txHash,
-        submissionId: submission.submissionId,
-        chainFrom: submission.chainFrom,
-        chainTo: submission.chainTo,
-        debridgeId: submission.debridgeId,
-        receiverAddr: submission.receiverAddr,
-        amount: submission.amount,
-        eventRaw: submission.rawEvent,
-      });
-      this.logger.log(`uploaded ${submission.submissionId} ipfsLogHash: ${logHash} ipfsKeyHash: ${doscHash}`);
+      const hash = await this.orbitDbService.addSignedSubmission(submission.submissionId,
+        submission.signature,
+        submission.debridgeId,
+        submission.txHash,
+        submission.chainFrom,
+        submission.chainTo,
+        submission.amount,
+        submission.receiverAddr);
+      this.logger.log(`uploaded ${submission.submissionId} ipfsLogHash: ${hash}`);
       await this.submissionsRepository.update(
         {
           submissionId: submission.submissionId,
         },
         {
           ipfsStatus: UploadStatusEnum.UPLOADED,
-          ipfsLogHash: logHash,
-          ipfsKeyHash: doscHash,
+          ipfsHash: hash,
         },
       );
     }
@@ -60,28 +57,24 @@ export class UploadToIPFSAction extends IAction {
     });
 
     for (const asset of assets) {
-      const [logHash, doscHash] = await this.orbitDbService.addConfirmNewAssets(asset.deployId, asset.signature, {
-        debridgeId: asset.debridgeId,
-        deployId: asset.deployId,
-        nativeChainId: asset.nativeChainId,
-        tokenAddress: asset.tokenAddress,
-        name: asset.name,
-        symbol: asset.symbol,
-        decimals: asset.decimals,
-        submissionTxHash: asset.submissionTxHash,
-        submissionChainFrom: asset.submissionChainFrom,
-        submissionChainTo: asset.submissionChainTo,
-      });
+      const hash = await this.orbitDbService.addConfirmNewAssets(asset.deployId,
+        asset.signature,
+        asset.tokenAddress,
+        asset.name,
+        asset.symbol,
+        asset.nativeChainId,
+        asset.decimals
+      );
 
-      this.logger.log(`uploaded deployId ${asset.deployId} ipfsLogHash: ${logHash} ipfsKeyHash: ${doscHash}`);
+      this.logger.log(`uploaded deployId ${asset.deployId} ipfsLogHash: ${hash}`);
       await this.confirmNewAssetEntityRepository.update(
         {
           deployId: asset.deployId,
         },
         {
           ipfsStatus: UploadStatusEnum.UPLOADED,
-          ipfsLogHash: logHash,
-          ipfsKeyHash: doscHash,
+          ipfsHash: hash,
+
         },
       );
     }

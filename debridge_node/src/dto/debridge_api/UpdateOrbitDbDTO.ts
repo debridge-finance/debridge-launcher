@@ -1,13 +1,13 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class UpdateOrbirDbDTO {
+export class UpdateOrbitDbDTO {
   @IsString()
   @IsNotEmpty()
-  orbitLogsDb: string;
+  submissionAddress: string;
 
   @IsString()
   @IsNotEmpty()
-  orbitDocsDb: string;
+  assetAddress: string;
 
   @IsString()
   @IsNotEmpty()
