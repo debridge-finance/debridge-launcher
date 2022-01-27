@@ -17,10 +17,10 @@ import { In, Repository } from 'typeorm';
 export class OrbitDbService extends HttpAuthService implements OnModuleInit {
   private readonly UPDATE_ORBITDB_INTERVAL = 5000; //5s
 
-  private readonly signedSubmissionsBatchCount = 100;
+  private readonly signedSubmissionsBatchSize: number;
+  private readonly signedSubmissionsUploadTimeout: number;
 
   private readonly signedSubmissions: AddLogSignedSubmissionRequestDTO[] = [];
-  private readonly signedSubmissionsUploadTimeout = 5000; //5s
 
   constructor(
     private readonly debrdigeApiService: DebrdigeApiService,
@@ -33,6 +33,8 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       login: configService.get('ORBITDB_LOGIN'),
       password: configService.get('ORBITDB_PASSWORD'),
     } as UserLoginDto);
+    this.signedSubmissionsBatchSize = parseInt(configService.get('SUBMISSIONS_BATCH_SIZE'));
+    this.signedSubmissionsUploadTimeout = parseInt(configService.get('SUBMISSIONS_UPLOAD_TIMEOUT'));
   }
 
   async onModuleInit() {
@@ -98,7 +100,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       amount,
       receiverAddr,
     } as AddLogSignedSubmissionRequestDTO);
-    if (this.signedSubmissions.length === this.signedSubmissionsBatchCount) {
+    if (this.signedSubmissions.length === this.signedSubmissionsBatchSize) {
       await this.addHashSubmissions(this.signedSubmissions);
       this.signedSubmissions.length = 0;
     }
@@ -129,7 +131,11 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
   }
 
   private async addHashSubmissions(data: AddLogSignedSubmissionRequestDTO[]) {
-    const hash = (await this.authRequest('/api/submissions', { data })).data;
+    this.logger.log(`start addHashSubmissions`);
+    if (!data) {
+      return;
+    }
+    const hash = (await this.authRequest('/api/submissions', { data })).hash;
     const submissions = data.map(submission => submission.submissionId);
     await this.submissionsRepository.update(
       {
@@ -140,6 +146,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
         ipfsHash: hash,
       },
     );
+    this.logger.log(`addHashSubmissions hash: ${hash}`);
     return hash;
   }
 }
