@@ -1,6 +1,6 @@
 FROM node:14 as builder
 RUN npm install npm@7 -g
-RUN npm install -g typescript@4.5.4 @nestjs/cli@8.1.6
+RUN npm install -g typescript@4.5.5 @nestjs/cli@8.2.0
 RUN mkdir /build
 
 COPY package.json /build

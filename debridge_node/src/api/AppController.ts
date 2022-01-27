@@ -7,6 +7,7 @@ import { RescanService } from './services/RescanService';
 import { AuthGuard } from '@nestjs/passport';
 import { GetSupportedChainsService } from './services/GetSupportedChainsService';
 import { ChainScanningService } from '../services/ChainScanningService';
+import { ChainConfigService } from '../services/ChainConfigService';
 
 @Controller()
 export class AppController {
@@ -15,6 +16,7 @@ export class AppController {
     private readonly rescanService: RescanService,
     private readonly getSupportedChainsService: GetSupportedChainsService,
     private readonly chainScanningService: ChainScanningService,
+    private readonly chainConfigService: ChainConfigService,
   ) {}
 
   @Get()
@@ -55,6 +57,14 @@ export class AppController {
   })
   getSupportedChains() {
     return this.getSupportedChainsService.get();
+  }
+
+  @Get('/chains/config')
+  @ApiOperation({
+    summary: 'Api for getting config of chains',
+  })
+  getChainsConfig() {
+    return this.chainConfigService.getConfig();
   }
 
   @Get('/chain/scan/pause')

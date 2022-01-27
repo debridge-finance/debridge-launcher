@@ -43,6 +43,7 @@ services:
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
       - THROTTLER_TTL=${THROTTLER_TTL}
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
+      - WEB3_TIMEOUT=${WEB3_TIMEOUT}
     depends_on:
       - postgres
     networks:
