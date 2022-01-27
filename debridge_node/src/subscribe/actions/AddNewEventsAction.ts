@@ -4,11 +4,11 @@ import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
-import ChainsConfig from '../../config/chains_config.json';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
-import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
 import { Web3Service } from '../../services/Web3Service';
+import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
+import { ChainConfigService } from '../../services/ChainConfigService';
 
 @Injectable()
 export class AddNewEventsAction {
@@ -20,6 +20,7 @@ export class AddNewEventsAction {
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
+    private readonly chainConfigService: ChainConfigService,
     private readonly web3Service: Web3Service,
   ) {
     this.logger = new Logger(AddNewEventsAction.name);
@@ -121,11 +122,9 @@ export class AddNewEventsAction {
         chainId,
       },
     });
-    const chainDetail = ChainsConfig.find(item => {
-      return item.chainId === chainId;
-    });
+    const chainDetail = this.chainConfigService.get(chainId);
 
-    const web3 = this.web3Service.web3HttpProvider(chainDetail.provider);
+    const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
 
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
 

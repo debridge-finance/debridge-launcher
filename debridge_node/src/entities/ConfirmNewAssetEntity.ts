@@ -1,6 +1,6 @@
-import { SubmisionStatusEnum } from 'src/enums/SubmisionStatusEnum';
-import { UploadStatusEnum } from 'src/enums/UploadStatusEnum';
 import { Column, Index, Entity, PrimaryColumn, Unique } from 'typeorm';
+import { SubmisionStatusEnum } from '../enums/SubmisionStatusEnum';
+import { UploadStatusEnum } from '../enums/UploadStatusEnum';
 
 @Entity('confirmNewAssets')
 @Unique(['deployId'])

@@ -1,11 +1,13 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UserLoginDto } from './auth/user.login.dto';
 import { AuthService } from './auth/auth.service';
 import { RescanDto } from './dto/RescanDto';
 import { RescanService } from './services/RescanService';
 import { AuthGuard } from '@nestjs/passport';
 import { GetSupportedChainsService } from './services/GetSupportedChainsService';
+import { ChainScanningService } from '../services/ChainScanningService';
+import { ChainConfigService } from '../services/ChainConfigService';
 
 @Controller()
 export class AppController {
@@ -13,6 +15,8 @@ export class AppController {
     private readonly authService: AuthService,
     private readonly rescanService: RescanService,
     private readonly getSupportedChainsService: GetSupportedChainsService,
+    private readonly chainScanningService: ChainScanningService,
+    private readonly chainConfigService: ChainConfigService,
   ) {}
 
   @Get()
@@ -53,5 +57,46 @@ export class AppController {
   })
   getSupportedChains() {
     return this.getSupportedChainsService.get();
+  }
+
+  @Get('/chains/config')
+  @ApiOperation({
+    summary: 'Api for getting config of chains',
+  })
+  getChainsConfig() {
+    return this.chainConfigService.getConfig();
+  }
+
+  @Get('/chain/scan/pause')
+  @ApiOperation({
+    summary: 'Api for pause chain scanning',
+  })
+  @ApiQuery({ name: 'chainId', required: true })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
+  pauseChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
+    return this.chainScanningService.pause(chainId);
+  }
+
+  @Get('/chain/scan/start')
+  @ApiQuery({ name: 'chainId', required: true })
+  @ApiOperation({
+    summary: 'Api for start chain scanning',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
+  startChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
+    return this.chainScanningService.start(chainId);
+  }
+
+  @Get('/chain/scan/status')
+  @ApiQuery({ name: 'chainId', required: true })
+  @ApiOperation({
+    summary: 'Api for status chain scanning',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
+  statusChainScan(@Query('chainId', ParseIntPipe) chainId: number) {
+    return this.chainScanningService.status(chainId);
   }
 }
