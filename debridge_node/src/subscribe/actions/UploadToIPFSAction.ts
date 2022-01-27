@@ -30,24 +30,17 @@ export class UploadToIPFSAction extends IAction {
     });
 
     for (const submission of submissions) {
-      const hash = await this.orbitDbService.addSignedSubmission(submission.submissionId,
+      await this.orbitDbService.addSignedSubmission(
+        submission.submissionId,
         submission.signature,
         submission.debridgeId,
         submission.txHash,
         submission.chainFrom,
         submission.chainTo,
         submission.amount,
-        submission.receiverAddr);
-      this.logger.log(`uploaded ${submission.submissionId} ipfsLogHash: ${hash}`);
-      await this.submissionsRepository.update(
-        {
-          submissionId: submission.submissionId,
-        },
-        {
-          ipfsStatus: UploadStatusEnum.UPLOADED,
-          ipfsHash: hash,
-        },
+        submission.receiverAddr,
       );
+      this.logger.log(`uploaded ${submission.submissionId} ipfsLogHash`);
     }
 
     //Process Assets
@@ -57,13 +50,14 @@ export class UploadToIPFSAction extends IAction {
     });
 
     for (const asset of assets) {
-      const hash = await this.orbitDbService.addConfirmNewAssets(asset.deployId,
+      const hash = await this.orbitDbService.addConfirmNewAssets(
+        asset.deployId,
         asset.signature,
         asset.tokenAddress,
         asset.name,
         asset.symbol,
         asset.nativeChainId,
-        asset.decimals
+        asset.decimals,
       );
 
       this.logger.log(`uploaded deployId ${asset.deployId} ipfsLogHash: ${hash}`);
@@ -74,7 +68,6 @@ export class UploadToIPFSAction extends IAction {
         {
           ipfsStatus: UploadStatusEnum.UPLOADED,
           ipfsHash: hash,
-
         },
       );
     }
