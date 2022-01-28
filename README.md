@@ -97,7 +97,7 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
-## v1.2.0 (27.01.2022)
+## v1.2.0 (28.01.2022)
 * Added support for multinode rpc connection
 * Send message to sentry if app was stopped
 * Refactor Dockerfile
@@ -108,15 +108,17 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 ### 1. Pull latest changes
 ```shell
 git checkout master
-git pull
+git pull origin master
 ```
 ### 2. Update .env file with new env var:
 ```
 WEB3_TIMEOUT=5000
 ```
-### 3. Run debridge-node
+### 3. Update config/chains_config.json to set up multiple rpc providers:
+![multiple rpc providers](./assets/multiple-rpc-providers.png)
+### 4. Run debridge-node
 ```shell
-docker-compose up -d --remove-orphans
+docker-compose up -d --build --remove-orphans
 ```
 
 ## v1.1.4 (24.12.2021)
