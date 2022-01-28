@@ -9,7 +9,7 @@ export class Web3Service {
   private readonly web3Timeout: number;
 
   constructor(private readonly configService: ConfigService) {
-    this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT'));
+    this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT', '10000'));
   }
 
   async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3> {
