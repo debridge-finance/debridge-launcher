@@ -41,6 +41,6 @@ export class Web3Service {
       this.logger.error(`Cann't connect to ${provider}: ${e.message}`);
       this.logger.error(e);
     }
-    return web3;
+    return undefined;
   }
 }
