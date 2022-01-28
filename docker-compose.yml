@@ -4,6 +4,8 @@ services:
     image: postgres:14.1
     container_name: postgres${DOCKER_ID}
     restart: unless-stopped
+    ports:
+      - 5432:5432
     environment:
       - PG_RANDOM_ID=${PG_RANDOM_ID}
       - POSTGRES_DATABASE=${POSTGRES_DATABASE}
@@ -43,6 +45,7 @@ services:
       - NODE_OPTIONS=${DEBRIDGE_NODE_NODE_OPTIONS}
       - THROTTLER_TTL=${THROTTLER_TTL}
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
+      - ENABLE_DATAFIX=${ENABLE_DATAFIX}
     depends_on:
       - postgres
     networks:
