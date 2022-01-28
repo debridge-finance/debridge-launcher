@@ -97,6 +97,28 @@ docker exec -it $(docker-compose ps | grep postgres | awk '{print $1}') psql -v 
 3. It's recommended to check `docker-compose logs` for ERROR
 
 # Changelog
+## v1.2.0 (27.01.2022)
+* Added support for multinode rpc connection
+* Send message to sentry if app was stopped
+* Refactor Dockerfile
+
+**Full Changelog**: https://github.com/debridge-finance/debridge-launcher/compare/v1.1.4...v1.2.0
+
+## How to update to v1.2.0
+### 1. Pull latest changes
+```shell
+git checkout master
+git pull
+```
+### 2. Update .env file with new env var:
+```
+WEB3_TIMEOUT=5000
+```
+### 3. Run debridge-node
+```shell
+docker-compose up -d --remove-orphans
+```
+
 ## v1.1.4 (24.12.2021)
 * temporary removed ipfs and orbitdb service
 * applied halborn security audit

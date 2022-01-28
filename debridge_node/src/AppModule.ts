@@ -27,6 +27,7 @@ import { Web3Service } from './services/Web3Service';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ChainScanningService } from './services/ChainScanningService';
+import { ChainConfigService } from './services/ChainConfigService';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { ChainScanningService } from './services/ChainScanningService';
     DebrdigeApiService,
     StatisticToApiAction,
     ChainScanningService,
+    ChainConfigService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

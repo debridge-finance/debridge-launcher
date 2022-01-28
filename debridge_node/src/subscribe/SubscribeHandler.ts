@@ -8,10 +8,10 @@ import { SignAction } from './actions/SignAction';
 import { UploadToIPFSAction } from './actions/UploadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
-import chainConfigs from './../config/chains_config.json';
 import { StatisticToApiAction } from './actions/StatisticToApiAction';
 import { Web3Service } from '../services/Web3Service';
 import { ChainScanningService } from '../services/ChainScanningService';
+import { ChainConfigService } from '../services/ChainConfigService';
 
 @Injectable()
 export class SubscribeHandler implements OnModuleInit {
@@ -29,28 +29,30 @@ export class SubscribeHandler implements OnModuleInit {
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     private readonly web3Service: Web3Service,
     private readonly chainScanningService: ChainScanningService,
+    private readonly chainConfigService: ChainConfigService,
   ) {}
 
   private async uploadConfig() {
-    for (const config of chainConfigs) {
+    for (const chainId of this.chainConfigService.getChains()) {
+      const chainConfig = this.chainConfigService.get(chainId);
       const configInDd = await this.supportedChainRepository.findOne({
         where: {
-          chainId: config.chainId,
+          chainId: chainId,
         },
       });
-      if (config.maxBlockRange <= 100) {
-        this.logger.error(`Cant up application maxBlockRange(${config.maxBlockRange}) < 100`);
-        process.exit();
+      if (chainConfig.maxBlockRange <= 100) {
+        this.logger.error(`Cant up application maxBlockRange(${chainConfig.maxBlockRange}) < 100`);
+        process.exit(1);
       }
-      if (config.blockConfirmation <= 8) {
-        this.logger.error(`Cant up application maxBlockRange(${config.blockConfirmation}) < 8`);
-        process.exit();
+      if (chainConfig.blockConfirmation <= 8) {
+        this.logger.error(`Cant up application maxBlockRange(${chainConfig.blockConfirmation}) < 8`);
+        process.exit(1);
       }
       if (!configInDd) {
         await this.supportedChainRepository.save({
-          chainId: config.chainId,
-          latestBlock: config.firstStartBlock,
-          network: config.name,
+          chainId: chainId,
+          latestBlock: chainConfig.firstStartBlock,
+          network: chainConfig.name,
         });
       }
     }
@@ -61,14 +63,12 @@ export class SubscribeHandler implements OnModuleInit {
 
     for (const chain of chains) {
       try {
-        const chainDetail = chainConfigs.find(item => {
-          return item.chainId === chain.chainId;
-        });
+        const chainDetail = this.chainConfigService.get(chain.chainId);
         if (!chainDetail) {
           this.logger.error(`${chain.chainId} ChainId from chains_config are not the same with the value from db`);
-          process.exit(1);
+          continue;
         }
-        const web3 = this.web3Service.web3HttpProvider(chainDetail.provider);
+        const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
 
         const web3ChainId = await web3.eth.getChainId();
         if (web3ChainId !== chainDetail.chainId) {
