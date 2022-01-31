@@ -16,6 +16,9 @@ export class Web3Service {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
       const web3 = await this.checkConnectionHttpProvider(provider);
       if (web3) {
+        if (!chainProvider.getProviderValidationStatus(provider)) {
+          await this.validateChainId(chainProvider, provider);
+        }
         chainProvider.setProviderStatus(provider, true);
         return web3;
       } else {
@@ -42,5 +45,18 @@ export class Web3Service {
       this.logger.error(e);
     }
     return undefined;
+  }
+
+  async validateChainId(chainProvider: ChainProvider, provider: string) {
+    const httpProvider = new Web3.providers.HttpProvider(provider, {
+      timeout: this.web3Timeout,
+    });
+    const web3 = new Web3(httpProvider);
+    const web3ChainId = await web3.eth.getChainId();
+    if (web3ChainId !== chainProvider.getChainId()) {
+      this.logger.error(`Checking correct RPC from config is failed (in config ${chainProvider.getChainId()} in rpc ${web3ChainId})`);
+      process.exit(1);
+    }
+    chainProvider.setProviderValidationStatus(provider, true);
   }
 }

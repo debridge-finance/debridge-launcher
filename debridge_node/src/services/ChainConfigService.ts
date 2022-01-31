@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import chainConfigs from '../config/chains_config.json';
 
+interface ChainProviderDetail {
+  isValid: boolean;
+  isActive: boolean;
+}
+
 /**
  * Chain provider
  */
 export class ChainProvider {
-  constructor(private readonly providers: Map<string, boolean>) {}
+  private readonly providers = new Map<string, ChainProviderDetail>();
+  constructor(private readonly providerList: string[], private readonly chainId: number) {
+    for (const provider of providerList) {
+      this.providers.set(provider, {
+        isValid: false,
+        isActive: true,
+      });
+    }
+  }
 
   /**
    * Get not failed provider
@@ -13,7 +26,7 @@ export class ChainProvider {
   getNotFailedProviders(): string[] {
     const providers = [];
     for (const provider of this.providers.keys()) {
-      if (this.providers.get(provider)) {
+      if (this.providers.get(provider).isActive && this.providers.get(provider).isValid) {
         providers.push(provider);
       }
     }
@@ -26,7 +39,7 @@ export class ChainProvider {
   getFailedProviders(): string[] {
     const providers = [];
     for (const provider of this.providers.keys()) {
-      if (!this.providers.get(provider)) {
+      if (!this.providers.get(provider).isActive) {
         providers.push(provider);
       }
     }
@@ -45,12 +58,57 @@ export class ChainProvider {
   }
 
   /**
-   * Get status of provider
+   * Set status to provider
    * @param {string} provider
    * @param {boolean} status
    */
   setProviderStatus(provider: string, status: boolean) {
-    this.providers.set(provider, status);
+    const details = this.providers.get(provider);
+    details.isActive = status;
+    this.providers.set(provider, details);
+  }
+
+  /**
+   * Get status to provider
+   * @param {string} provider
+   */
+  getProviderStatus(provider: string): boolean {
+    const details = this.providers.get(provider);
+    return details.isActive;
+  }
+
+  /**
+   * Set validation status to provider
+   * @param {string} provider
+   * @param {boolean} status
+   */
+  setProviderValidationStatus(provider: string, status: boolean) {
+    const details = this.providers.get(provider);
+    details.isValid = status;
+    this.providers.set(provider, details);
+  }
+
+  /**
+   * Get validation status to provider
+   * @param {string} provider
+   */
+  getProviderValidationStatus(provider: string): boolean {
+    const details = this.providers.get(provider);
+    return details.isValid;
+  }
+
+  /**
+   * Get counts of providers
+   */
+  size(): number {
+    return this.providers.size;
+  }
+
+  /**
+   * Get id of chain
+   */
+  getChainId(): number {
+    return this.chainId;
   }
 }
 
@@ -112,14 +170,12 @@ export class ChainConfigService {
   }
 
   private generateChainProvides(config: any): ChainProvider {
-    const providers = new Map<string, boolean>();
+    let providers: string[] = [];
     if (config.providers) {
-      config.providers.forEach(provider => {
-        providers.set(provider, true);
-      });
+      providers = config.providers;
     } else if (config.provider) {
-      providers.set(config.provider, true);
+      providers = [config.provider];
     }
-    return new ChainProvider(providers);
+    return new ChainProvider(providers, config.chainId);
   }
 }
