@@ -24,8 +24,6 @@ async function bootstrap() {
   const config = new DocumentBuilder().setTitle('Initiator').setVersion('1.0').addBearerAuth().build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
-  console.log('process.pid :>> ', process.pid);
-  process.abort();
   await app.listen(configService.get('PORT') || 3000);
 }
 bootstrap();
@@ -33,7 +31,7 @@ bootstrap();
 const timer = (ms: number) => new Promise(res => setTimeout(res, ms));
 async function addToSentry(message: string | any) {
   const eventId = Sentry.captureException(new Error(message));
-  await timer(10000);
+  await timer(1000);
   console.log('eventId', eventId);
 }
 
@@ -126,7 +124,6 @@ process.on('SIGTERM', async () => {
 process.on('uncaughtException', async (reason: string) => {
   if (process.env.SENTRY_DSN) {
     const message = `App is stopped: ${reason}`;
-
     await addToSentry(message);
     process.exit(1);
   }
