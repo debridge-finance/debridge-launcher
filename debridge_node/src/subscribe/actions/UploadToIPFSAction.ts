@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IAction } from './IAction';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+
+import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
-import { OrbitDbService } from '../../services/OrbitDbService';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
-import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
+import { OrbitDbService } from '../../services/OrbitDbService';
+import { IAction } from './IAction';
 
 @Injectable()
 export class UploadToIPFSAction extends IAction {
@@ -28,19 +29,22 @@ export class UploadToIPFSAction extends IAction {
       status: SubmisionStatusEnum.SIGNED,
       ipfsStatus: UploadStatusEnum.NEW,
     });
-
-    for (const submission of submissions) {
-      await this.orbitDbService.addSignedSubmission(
-        submission.submissionId,
-        submission.signature,
-        submission.debridgeId,
-        submission.txHash,
-        submission.chainFrom,
-        submission.chainTo,
-        submission.amount,
-        submission.receiverAddr,
+    const pageSize = this.orbitDbService.getBatchSize();
+    const size = Math.ceil(submissions.length / pageSize);
+    for (let pageNumber = 0; pageNumber < size; pageNumber++) {
+      const skip = pageNumber * pageSize;
+      const end = Math.min((pageNumber + 1) * pageSize, submissions.length);
+      const { hash, submissionIds } = await this.orbitDbService.addHashSubmissions(submissions.slice(skip, end));
+      await this.submissionsRepository.update(
+        {
+          submissionId: In(submissionIds),
+        },
+        {
+          ipfsStatus: UploadStatusEnum.UPLOADED,
+          ipfsHash: hash,
+        },
       );
-      this.logger.log(`uploaded ${submission.submissionId} ipfsLogHash`);
+      this.logger.log(`uploaded submissionIds to the orbitdb:${JSON.stringify(submissionIds)}`);
     }
 
     //Process Assets

@@ -1,17 +1,17 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { DebrdigeApiService } from './DebrdigeApiService';
 import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { readFileSync } from 'fs';
+import { Repository } from 'typeorm';
+
 import { UserLoginDto } from '../api/auth/user.login.dto';
-import { HttpAuthService } from './HttpAuthService';
-import { GetAddressResponseDTO } from '../dto/orbitdb/output/GetAddressResponseDTO';
 import { AddLogConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddLogConfirmNewAssetsRequestDTO';
 import { AddLogSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddLogSignedSubmissionRequestDTO';
-import { readFileSync } from 'fs';
-import { UploadStatusEnum } from '../enums/UploadStatusEnum';
-import { InjectRepository } from '@nestjs/typeorm';
+import { GetAddressResponseDTO } from '../dto/orbitdb/output/GetAddressResponseDTO';
 import { SubmissionEntity } from '../entities/SubmissionEntity';
-import { In, Repository } from 'typeorm';
+import { DebrdigeApiService } from './DebrdigeApiService';
+import { HttpAuthService } from './HttpAuthService';
 
 @Injectable()
 export class OrbitDbService extends HttpAuthService implements OnModuleInit {
@@ -34,7 +34,6 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       password: configService.get('ORBITDB_PASSWORD'),
     } as UserLoginDto);
     this.signedSubmissionsBatchSize = parseInt(configService.get('SUBMISSIONS_BATCH_SIZE'));
-    this.signedSubmissionsUploadTimeout = parseInt(configService.get('SUBMISSIONS_UPLOAD_TIMEOUT'));
   }
 
   async onModuleInit() {
@@ -68,42 +67,14 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
           }
         }
       }, this.UPDATE_ORBITDB_INTERVAL);
-
-      setInterval(async () => {
-        await this.addHashSubmissions(this.signedSubmissions);
-        this.signedSubmissions.length = 0;
-      }, this.signedSubmissionsUploadTimeout);
     } catch (e) {
       this.logger.error(`Error in initialization orbitdb service ${e.message}`);
       //process.exit(1);
     }
   }
 
-  async addSignedSubmission(
-    submissionId: string,
-    signature: string,
-    debridgeId: string,
-    txHash: string,
-    chainFrom: number,
-    chainTo: number,
-    amount: string,
-    receiverAddr: string,
-  ): Promise<void> {
-    this.logger.log(`addSignedSubmission start submissionId: ${submissionId}, signature: ${signature}`);
-    this.signedSubmissions.push({
-      submissionId,
-      signature,
-      debridgeId,
-      txHash,
-      chainFrom,
-      chainTo,
-      amount,
-      receiverAddr,
-    } as AddLogSignedSubmissionRequestDTO);
-    if (this.signedSubmissions.length === this.signedSubmissionsBatchSize) {
-      await this.addHashSubmissions(this.signedSubmissions);
-      this.signedSubmissions.length = 0;
-    }
+  getBatchSize(): number {
+    return this.signedSubmissionsBatchSize;
   }
 
   async addConfirmNewAssets(
@@ -130,23 +101,26 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
     return hash;
   }
 
-  private async addHashSubmissions(data: AddLogSignedSubmissionRequestDTO[]) {
+  async addHashSubmissions(submissions: SubmissionEntity[]) {
     this.logger.log(`start addHashSubmissions`);
-    if (!data) {
+    if (!submissions) {
       return;
     }
-    const hash = (await this.authRequest('/api/submissions', { data })).hash;
-    const submissions = data.map(submission => submission.submissionId);
-    await this.submissionsRepository.update(
-      {
-        submissionId: In(submissions),
-      },
-      {
-        ipfsStatus: UploadStatusEnum.UPLOADED,
-        ipfsHash: hash,
-      },
-    );
-    this.logger.log(`addHashSubmissions hash: ${hash}`);
-    return hash;
+    const data = submissions.map(submission => {
+      return {
+        submissionId: submission.submissionId,
+        signature: submission.signature,
+        debridgeId: submission.debridgeId,
+        txHash: submission.txHash,
+        chainFrom: submission.chainFrom,
+        chainTo: submission.chainTo,
+        amount: submission.amount,
+        receiverAddr: submission.receiverAddr,
+      };
+    });
+
+    const response = (await this.authRequest('/api/submissions', { data })).data;
+    const submissionIds = data.map(submission => submission.submissionId);
+    return { hash: response.hash, submissionIds };
   }
 }
