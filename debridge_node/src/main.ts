@@ -32,7 +32,7 @@ const timer = (ms: number) => new Promise(res => setTimeout(res, ms));
 async function addToSentry(message: string | any) {
   const eventId = Sentry.captureException(new Error(message));
   await timer(1000);
-  console.log('eventId', eventId);
+  console.log(`message: ${message}; eventId: ${eventId}`);
 }
 
 process.on('SIGHUP', async () => {
