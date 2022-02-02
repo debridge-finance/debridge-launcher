@@ -68,13 +68,12 @@ export class SubscribeHandler implements OnModuleInit {
           this.logger.error(`${chain.chainId} ChainId from chains_config are not the same with the value from db`);
           continue;
         }
-        const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
 
-        const web3ChainId = await web3.eth.getChainId();
-        if (web3ChainId !== chainDetail.chainId) {
-          this.logger.error(`Checking correct RPC from config is failed (in config ${chainDetail.chainId} in rpc ${web3ChainId})`);
-          process.exit(1);
-        }
+        await Promise.all(
+          chainDetail.providers.getAllProviders().map(provider => {
+            return this.web3Service.validateChainId(chainDetail.providers, provider);
+          }),
+        );
       } catch (e) {
         this.logger.error(`Error in validation configs for chain ${chain.chainId}: ${e.message}`);
         process.exit(1);
