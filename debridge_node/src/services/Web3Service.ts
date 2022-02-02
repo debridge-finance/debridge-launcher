@@ -15,17 +15,16 @@ export class Web3Service {
   async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3> {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
       const web3 = await this.checkConnectionHttpProvider(provider);
-      if (web3) {
-        if (!chainProvider.getProviderValidationStatus(provider)) {
-          await this.validateChainId(chainProvider, provider);
-        }
-        chainProvider.setProviderStatus(provider, true);
-        return web3;
-      } else {
+      if (!web3) {
         chainProvider.setProviderStatus(provider, false);
+        continue;
       }
+      if (!chainProvider.getProviderValidationStatus(provider)) {
+        await this.validateChainId(chainProvider, provider);
+      }
+      chainProvider.setProviderStatus(provider, true);
+      return web3;
     }
-
     this.logger.error(`Cann't connect to any provider`);
   }
 
@@ -48,15 +47,19 @@ export class Web3Service {
   }
 
   async validateChainId(chainProvider: ChainProvider, provider: string) {
-    const httpProvider = new Web3.providers.HttpProvider(provider, {
-      timeout: this.web3Timeout,
-    });
-    const web3 = new Web3(httpProvider);
-    const web3ChainId = await web3.eth.getChainId();
-    if (web3ChainId !== chainProvider.getChainId()) {
-      this.logger.error(`Checking correct RPC from config is failed (in config ${chainProvider.getChainId()} in rpc ${web3ChainId})`);
-      process.exit(1);
+    try {
+      const httpProvider = new Web3.providers.HttpProvider(provider, {
+        timeout: this.web3Timeout,
+      });
+      const web3 = new Web3(httpProvider);
+      const web3ChainId = await web3.eth.getChainId();
+      if (web3ChainId !== chainProvider.getChainId()) {
+        this.logger.error(`Checking correct RPC from config is failed (in config ${chainProvider.getChainId()} in rpc ${web3ChainId})`);
+        process.exit(1);
+      }
+      chainProvider.setProviderValidationStatus(provider, true);
+    } catch (error) {
+      this.logger.error(`Catch error: ${error}`);
     }
-    chainProvider.setProviderValidationStatus(provider, true);
   }
 }
