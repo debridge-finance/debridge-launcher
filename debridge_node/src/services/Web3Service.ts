@@ -18,7 +18,7 @@ export class Web3Service {
 
   async web3Execution<T>(chainProvider: ChainProvider, executor: Web3FunctionExecutor<T>): Promise<T> {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
-      const web3 = await this.checkConnectionHttpProvider(provider);
+      const { web3, httpProvider } = await this.checkConnectionHttpProvider(provider);
       if (!web3) {
         chainProvider.setProviderStatus(provider, false);
         continue;
@@ -35,24 +35,23 @@ export class Web3Service {
       } catch (e) {
         this.logger.error(`Error in web3 executor ${e.message}`);
       } finally {
-        await web3.givenProvider.disconnect();
+        await httpProvider.disconnect();
       }
     }
     this.logger.error(`Cann't connect to any provider`);
     process.kill(process.pid, 'SIGQUIT');
   }
 
-  private async checkConnectionHttpProvider(provider: string): Promise<Web3> {
-    let web3 = undefined;
+  private async checkConnectionHttpProvider(provider: string): Promise<{ web3: Web3, httpProvider }> {
     try {
       const httpProvider = new Web3.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
       });
-      web3 = new Web3(httpProvider);
+      const web3 = new Web3(httpProvider);
       this.logger.log(`Connection to ${provider} is started`);
       await web3.eth.getBlockNumber();
       this.logger.log(`Connection to ${provider} is success`);
-      return web3;
+      return { web3, httpProvider };
     } catch (e) {
       this.logger.error(`Cann't connect to ${provider}: ${e.message}`);
       this.logger.error(e);
