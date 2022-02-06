@@ -152,7 +152,11 @@ export class ChainConfigService {
    * @param chainId
    */
   get(chainId: number) {
-    return this.configs.get(chainId);
+    const chain = this.configs.get(chainId);
+    if (!chain) {
+      throw new Error(`Not found chain ${chainId}`);
+    }
+    return chain;
   }
 
   /**
