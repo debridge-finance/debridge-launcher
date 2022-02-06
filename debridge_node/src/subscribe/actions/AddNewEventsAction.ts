@@ -124,34 +124,34 @@ export class AddNewEventsAction {
     });
     const chainDetail = this.chainConfigService.get(chainId);
 
-    const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
+    await this.web3Service.web3Execution(chainDetail.providers, async web3 => {
+      const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
 
-    const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+      const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
+      let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
 
-    const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
-    let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
+      this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
 
-    this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
+      for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
+        const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
+        this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
-    for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
-      const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
-      this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
+        const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
+        const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
-      const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
-      const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
-
-      /* update lattest viewed block */
-      if (processSuccess) {
-        if (supportedChain.latestBlock != lastBlockOfPage) {
-          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
-          await this.supportedChainRepository.update(chainId, {
-            latestBlock: lastBlockOfPage,
-          });
+        /* update lattest viewed block */
+        if (processSuccess) {
+          if (supportedChain.latestBlock != lastBlockOfPage) {
+            this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
+            await this.supportedChainRepository.update(chainId, {
+              latestBlock: lastBlockOfPage,
+            });
+          }
+        } else {
+          this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
+          break;
         }
-      } else {
-        this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
-        break;
       }
-    }
+    });
   }
 }

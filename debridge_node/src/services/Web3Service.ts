@@ -3,6 +3,10 @@ import Web3 from 'web3';
 import { ChainProvider } from './ChainConfigService';
 import { ConfigService } from '@nestjs/config';
 
+interface Web3FunctionExecutor<T> {
+  (web3: Web3): Promise<T>;
+}
+
 @Injectable()
 export class Web3Service {
   private readonly logger = new Logger(Web3Service.name);
@@ -12,7 +16,7 @@ export class Web3Service {
     this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT', '10000'));
   }
 
-  async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3> {
+  async web3Execution<T>(chainProvider: ChainProvider, executor: Web3FunctionExecutor<T>): Promise<T> {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
       const web3 = await this.checkConnectionHttpProvider(provider);
       if (!web3) {
@@ -23,7 +27,16 @@ export class Web3Service {
         await this.validateChainId(chainProvider, provider);
       }
       chainProvider.setProviderStatus(provider, true);
-      return web3;
+      try {
+        this.logger.verbose(`web3 executor is started`);
+        const res = await executor(web3);
+        this.logger.verbose(`web3 executor is finished`);
+        return res;
+      } catch (e) {
+        this.logger.error(`Error in web3 executor ${e.message}`);
+      } finally {
+        await web3.givenProvider.disconnect();
+      }
     }
     this.logger.error(`Cann't connect to any provider`);
     process.kill(process.pid, 'SIGQUIT');
@@ -48,8 +61,9 @@ export class Web3Service {
   }
 
   async validateChainId(chainProvider: ChainProvider, provider: string) {
+    let httpProvider;
     try {
-      const httpProvider = new Web3.providers.HttpProvider(provider, {
+      httpProvider = new Web3.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
       });
       const web3 = new Web3(httpProvider);
@@ -61,6 +75,8 @@ export class Web3Service {
       chainProvider.setProviderValidationStatus(provider, true);
     } catch (error) {
       this.logger.error(`Catch error: ${error}`);
+    } finally {
+      await httpProvider.disconnect();
     }
   }
 }
