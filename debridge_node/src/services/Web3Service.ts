@@ -34,6 +34,7 @@ export class Web3Service {
     try {
       const httpProvider = new Web3.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
+        keepAlive: false,
       });
       web3 = new Web3(httpProvider);
       this.logger.log(`Connection to ${provider} is started`);
@@ -51,6 +52,7 @@ export class Web3Service {
     try {
       const httpProvider = new Web3.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
+        keepAlive: false,
       });
       const web3 = new Web3(httpProvider);
       const web3ChainId = await web3.eth.getChainId();
