@@ -26,7 +26,7 @@ export class Web3Service {
       }
       const httpProvider = new Web3.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
-        keepAlive: false,
+        keepAlive: true,
       });
       const web3 = new Web3(httpProvider);
       const isWorking = this.checkConnectionHttpProvider(web3);
