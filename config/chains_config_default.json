@@ -36,7 +36,7 @@
     "firstStartBlock": 21672977,
     "provider": "https://polygon-rpc.com/",
     "interval": 10000,
-    "blockConfirmation": 100,
+    "blockConfirmation": 256,
     "maxBlockRange": 1000
   },
   {
