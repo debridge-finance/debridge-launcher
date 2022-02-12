@@ -70,12 +70,12 @@ export class AddNewEventsAction implements OnModuleInit {
         continue;
       }
 
-      if (nonce !== this.maxNonceChains.get(chainIdFrom) + 1) {
-        const message = `Incorrect nonce ${nonce} in scanning from ${submission.chainFrom}`;
+      if (this.maxNonceChains.get(chainIdFrom) && nonce !== this.maxNonceChains.get(chainIdFrom) + 1) {
+        const message = `Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`;
         this.logger.error(message);
         return 'incorrect_nonce';
       } else {
-        this.maxNonceChains.set(submission.chainFrom, nonce);
+        this.maxNonceChains.set(chainIdFrom, nonce);
       }
 
       try {
@@ -157,13 +157,12 @@ export class AddNewEventsAction implements OnModuleInit {
 
       if (processSuccess === 'incorrect_nonce') {
         // @ts-ignore
-        chainDetail.providers.setProviderStatus(web3.currentProvider.provider, false);
+        const host = web3.currentProvider.host;
+        chainDetail.providers.setProviderStatus(host, false);
+        this.logger.verbose(`Web3 ${host} is disabled`);
         break;
-      }
-
-      /* update lattest viewed block */
-      if (processSuccess) {
-        if (supportedChain.latestBlock != lastBlockOfPage) {
+      } else if (processSuccess) {
+        if (supportedChain.latestBlock !== lastBlockOfPage) {
           this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
           await this.supportedChainRepository.update(chainId, {
             latestBlock: processSuccess,
