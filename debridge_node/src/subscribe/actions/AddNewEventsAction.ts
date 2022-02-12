@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
@@ -11,9 +11,10 @@ import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService } from '../../services/ChainConfigService';
 
 @Injectable()
-export class AddNewEventsAction {
+export class AddNewEventsAction implements OnModuleInit {
   logger: Logger;
-  private locker = new Map();
+  private readonly locker = new Map();
+  private readonly maxNonceChains = new Map();
 
   constructor(
     @InjectRepository(SupportedChainEntity)
@@ -22,6 +23,8 @@ export class AddNewEventsAction {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     private readonly chainConfigService: ChainConfigService,
     private readonly web3Service: Web3Service,
+    @InjectConnection()
+    private readonly entityManager: EntityManager,
   ) {
     this.logger = new Logger(AddNewEventsAction.name);
   }
@@ -49,13 +52,14 @@ export class AddNewEventsAction {
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(events: any[], chainIdFrom: number) {
+  async processNewTransfers(events: any[], chainIdFrom: number, provider?: string) {
     if (!events) return true;
     const isOk = true;
     for (const sendEvent of events) {
       this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${sendEvent.returnValues.submissionId}`);
       //this.logger.debug(JSON.stringify(sentEvents));
       const submissionId = sendEvent.returnValues.submissionId;
+      const nonce = parseInt(sendEvent.returnValues.nonce);
       const submission = await this.submissionsRepository.findOne({
         where: {
           submissionId,
@@ -64,6 +68,12 @@ export class AddNewEventsAction {
       if (submission) {
         this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
         continue;
+      }
+
+      if (nonce !== this.maxNonceChains.get(submission.chainFrom) + 1) {
+        const message = `Miss nonce ${nonce} in scanning from ${submission.chainFrom}`;
+        this.logger.error(message);
+        throw new Error(message);
       }
 
       try {
@@ -80,6 +90,8 @@ export class AddNewEventsAction {
           apiStatus: UploadStatusEnum.NEW,
           assetsStatus: SubmisionAssetsStatusEnum.NEW,
           rawEvent: JSON.stringify(sendEvent),
+          blockNumber: sendEvent.blockNumber,
+          nonce,
         } as SubmissionEntity);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
@@ -152,6 +164,16 @@ export class AddNewEventsAction {
         this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
         break;
       }
+    }
+  }
+
+  async onModuleInit() {
+    const chains = await this.entityManager.query(`
+ SELECT "chainFrom", MAX(nonce) FROM public.submissions GROUP BY "chainFrom"
+        `);
+    for (const { chainFrom, max } of chains) {
+      this.maxNonceChains.set(chainFrom, max);
+      this.logger.verbose(`Max nonce in chain ${chainFrom} is ${max}`);
     }
   }
 }

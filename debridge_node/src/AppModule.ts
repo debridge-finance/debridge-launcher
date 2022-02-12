@@ -28,9 +28,12 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ChainScanningService } from './services/ChainScanningService';
 import { ChainConfigService } from './services/ChainConfigService';
+import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
+import { DataFixModule } from './datafixes/DataFixModule';
 
 @Module({
   imports: [
+    //DataFixModule,
     HttpModule.register({
       timeout: 30000, //30s
     }),
@@ -84,6 +87,7 @@ import { ChainConfigService } from './services/ChainConfigService';
     StatisticToApiAction,
     ChainScanningService,
     ChainConfigService,
+    FixNotExistsNonceBlockNumber,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
