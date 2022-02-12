@@ -10,6 +10,11 @@ import { Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService } from '../../services/ChainConfigService';
 
+interface ProcessNewTransferResult {
+  lastSuccessBlockNumber: number;
+  status: 'incorrect_nonce' | 'success';
+}
+
 @Injectable()
 export class AddNewEventsAction implements OnModuleInit {
   logger: Logger;
@@ -52,13 +57,13 @@ export class AddNewEventsAction implements OnModuleInit {
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(events: any[], chainIdFrom: number): Promise<number | 'incorrect_nonce'> {
-    let lastSuccessBlock;
+  async processNewTransfers(events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
+    let lastSuccessBlockNumber;
     if (!events) return;
     for (const sendEvent of events) {
-      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${sendEvent.returnValues.submissionId}`);
-      //this.logger.debug(JSON.stringify(sentEvents));
       const submissionId = sendEvent.returnValues.submissionId;
+      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${submissionId}`);
+      //this.logger.debug(JSON.stringify(sentEvents));
       const nonce = parseInt(sendEvent.returnValues.nonce);
       const submission = await this.submissionsRepository.findOne({
         where: {
@@ -73,9 +78,10 @@ export class AddNewEventsAction implements OnModuleInit {
       if (this.maxNonceChains.get(chainIdFrom) && nonce !== this.maxNonceChains.get(chainIdFrom) + 1) {
         const message = `Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`;
         this.logger.error(message);
-        return 'incorrect_nonce';
-      } else {
-        this.maxNonceChains.set(chainIdFrom, nonce);
+        return {
+          lastSuccessBlockNumber,
+          status: 'incorrect_nonce',
+        };
       }
 
       try {
@@ -95,13 +101,17 @@ export class AddNewEventsAction implements OnModuleInit {
           blockNumber: sendEvent.blockNumber,
           nonce,
         } as SubmissionEntity);
-        lastSuccessBlock = sendEvent.blockNumber;
+        lastSuccessBlockNumber = sendEvent.blockNumber;
+        this.maxNonceChains.set(chainIdFrom, nonce);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
         throw e;
       }
     }
-    return lastSuccessBlock;
+    return {
+      lastSuccessBlockNumber,
+      status: 'success',
+    };
   }
 
   async getEvents(registerInstance, fromBlock: number, toBlock) {
@@ -153,20 +163,22 @@ export class AddNewEventsAction implements OnModuleInit {
       this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
-      const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+      const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
-      if (processSuccess === 'incorrect_nonce') {
-        // @ts-ignore
-        const host = web3.currentProvider.host;
-        chainDetail.providers.setProviderStatus(host, false);
-        this.logger.verbose(`Web3 ${host} is disabled`);
-        break;
-      } else if (processSuccess) {
+      if (result) {
         if (supportedChain.latestBlock !== lastBlockOfPage) {
           this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
           await this.supportedChainRepository.update(chainId, {
-            latestBlock: processSuccess,
+            latestBlock: result.lastSuccessBlockNumber,
           });
+
+          if (result.status === 'incorrect_nonce') {
+            // @ts-ignore
+            const host = web3.currentProvider.host;
+            chainDetail.providers.setProviderStatus(host, false);
+            this.logger.verbose(`Web3 ${host} is disabled`);
+            break;
+          }
         }
       } else {
         this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
