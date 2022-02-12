@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { FixNotExistsNonceBlockNumber } from './FixNotExistsNonceBlockNumber';
 
 @Module({
-  imports: [ConfigModule.forRoot()],
+  imports: [ConfigModule],
   providers: [FixNotExistsNonceBlockNumber],
 })
 export class DataFixModule {}

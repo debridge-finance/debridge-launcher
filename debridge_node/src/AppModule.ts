@@ -33,7 +33,7 @@ import { DataFixModule } from './datafixes/DataFixModule';
 
 @Module({
   imports: [
-    //DataFixModule,
+    DataFixModule,
     HttpModule.register({
       timeout: 30000, //30s
     }),
