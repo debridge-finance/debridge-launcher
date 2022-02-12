@@ -20,6 +20,7 @@ export class FixNotExistsNonceBlockNumber implements OnModuleInit {
 
   async onModuleInit() {
     if (this.configService.get('ENABLE_DATAFIX') !== 'true') {
+      await this.pool.end();
       return;
     }
     const queryFunc = promisify(this.pool.query).bind(this.pool);
