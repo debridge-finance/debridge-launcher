@@ -52,9 +52,9 @@ export class AddNewEventsAction implements OnModuleInit {
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(events: any[], chainIdFrom: number, provider?: string) {
-    if (!events) return true;
-    const isOk = true;
+  async processNewTransfers(events: any[], chainIdFrom: number): Promise<number | 'incorrect_nonce'> {
+    let lastSuccessBlock;
+    if (!events) return;
     for (const sendEvent of events) {
       this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${sendEvent.returnValues.submissionId}`);
       //this.logger.debug(JSON.stringify(sentEvents));
@@ -71,9 +71,11 @@ export class AddNewEventsAction implements OnModuleInit {
       }
 
       if (nonce !== this.maxNonceChains.get(submission.chainFrom) + 1) {
-        const message = `Miss nonce ${nonce} in scanning from ${submission.chainFrom}`;
+        const message = `Incorrect nonce ${nonce} in scanning from ${submission.chainFrom}`;
         this.logger.error(message);
-        throw new Error(message);
+        return 'incorrect_nonce';
+      } else {
+        this.maxNonceChains.set(submission.chainFrom, nonce);
       }
 
       try {
@@ -93,12 +95,13 @@ export class AddNewEventsAction implements OnModuleInit {
           blockNumber: sendEvent.blockNumber,
           nonce,
         } as SubmissionEntity);
+        lastSuccessBlock = sendEvent.blockNumber;
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
         throw e;
       }
     }
-    return isOk;
+    return lastSuccessBlock;
   }
 
   async getEvents(registerInstance, fromBlock: number, toBlock) {
@@ -152,12 +155,18 @@ export class AddNewEventsAction implements OnModuleInit {
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
       const processSuccess = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
+      if (processSuccess === 'incorrect_nonce') {
+        // @ts-ignore
+        chainDetail.providers.setProviderStatus(web3.currentProvider.provider, false);
+        break;
+      }
+
       /* update lattest viewed block */
       if (processSuccess) {
         if (supportedChain.latestBlock != lastBlockOfPage) {
           this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
           await this.supportedChainRepository.update(chainId, {
-            latestBlock: lastBlockOfPage,
+            latestBlock: processSuccess,
           });
         }
       } else {
