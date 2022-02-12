@@ -70,7 +70,7 @@ export class AddNewEventsAction implements OnModuleInit {
         continue;
       }
 
-      if (nonce !== this.maxNonceChains.get(submission.chainFrom) + 1) {
+      if (nonce !== this.maxNonceChains.get(chainIdFrom) + 1) {
         const message = `Incorrect nonce ${nonce} in scanning from ${submission.chainFrom}`;
         this.logger.error(message);
         return 'incorrect_nonce';
