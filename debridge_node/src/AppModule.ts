@@ -28,6 +28,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ChainScanningService } from './services/ChainScanningService';
 import { ChainConfigService } from './services/ChainConfigService';
+import { TokenBalanceHistory } from './entities/TokenBalanceHistory';
 
 @Module({
   imports: [
@@ -57,10 +58,10 @@ import { ChainConfigService } from './services/ChainConfigService';
         password: configService.get('POSTGRES_PASSWORD', 'password'),
         database: configService.get('POSTGRES_DATABASE', 'postgres'),
         synchronize: true,
-        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
+        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, TokenBalanceHistory],
       }),
     }),
-    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity]),
+    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, TokenBalanceHistory]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
