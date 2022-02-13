@@ -1,7 +1,7 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { EntityManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
@@ -9,17 +9,16 @@ import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum
 import { Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService } from '../../services/ChainConfigService';
+import { NonceControllingService } from './NonceControllingService';
 
 interface ProcessNewTransferResult {
   lastSuccessBlockNumber?: number;
   status: 'incorrect_nonce' | 'success' | 'empty';
 }
 
-@Injectable()
-export class AddNewEventsAction implements OnModuleInit {
-  private readonly logger = new Logger(AddNewEventsAction.name);
+export class AddNewEventsAction {
+  private logger = new Logger(AddNewEventsAction.name);
   private readonly locker = new Map();
-  private readonly maxNonceChains = new Map();
 
   constructor(
     @InjectRepository(SupportedChainEntity)
@@ -28,8 +27,7 @@ export class AddNewEventsAction implements OnModuleInit {
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     private readonly chainConfigService: ChainConfigService,
     private readonly web3Service: Web3Service,
-    @InjectConnection()
-    private readonly entityManager: EntityManager,
+    private readonly nonceControllingService: NonceControllingService,
   ) {}
 
   async action(chainId: number) {
@@ -77,7 +75,7 @@ export class AddNewEventsAction implements OnModuleInit {
         continue;
       }
 
-      if (this.maxNonceChains.get(chainIdFrom) && nonce !== this.maxNonceChains.get(chainIdFrom) + 1) {
+      if (this.nonceControllingService.get(chainIdFrom) && nonce !== this.nonceControllingService.get(chainIdFrom) + 1) {
         const message = `Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`;
         this.logger.error(message);
         return {
@@ -104,7 +102,7 @@ export class AddNewEventsAction implements OnModuleInit {
           nonce,
         } as SubmissionEntity);
         lastSuccessBlockNumber = sendEvent.blockNumber;
-        this.maxNonceChains.set(chainIdFrom, nonce);
+        this.nonceControllingService.set(chainIdFrom, nonce);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
         throw e;
@@ -143,6 +141,7 @@ export class AddNewEventsAction implements OnModuleInit {
    * @param {number} to
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
+    this.logger = new Logger(`${AddNewEventsAction.name} ${chainId}`);
     this.logger.verbose(`checkNewEvents ${chainId}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       where: {
@@ -193,16 +192,6 @@ export class AddNewEventsAction implements OnModuleInit {
         this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
         break;
       }
-    }
-  }
-
-  async onModuleInit() {
-    const chains = await this.entityManager.query(`
- SELECT "chainFrom", MAX(nonce) FROM public.submissions GROUP BY "chainFrom"
-        `);
-    for (const { chainFrom, max } of chains) {
-      this.maxNonceChains.set(chainFrom, max);
-      this.logger.verbose(`Max nonce in chain ${chainFrom} is ${max}`);
     }
   }
 }
