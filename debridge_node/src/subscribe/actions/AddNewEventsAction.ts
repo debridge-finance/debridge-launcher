@@ -20,6 +20,7 @@ interface ProcessNewTransferResult {
 export class AddNewEventsAction {
   private logger = new Logger(AddNewEventsAction.name);
   private readonly locker = new Map();
+  private readonly chainingScanningMap = new Map<number, AddNewEventsAction>();
 
   constructor(
     @InjectRepository(SupportedChainEntity)
@@ -39,7 +40,19 @@ export class AddNewEventsAction {
     try {
       this.locker.set(chainId, true);
       this.logger.log(`Is locked chainId: ${chainId}`);
-      await this.process(chainId);
+      if (!this.chainingScanningMap.has(chainId)) {
+        this.chainingScanningMap.set(
+          chainId,
+          new AddNewEventsAction(
+            this.supportedChainRepository,
+            this.submissionsRepository,
+            this.chainConfigService,
+            this.web3Service,
+            this.nonceControllingService,
+          ),
+        );
+      }
+      await this.chainingScanningMap.get(chainId).process(chainId);
     } catch (e) {
       this.logger.error(e);
     } finally {
@@ -142,6 +155,7 @@ export class AddNewEventsAction {
    * @param {number} to
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
+    this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
     this.logger.verbose(`checkNewEvents ${chainId}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       where: {
