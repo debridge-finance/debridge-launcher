@@ -11,13 +11,13 @@ import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService } from '../../services/ChainConfigService';
 
 interface ProcessNewTransferResult {
-  lastSuccessBlockNumber: number;
-  status: 'incorrect_nonce' | 'success';
+  lastSuccessBlockNumber?: number;
+  status: 'incorrect_nonce' | 'success' | 'empty';
 }
 
 @Injectable()
 export class AddNewEventsAction implements OnModuleInit {
-  logger: Logger;
+  private readonly logger = new Logger(AddNewEventsAction.name);
   private readonly locker = new Map();
   private readonly maxNonceChains = new Map();
 
@@ -30,9 +30,7 @@ export class AddNewEventsAction implements OnModuleInit {
     private readonly web3Service: Web3Service,
     @InjectConnection()
     private readonly entityManager: EntityManager,
-  ) {
-    this.logger = new Logger(AddNewEventsAction.name);
-  }
+  ) {}
 
   async action(chainId: number) {
     if (this.locker.get(chainId)) {
@@ -59,7 +57,11 @@ export class AddNewEventsAction implements OnModuleInit {
    */
   async processNewTransfers(events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
     let lastSuccessBlockNumber;
-    if (!events) return;
+    if (!events) {
+      return {
+        status: 'empty',
+      };
+    }
     for (const sendEvent of events) {
       const submissionId = sendEvent.returnValues.submissionId;
       this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${submissionId}`);
@@ -163,11 +165,18 @@ export class AddNewEventsAction implements OnModuleInit {
       this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
+      if (!sentEvents || sentEvents.length === 0) {
+        this.logger.verbose(`Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
+        await this.supportedChainRepository.update(chainId, {
+          latestBlock: lastBlockOfPage,
+        });
+        continue;
+      }
       const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
-      if (result) {
+      if (result && result.lastSuccessBlockNumber) {
         if (supportedChain.latestBlock !== lastBlockOfPage) {
-          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlockOfPage}`);
+          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${result.lastSuccessBlockNumber}`);
           await this.supportedChainRepository.update(chainId, {
             latestBlock: result.lastSuccessBlockNumber,
           });
