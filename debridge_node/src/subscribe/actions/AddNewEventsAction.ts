@@ -16,6 +16,7 @@ interface ProcessNewTransferResult {
   status: 'incorrect_nonce' | 'success' | 'empty';
 }
 
+@Injectable()
 export class AddNewEventsAction {
   private logger = new Logger(AddNewEventsAction.name);
   private readonly locker = new Map();
