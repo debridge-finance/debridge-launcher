@@ -14,6 +14,7 @@ import { SubmissionEntity } from '../entities/SubmissionEntity';
 import { ConfirmNewAssetEntity } from '../entities/ConfirmNewAssetEntity';
 import { ConfrimNewAssetsResponseDTO } from '../dto/debridge_api/ConfrimNewAssetsResponseDTO';
 import { ConfrimNewAssetsRequestDTO } from '../dto/debridge_api/ConfrimNewAssetsRequestDTO';
+import { IncorrectNonceNotificationDTO } from '../dto/debridge_api/IncorrectNonceNotificationDTO';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
@@ -116,5 +117,18 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     const result = httpResult.data as ConfrimNewAssetsResponseDTO;
     this.logger.log(`uploadConfirmNewAssetsToApi is finished`);
     return result;
+  }
+
+  async notifyIncorrectNonce(nonce: string, chainId: number, submissionId: string) {
+    const requestBody = {
+      nonce,
+      chainId,
+      submissionId,
+    } as IncorrectNonceNotificationDTO;
+    this.logger.log(`notifyIncorrectNonce is started`);
+    const httpResult = await this.authRequest('/Validator/notifyIncorrectNonce', requestBody, this.getLoginDto());
+
+    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.log(`notifyIncorrectNonce is finished`);
   }
 }
