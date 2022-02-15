@@ -19,16 +19,12 @@ export class FixNotExistsNonceBlockNumber implements OnModuleInit {
   }
 
   async onModuleInit() {
+    this.logger.log('datafix service started');
     if (this.configService.get('ENABLE_DATAFIX') !== 'true') {
       await this.pool.end();
       return;
     }
     const queryFunc = promisify(this.pool.query).bind(this.pool);
-    await queryFunc('ALTER TABLE submissions ADD COLUMN nonce numeric');
-    this.logger.log(`Nonce is added to submissions`);
-
-    await queryFunc('ALTER TABLE submissions ADD COLUMN "blockNumber" numeric');
-    this.logger.log(`blockNumber is added to submissions`);
 
     this.logger.log(`Start setting Nonce and Blocknumber if not exists`);
     let size = 0;
@@ -40,7 +36,7 @@ export class FixNotExistsNonceBlockNumber implements OnModuleInit {
           const { submissionId, rawEvent } = submission;
           const rawEventJson = JSON.parse(rawEvent);
           this.logger.log(`Nonce and blockNumber are added to submission ${submissionId}`);
-          return queryFunc('UPDATE submissions SET blockNumber = $1, nonce = $2 WHERE submissionId = $3', [
+          return queryFunc('UPDATE submissions SET "blockNumber" = $1, nonce = $2 WHERE "submissionId" = $3', [
             rawEventJson.blockNumber,
             parseInt(rawEventJson.returnValues.nonce),
             submissionId,
