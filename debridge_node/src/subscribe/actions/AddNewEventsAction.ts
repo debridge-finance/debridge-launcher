@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { Repository } from 'typeorm';
@@ -10,6 +10,7 @@ import { Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService } from '../../services/ChainConfigService';
 import { NonceControllingService } from './NonceControllingService';
+import { ChainScanningService } from '../../services/ChainScanningService';
 
 interface ProcessNewTransferResult {
   lastSuccessBlockNumber?: number;
@@ -23,6 +24,8 @@ export class AddNewEventsAction {
   private readonly chainingScanningMap = new Map<number, AddNewEventsAction>();
 
   constructor(
+    @Inject(forwardRef(() => ChainScanningService))
+    private readonly chainScanningService: ChainScanningService,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     @InjectRepository(SubmissionEntity)
@@ -44,6 +47,7 @@ export class AddNewEventsAction {
         this.chainingScanningMap.set(
           chainId,
           new AddNewEventsAction(
+            this.chainScanningService,
             this.supportedChainRepository,
             this.submissionsRepository,
             this.chainConfigService,
@@ -199,6 +203,10 @@ export class AddNewEventsAction {
             const host = web3.currentProvider.host;
             chainDetail.providers.setProviderStatus(host, false);
             this.logger.verbose(`Web3 ${host} is disabled`);
+            if (chainDetail.providers.getFailedProviders().length === chainDetail.providers.getAllProviders().length) {
+              this.chainScanningService.pause(chainId);
+            }
+            //await this.debrdigeApiService.notifyIncorrectNonce(sendEvent.returnValues.nonce, chainIdFrom, submissionId);
             break;
           }
         }
