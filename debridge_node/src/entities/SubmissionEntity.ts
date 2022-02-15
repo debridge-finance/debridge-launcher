@@ -1,4 +1,4 @@
-import { Column, Entity, Index, PrimaryColumn, Unique } from 'typeorm';
+import { Column, CreateDateColumn, UpdateDateColumn, Entity, Index, PrimaryColumn, Unique } from 'typeorm';
 import { SubmisionStatusEnum } from '../enums/SubmisionStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../enums/SubmisionAssetsStatusEnum';
 import { UploadStatusEnum } from '../enums/UploadStatusEnum';
@@ -75,4 +75,10 @@ export class SubmissionEntity {
   @Column({ nullable: true })
   @Index()
   blockNumber: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
