@@ -18,17 +18,33 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
+import { NonceControllingService } from './subscribe/actions/NonceControllingService';
 import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 import { MonitoringModule } from './monitoring/MonitoringModule';
 import { Web3Service } from './services/Web3Service';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ChainScanningService } from './services/ChainScanningService';
+import { ChainConfigService } from './services/ChainConfigService';
+import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
+import { DataFixModule } from './datafixes/DataFixModule';
 
 @Module({
   imports: [
+    DataFixModule,
     HttpModule.register({
       timeout: 30000, //30s
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        ttl: configService.get('THROTTLER_TTL', 60),
+        limit: configService.get('THROTTLER_LIMIT', 10),
+      }),
     }),
     MonitoringModule,
     ConfigModule.forRoot(),
@@ -64,20 +80,20 @@ import { Web3Service } from './services/Web3Service';
     SignAction,
     UploadToIPFSAction,
     UploadToApiAction,
+    NonceControllingService,
     CheckAssetsEventAction,
     SubscribeHandler,
     GetSupportedChainsService,
     OrbitDbService,
     DebrdigeApiService,
     StatisticToApiAction,
-    // {
-    //   provide: DebrdigeApiService,
-    //   useFactory: async () => {
-    //     const service = new DebrdigeApiService();
-    //     await service.init();
-    //     return service;
-    //   }
-    // },
+    ChainScanningService,
+    ChainConfigService,
+    FixNotExistsNonceBlockNumber,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

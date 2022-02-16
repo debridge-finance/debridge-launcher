@@ -1,12 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { SubmissionEntity } from 'src/entities/SubmissionEntity';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { SubmissionsConfirmationsRequestDTO } from '../dto/debridge_api/SubmissionsConfirmationsRequestDTO';
 import { SubmissionConfirmationResponse, SubmissionsConfirmationsResponseDTO } from '../dto/debridge_api/SubmissionsConfirmationsResponseDTO';
-import { ConfirmNewAssetEntity } from 'src/entities/ConfirmNewAssetEntity';
-import { ConfrimNewAssetsRequestDTO } from 'src/dto/debridge_api/ConfrimNewAssetsRequestDTO';
-import { ConfrimNewAssetsResponseDTO } from 'src/dto/debridge_api/ConfrimNewAssetsResponseDTO';
 import { Account } from 'web3-core';
 import Web3 from 'web3';
 import { readFileSync } from 'fs';
@@ -14,7 +10,11 @@ import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/Vali
 import { createProxy } from '../utils/create.proxy';
 import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
 import { HttpAuthService } from './HttpAuthService';
-import { version } from './../../package.json';
+import { SubmissionEntity } from '../entities/SubmissionEntity';
+import { ConfirmNewAssetEntity } from '../entities/ConfirmNewAssetEntity';
+import { ConfrimNewAssetsResponseDTO } from '../dto/debridge_api/ConfrimNewAssetsResponseDTO';
+import { ConfrimNewAssetsRequestDTO } from '../dto/debridge_api/ConfrimNewAssetsRequestDTO';
+import { ErrorNotificationDTO } from '../dto/debridge_api/ErrorNotificationDTO';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
@@ -29,6 +29,7 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
   }
 
   async onModuleInit() {
+    const { version } = JSON.parse(readFileSync('./package.json', { encoding: 'utf8' }));
     const updateVersionInterval = setInterval(async () => {
       try {
         await this.updateVersion(version);
@@ -116,5 +117,16 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     const result = httpResult.data as ConfrimNewAssetsResponseDTO;
     this.logger.log(`uploadConfirmNewAssetsToApi is finished`);
     return result;
+  }
+
+  async notifyError(message: string) {
+    const requestBody = {
+      message
+    } as ErrorNotificationDTO;
+    this.logger.log(`notifyError is started; requestBody: ${JSON.stringify(requestBody)}`);
+    const httpResult = await this.authRequest('/Validator/notifyError', requestBody, this.getLoginDto());
+
+    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.log(`notifyError is finished`);
   }
 }
