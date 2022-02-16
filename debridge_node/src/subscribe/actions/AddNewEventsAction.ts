@@ -193,7 +193,9 @@ export class AddNewEventsAction {
       if (result.status === 'incorrect_nonce') {
         this.logger.log(`chainId: ${chainDetail.chainId}; result.status: incorrect_nonce`);
         this.chainScanningService.pause(chainId);
-        await this.debridgeApiService.notifyIncorrectNonce(result.nonce, chainId, result.submissionId);
+        await this.debridgeApiService.notifyError(
+          `incorrect nonce error: nonce: ${result.nonce}; chainId: ${chainId}; submissionId: ${result.submissionId}`,
+        );
         break;
       }
       if (result && result.lastSuccessBlockNumber) {
