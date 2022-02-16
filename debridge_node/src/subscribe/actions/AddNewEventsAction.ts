@@ -80,7 +80,7 @@ export class AddNewEventsAction {
     }
     for (const sendEvent of events) {
       const submissionId = sendEvent.returnValues.submissionId;
-      this.logger.log(`processNewTransfers chainIdFrom ${chainIdFrom}; submissionId: ${submissionId}`);
+      this.logger.log(`${chainIdFrom}> proceess> with> processNewTransfers 0 chainIdFrom ${chainIdFrom}; submissionId: ${submissionId}`);
       //this.logger.debug(JSON.stringify(sentEvents));
       const nonce = parseInt(sendEvent.returnValues.nonce);
       const submission = await this.submissionsRepository.findOne({
@@ -89,13 +89,15 @@ export class AddNewEventsAction {
         },
       });
       if (submission) {
-        this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
+        this.logger.verbose(`${chainIdFrom}> proceess> with> processNewTransfers 1 Submission already found in db submissionId: ${submissionId}`);
+        lastSuccessBlockNumber = submission.blockNumber;
         continue;
       }
 
       if (this.nonceControllingService.get(chainIdFrom) && nonce !== this.nonceControllingService.get(chainIdFrom) + 1) {
         const message = `Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`;
         this.logger.error(message);
+        this.logger.verbose(`${chainIdFrom}> proceess> with> processNewTransfers 2 Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`);
         return {
           lastSuccessBlockNumber,
           status: 'incorrect_nonce',
@@ -126,6 +128,7 @@ export class AddNewEventsAction {
         throw e;
       }
     }
+    this.logger.log(`${chainIdFrom}> proceess> with> processNewTransfers 3 lastSuccessBlockNumber ${lastSuccessBlockNumber}`);
     return {
       lastSuccessBlockNumber,
       status: 'success',
@@ -160,7 +163,7 @@ export class AddNewEventsAction {
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
     this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
-    this.logger.verbose(`checkNewEvents ${chainId}`);
+    this.logger.verbose(`${chainId}> proceess> with> 0 checkNewEvents args: chainId: ${chainId}; from: ${from}; to: ${to}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       where: {
         chainId,
@@ -175,24 +178,32 @@ export class AddNewEventsAction {
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
     let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
 
-    this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
+    this.logger.debug(`${chainDetail.chainId}> proceess> with> 1 Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
 
     for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
       const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
-      this.logger.log(`checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
+      this.logger.log(`${chainDetail.chainId}> proceess> with> 2 checkNewEvents ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
 
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
+      this.logger.log(`${chainDetail.chainId}> proceess> with> 4 sentEvents: ${JSON.stringify(sentEvents)}`);
       if (!sentEvents || sentEvents.length === 0) {
-        this.logger.verbose(`Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
+        this.logger.verbose(`${chainDetail.chainId}> proceess> with> 3 Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
         await this.supportedChainRepository.update(chainId, {
           latestBlock: lastBlockOfPage,
         });
         continue;
       }
+
       const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+      this.logger.log(`${chainDetail.chainId}> proceess> with> 5 chainDetail: ${JSON.stringify(chainDetail)}`);
+      this.logger.log(`${chainDetail.chainId}> proceess> with> 6 result: ${JSON.stringify(result)}`);
+      this.logger.log(`${chainDetail.chainId}> proceess> with> 7 fromBlock: ${fromBlock}`);
+      this.logger.log(`${chainDetail.chainId}> proceess> with> 8 lastBlockOfPage: ${lastBlockOfPage}`);
 
       if (result && result.lastSuccessBlockNumber) {
+        this.logger.log(`${chainDetail.chainId}> proceess> with> 9`);
         if (supportedChain.latestBlock !== lastBlockOfPage) {
+          this.logger.log(`${chainDetail.chainId}> proceess> with> 10`);
           this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${result.lastSuccessBlockNumber}`);
           await this.supportedChainRepository.update(chainId, {
             latestBlock: result.lastSuccessBlockNumber,
@@ -200,10 +211,12 @@ export class AddNewEventsAction {
 
           if (result.status === 'incorrect_nonce') {
             // @ts-ignore
-            const host = web3.currentProvider.host;
-            chainDetail.providers.setProviderStatus(host, false);
-            this.logger.verbose(`Web3 ${host} is disabled`);
+            this.logger.log(`${chainDetail.chainId}> proceess> with> 11 incorrect_nonce currentProvider: ${web3.currentProvider}`);
+            const host = web3.currentProvider;
+            chainDetail.providers.setProviderStatus(host.toString(), false);
+            this.logger.verbose(`${chainDetail.chainId}> proceess> with> 12 Web3 ${host} is disabled`);
             if (chainDetail.providers.getFailedProviders().length === chainDetail.providers.getAllProviders().length) {
+              this.logger.log(`${chainDetail.chainId}> proceess> with> 13`);
               this.chainScanningService.pause(chainId);
             }
             //await this.debrdigeApiService.notifyIncorrectNonce(sendEvent.returnValues.nonce, chainIdFrom, submissionId);
@@ -211,7 +224,9 @@ export class AddNewEventsAction {
           }
         }
       } else {
-        this.logger.error(`checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`);
+        this.logger.error(
+          `${chainDetail.chainId}> proceess> with> 14 checkNewEvents. Last block not updated. Found error in processNewTransfers ${chainId}`,
+        );
         break;
       }
     }
