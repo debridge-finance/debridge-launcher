@@ -42,7 +42,7 @@ export class Web3Service {
       return web3;
     }
     this.logger.error(`Cann't connect to any provider`);
-    process.kill(process.pid, 'SIGQUIT');
+    process.exit(1);
   }
 
   private async checkConnectionHttpProvider(web3): Promise<boolean> {
