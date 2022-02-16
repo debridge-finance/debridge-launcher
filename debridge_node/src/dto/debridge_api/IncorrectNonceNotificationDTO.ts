@@ -2,7 +2,7 @@ import { IsNumber, IsString } from 'class-validator';
 
 export class IncorrectNonceNotificationDTO {
   @IsString()
-  nonce: string;
+  nonce: number;
 
   @IsNumber()
   chainId: number;

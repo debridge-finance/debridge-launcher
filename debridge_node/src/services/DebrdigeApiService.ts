@@ -119,13 +119,13 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     return result;
   }
 
-  async notifyIncorrectNonce(nonce: string, chainId: number, submissionId: string) {
+  async notifyIncorrectNonce(nonce: number, chainId: number, submissionId: string) {
     const requestBody = {
       nonce,
       chainId,
       submissionId,
     } as IncorrectNonceNotificationDTO;
-    this.logger.log(`notifyIncorrectNonce is started`);
+    this.logger.log(`notifyIncorrectNonce is started; requestBody: ${JSON.stringify(requestBody)}`);
     const httpResult = await this.authRequest('/Validator/notifyIncorrectNonce', requestBody, this.getLoginDto());
 
     this.logger.verbose(`response: ${httpResult.data}`);
