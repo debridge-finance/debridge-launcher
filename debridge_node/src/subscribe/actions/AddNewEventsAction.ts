@@ -14,7 +14,7 @@ import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 
 interface ProcessNewTransferResult {
-  lastSuccessBlockNumber?: number;
+  blockToOverwrite?: number;
   status: 'incorrect_nonce' | 'success' | 'empty';
   submissionId?: string;
   nonce?: number;
@@ -77,7 +77,7 @@ export class AddNewEventsAction {
    * @private
    */
   async processNewTransfers(events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
-    let lastSuccessBlockNumber;
+    let blockToOverwrite;
     if (!events) {
       return {
         status: 'empty',
@@ -94,7 +94,7 @@ export class AddNewEventsAction {
       });
       if (submission) {
         this.logger.verbose(`chainId: ${chainIdFrom}; Submission already found in db submissionId: ${submissionId}`);
-        lastSuccessBlockNumber = submission.blockNumber;
+        blockToOverwrite = submission.blockNumber;
         continue;
       }
 
@@ -102,7 +102,7 @@ export class AddNewEventsAction {
         const message = `Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`;
         this.logger.error(message);
         return {
-          lastSuccessBlockNumber,
+          blockToOverwrite,
           status: 'incorrect_nonce',
           submissionId,
           nonce,
@@ -126,16 +126,15 @@ export class AddNewEventsAction {
           blockNumber: sendEvent.blockNumber,
           nonce,
         } as SubmissionEntity);
-        lastSuccessBlockNumber = sendEvent.blockNumber;
+        blockToOverwrite = sendEvent.blockNumber;
         this.nonceControllingService.set(chainIdFrom, nonce);
       } catch (e) {
         this.logger.error(`Error in saving ${submissionId}`);
         throw e;
       }
     }
-    this.logger.log(`chainIdFrom: ${chainIdFrom}; lastSuccessBlockNumber ${lastSuccessBlockNumber}`);
+    this.logger.log(`chainIdFrom: ${chainIdFrom}; blockToOverwrite ${blockToOverwrite}`);
     return {
-      lastSuccessBlockNumber,
       status: 'success',
     };
   }
@@ -198,11 +197,12 @@ export class AddNewEventsAction {
         );
         break;
       }
-      if (result && result.lastSuccessBlockNumber) {
+      if (result) {
+        const lastBlock = result.blockToOverwrite ? result.blockToOverwrite : toBlock;
         if (supportedChain.latestBlock !== lastBlockOfPage) {
-          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${result.lastSuccessBlockNumber}`);
+          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlock}`);
           await this.supportedChainRepository.update(chainId, {
-            latestBlock: result.lastSuccessBlockNumber,
+            latestBlock: lastBlock,
           });
         }
       } else {
