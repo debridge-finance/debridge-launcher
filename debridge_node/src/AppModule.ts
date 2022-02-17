@@ -18,6 +18,7 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
+import { NonceControllingService } from './subscribe/actions/NonceControllingService';
 import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
@@ -28,9 +29,12 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ChainScanningService } from './services/ChainScanningService';
 import { ChainConfigService } from './services/ChainConfigService';
+import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
+import { DataFixModule } from './datafixes/DataFixModule';
 
 @Module({
   imports: [
+    DataFixModule,
     HttpModule.register({
       timeout: 30000, //30s
     }),
@@ -76,6 +80,7 @@ import { ChainConfigService } from './services/ChainConfigService';
     SignAction,
     UploadToIPFSAction,
     UploadToApiAction,
+    NonceControllingService,
     CheckAssetsEventAction,
     SubscribeHandler,
     GetSupportedChainsService,
@@ -84,6 +89,7 @@ import { ChainConfigService } from './services/ChainConfigService';
     StatisticToApiAction,
     ChainScanningService,
     ChainConfigService,
+    FixNotExistsNonceBlockNumber,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
