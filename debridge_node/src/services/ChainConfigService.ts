@@ -1,9 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import chainConfigs from '../config/chains_config.json';
 
+export enum AuthType {
+  NONE = 'NONE',
+  BASIC = 'BASIC',
+}
+
 interface ChainProviderDetail {
   isValid: boolean;
   isActive: boolean;
+  provider: string;
+  user?: string;
+  password?: string;
+  authType: AuthType;
 }
 
 /**
@@ -11,12 +20,9 @@ interface ChainProviderDetail {
  */
 export class ChainProvider {
   private readonly providers = new Map<string, ChainProviderDetail>();
-  constructor(private readonly providerList: string[], private readonly chainId: number) {
+  constructor(private readonly providerList: ChainProviderDetail[], private readonly chainId: number) {
     for (const provider of providerList) {
-      this.providers.set(provider, {
-        isValid: false,
-        isActive: true,
-      });
+      this.providers.set(provider.provider, provider);
     }
   }
 
@@ -31,6 +37,23 @@ export class ChainProvider {
       }
     }
     return providers;
+  }
+
+  /**
+   * Get auth of chain
+   * @param {string} provider
+   */
+  getChainAuth(provider: string) {
+    const detail = this.providers.get(provider);
+    if (detail.authType === AuthType.BASIC) {
+      return [
+        {
+          name: 'Authorization',
+          value: `Basic ${Buffer.from(`${detail.user}:${detail.password}`).toString('base64')}`,
+        },
+      ];
+    }
+    return undefined;
   }
 
   /**
@@ -170,12 +193,40 @@ export class ChainConfigService {
   }
 
   private generateChainProvides(config: any): ChainProvider {
-    let providers: string[] = [];
+    let providers: ChainProviderDetail[] = [];
     if (config.providers) {
-      providers = config.providers;
+      providers = config.providers.map(provider => {
+        return ChainConfigService.transformConfigToProvider(provider);
+      });
     } else if (config.provider) {
-      providers = [config.provider];
+      providers = [ChainConfigService.transformConfigToProvider(config.provider)];
     }
     return new ChainProvider(providers, config.chainId);
+  }
+
+  private static transformConfigToProvider(config: string | Partial<ChainProviderDetail>): ChainProviderDetail {
+    if (typeof config === 'string') {
+      return {
+        provider: config,
+        isValid: false,
+        isActive: true,
+        authType: AuthType.NONE,
+      };
+    } else {
+      config.isValid = false;
+      config.isActive = true;
+      let authType = AuthType.NONE;
+      if (config.user) {
+        authType = AuthType.BASIC;
+      }
+      return {
+        isValid: false,
+        isActive: true,
+        provider: config.provider,
+        user: config.user,
+        password: config.password,
+        authType,
+      };
+    }
   }
 }
