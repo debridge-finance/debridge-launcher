@@ -27,6 +27,7 @@ export class Web3Service {
       const httpProvider = new Web3.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
         keepAlive: true,
+        headers: chainProvider.getChainAuth(provider),
       });
       const web3 = new Web3(httpProvider);
       const isWorking = this.checkConnectionHttpProvider(web3);
@@ -64,6 +65,7 @@ export class Web3Service {
       const httpProvider = new Web3.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
         keepAlive: false,
+        headers: chainProvider.getChainAuth(provider),
       });
       const web3 = new Web3(httpProvider);
       const web3ChainId = await web3.eth.getChainId();
