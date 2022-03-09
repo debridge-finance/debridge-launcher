@@ -4,7 +4,16 @@
     "name": "ETHEREUM",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 13665321,
-    "provider": "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+    "providers": [
+      {
+        "provider": "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+      },
+      {
+        "provider": "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "user": "user",
+        "password": "password"
+      }
+    ],
     "interval": 10000,
     "blockConfirmation": 12,
     "maxBlockRange": 5000
