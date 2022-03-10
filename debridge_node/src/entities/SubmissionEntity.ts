@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, UpdateDateColumn, Entity, Index, PrimaryColumn, Unique } from 'typeorm';
 import { SubmisionStatusEnum } from '../enums/SubmisionStatusEnum';
+import { SubmisionBalanceStatusEnum } from '../enums/SubmisionBalanceStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../enums/SubmisionAssetsStatusEnum';
 import { UploadStatusEnum } from '../enums/UploadStatusEnum';
 
@@ -55,6 +56,10 @@ export class SubmissionEntity {
   @Column()
   @Index()
   status: SubmisionStatusEnum;
+
+  @Column()
+  @Index()
+  balanceStatus: SubmisionBalanceStatusEnum;
 
   @Column()
   @Index()

@@ -3,6 +3,7 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { EntityManager } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
+import { SubmisionBalanceStatusEnum } from '../../enums/SubmisionBalanceStatusEnum';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
@@ -71,6 +72,92 @@ export class AddNewEventsAction {
   }
 
   /**
+   * Process events by period
+   * @param {string} chainId
+   * @param {number} from
+   * @param {number} to
+   */
+  async process(chainId: number, from: number = undefined, to: number = undefined) {
+    this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
+
+    await this.entityManager.transaction(async transaction => {
+      this.logger.verbose(`${chainId}> proceess> with> 0 checkNewEvents args: chainId: ${chainId}; from: ${from}; to: ${to}`);
+      const supportedChain = await transaction.findOne(SupportedChainEntity, {
+        where: {
+          chainId,
+        },
+      });
+      const chainDetail = this.chainConfigService.get(chainId);
+      const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
+      const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+      const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
+      let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
+
+      this.logger.debug(`chainId: ${chainDetail.chainId}; Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
+
+      for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
+        const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
+        this.logger.log(`chainId: ${chainDetail.chainId}; supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
+
+        // get monitoringSendEvents and save to the database
+        const monitoringSendEvents = await this.getEvents(registerInstance, 'MonitoringSend', fromBlock, lastBlockOfPage);
+        await Promise.all(
+          monitoringSendEvents.map(event => {
+            return transaction.save({
+              submissionId: event.returnValues.submissionId,
+              nonce: event.returnValues.nonce,
+              lockedOrMintedAmount: event.returnValues.lockedOrMintedAmount,
+              chainId,
+            } as MonitoringSendEventEntity);
+          }),
+        );
+        // get sent events
+        const sentEvents = await this.getEvents(registerInstance, 'Sent', fromBlock, lastBlockOfPage);
+        this.logger.log(`chainId: ${chainDetail.chainId}; sentEvents: ${JSON.stringify(sentEvents)}`);
+        if (!sentEvents || sentEvents.length === 0) {
+          this.logger.verbose(`chainId: ${chainDetail.chainId}; Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
+          await transaction.update(SupportedChainEntity, chainId, {
+            latestBlock: lastBlockOfPage,
+          });
+          continue;
+        }
+        // procces sent events
+        const result = await this.processNewTransfers(transaction, sentEvents, supportedChain.chainId);
+
+        if (result.status === 'incorrect_nonce') {
+          this.logger.log(`chainId: ${chainDetail.chainId}; result.status: incorrect_nonce`);
+          this.chainScanningService.pause(chainId);
+          await this.debridgeApiService.notifyError(
+            `incorrect nonce error: nonce: ${result.nonce}; chainId: ${chainId}; submissionId: ${result.submissionId}`,
+          );
+          break;
+        }
+        if (result) {
+          const lastBlock = result.blockToOverwrite ? result.blockToOverwrite : toBlock;
+          if (supportedChain.latestBlock !== lastBlockOfPage) {
+            this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlock}`);
+            await transaction.update(SupportedChainEntity, chainId, {
+              latestBlock: lastBlock,
+            });
+          }
+        } else {
+          this.logger.error(`chainId: ${chainId}; Last block not updated. Found error in processNewTransfers`);
+          break;
+        }
+      }
+    });
+  }
+
+  async getEvents(registerInstance, event: 'Sent' | 'MonitoringSend', fromBlock: number, toBlock) {
+    if (fromBlock >= toBlock) return;
+
+    /* get events */
+    const events = await registerInstance.getPastEvents(event, { fromBlock, toBlock });
+
+    return events;
+  }
+
+  /**
    * Process new transfers
    * @param manager
    * @param {EventData[]} events
@@ -110,6 +197,9 @@ export class AddNewEventsAction {
         };
       }
 
+      // validate balances here
+      const balanceStatus = await this.validateBalance();
+
       try {
         await manager.save({
           submissionId: submissionId,
@@ -120,6 +210,7 @@ export class AddNewEventsAction {
           receiverAddr: sendEvent.returnValues.receiver,
           amount: sendEvent.returnValues.amount,
           status: SubmisionStatusEnum.NEW,
+          balanceStatus: balanceStatus,
           ipfsStatus: UploadStatusEnum.NEW,
           apiStatus: UploadStatusEnum.NEW,
           assetsStatus: SubmisionAssetsStatusEnum.NEW,
@@ -140,94 +231,6 @@ export class AddNewEventsAction {
     };
   }
 
-  async getEvents(registerInstance, event: 'Sent' | 'MonitoringSend', fromBlock: number, toBlock) {
-    if (fromBlock >= toBlock) return;
-
-    /* get events */
-    const sentEvents = await registerInstance.getPastEvents(event, { fromBlock, toBlock });
-
-    return sentEvents;
-  }
-
-  /**
-   * Process events by period
-   * @param {string} chainId
-   * @param {number} from
-   * @param {number} to
-   */
-  async process(chainId: number, from: number = undefined, to: number = undefined) {
-    this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
-
-    await this.entityManager.transaction(async transaction => {
-      this.logger.verbose(`${chainId}> proceess> with> 0 checkNewEvents args: chainId: ${chainId}; from: ${from}; to: ${to}`);
-      const supportedChain = await transaction.findOne(SupportedChainEntity, {
-        where: {
-          chainId,
-        },
-      });
-      const chainDetail = this.chainConfigService.get(chainId);
-
-      const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
-
-      const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
-
-      const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
-      let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
-
-      this.logger.debug(`chainId: ${chainDetail.chainId}; Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
-
-      for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
-        const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
-        this.logger.log(`chainId: ${chainDetail.chainId}; supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
-
-        const monitoringSendEvents = await this.getEvents(registerInstance, 'MonitoringSend', fromBlock, lastBlockOfPage);
-        await Promise.all(
-          monitoringSendEvents.map(event => {
-            return transaction.save({
-              submissionId: event.returnValues.submissionId,
-              nonce: event.returnValues.nonce,
-              lockedOrMintedAmount: event.returnValues.lockedOrMintedAmount,
-              chainId,
-            } as MonitoringSendEventEntity);
-          }),
-        );
-
-        const sentEvents = await this.getEvents(registerInstance, 'Sent', fromBlock, lastBlockOfPage);
-        this.logger.log(`chainId: ${chainDetail.chainId}; sentEvents: ${JSON.stringify(sentEvents)}`);
-        if (!sentEvents || sentEvents.length === 0) {
-          this.logger.verbose(`chainId: ${chainDetail.chainId}; Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
-          await transaction.update(SupportedChainEntity, chainId, {
-            latestBlock: lastBlockOfPage,
-          });
-          continue;
-        }
-
-        const result = await this.processNewTransfers(transaction, sentEvents, supportedChain.chainId);
-
-        if (result.status === 'incorrect_nonce') {
-          this.logger.log(`chainId: ${chainDetail.chainId}; result.status: incorrect_nonce`);
-          this.chainScanningService.pause(chainId);
-          await this.debridgeApiService.notifyError(
-            `incorrect nonce error: nonce: ${result.nonce}; chainId: ${chainId}; submissionId: ${result.submissionId}`,
-          );
-          break;
-        }
-        if (result) {
-          const lastBlock = result.blockToOverwrite ? result.blockToOverwrite : toBlock;
-          if (supportedChain.latestBlock !== lastBlockOfPage) {
-            this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlock}`);
-            await transaction.update(SupportedChainEntity, chainId, {
-              latestBlock: lastBlock,
-            });
-          }
-        } else {
-          this.logger.error(`chainId: ${chainId}; Last block not updated. Found error in processNewTransfers`);
-          break;
-        }
-      }
-    });
-  }
-
   private async calculateBalance(manager: EntityManager, web3, chainId: string, event) {
     const submissionId = event.returnValues.submissionId;
     const amount = new BigNumber(event.amount);
@@ -245,15 +248,20 @@ export class AddNewEventsAction {
     });
 
     if (!monitorSendEvent) {
-      const message = `Not found monitor event for submissionId ${submissionId}`;
+      const message = `Not found monitoring event for submissionId ${submissionId}`;
+      this.logger.warn(message);
+      throw new Error(message);
+    }
+    if (monitorSendEvent.nonce !== event.nonce) {
+      const message = `Monitring event nonce does not equal to send event nonce ${monitorSendEvent.nonce} !== ${event.nonce}`;
       this.logger.warn(message);
       throw new Error(message);
     }
 
     const D = amount.minus(exectutionFee);
     if (event.event === 'Sent') {
-      amountBalanceSender.minus(D);
-      amountBalanceReceiver.plus(D);
+      this.getBalanceForSent(amountBalanceSender, amountBalanceReceiver, D);
+
     } else if (event.event === 'Burn') {
       amountBalanceSender.plus(D);
       amountBalanceReceiver.plus(D);
@@ -264,7 +272,7 @@ export class AddNewEventsAction {
     const fixFee = new BigNumber(event.returnValues.feeParams[1]);
 
     const assetComission = useAssetFee ? transferFee.plus(fixFee) : transferFee;
-    const Dform = amount.plus(assetComission).plus(exectutionFee);
+    const Dfrom = amount.plus(assetComission).plus(exectutionFee);
     const Dto = assetComission.plus(exectutionFee);
   }
 
@@ -284,5 +292,15 @@ export class AddNewEventsAction {
       await entityManager.save(TokenBalanceHistory, emptyBalance);
     }
     return balance;
+  }
+
+  private async getBalanceForSend(amountBalanceSender: BigNumber, amountBalanceReceiver: BigNumber, D: BigNumber) {
+    return;
+  }
+  private async getBalanceForBurn() {
+    return;
+  }
+  private async validateBalance(): Promise<SubmisionBalanceStatusEnum> {
+    return SubmisionBalanceStatusEnum.CHECKED;
   }
 }
