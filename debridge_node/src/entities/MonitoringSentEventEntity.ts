@@ -1,8 +1,8 @@
 import { Column, Entity, PrimaryColumn, Unique } from 'typeorm';
 
-@Entity('monitoring_send_event')
+@Entity('monitoring_sent_event')
 @Unique(['submissionId'])
-export class MonitoringSendEventEntity {
+export class MonitoringSentEventEntity {
   @PrimaryColumn()
   submissionId: string;
 

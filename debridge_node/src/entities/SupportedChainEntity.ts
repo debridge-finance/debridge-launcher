@@ -11,4 +11,14 @@ export class SupportedChainEntity {
 
   @Column()
   latestBlock: number;
+
+  @Column({
+    nullable: true,
+  })
+  latestValidationBlock?: number;
+
+  @Column({
+    nullable: true,
+  })
+  validationTimestamp?: Date;
 }

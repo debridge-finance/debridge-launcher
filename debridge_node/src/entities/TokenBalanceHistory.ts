@@ -7,7 +7,7 @@ export class TokenBalanceHistory {
   debridgeId: string;
 
   @Column()
-  chainId: string;
+  chainId: number;
 
   @Column()
   amount: string;

@@ -31,6 +31,8 @@ import { ChainScanningService } from './services/ChainScanningService';
 import { ChainConfigService } from './services/ChainConfigService';
 import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
 import { DataFixModule } from './datafixes/DataFixModule';
+import { ValidationBalanceAction } from './subscribe/actions/ValidationBalanceAction';
+import { ValidationBalanceService } from './services/ValidationBalanceService';
 
 @Module({
   imports: [
@@ -89,6 +91,8 @@ import { DataFixModule } from './datafixes/DataFixModule';
     StatisticToApiAction,
     ChainScanningService,
     ChainConfigService,
+    ValidationBalanceAction,
+    ValidationBalanceService,
     FixNotExistsNonceBlockNumber,
     {
       provide: APP_GUARD,

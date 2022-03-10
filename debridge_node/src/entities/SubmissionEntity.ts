@@ -57,7 +57,9 @@ export class SubmissionEntity {
   @Index()
   status: SubmisionStatusEnum;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   @Index()
   balanceStatus: SubmisionBalanceStatusEnum;
 
