@@ -39,14 +39,29 @@ export class ValidationBalanceService {
           if (amountBalanceSender.gt(0)) {
             await this.setBalance(manager, chainTo, debridgeId, amountBalanceSender);
           } else {
+            const isAllChainsSynced = await this.checkTimestaps(manager, validationTime);
+            if (isAllChainsSynced) {
+              throw new Error('all chains synced');
+            }
+            result = SubmisionBalanceStatusEnum.ON_HOLD;
+            return result;
+          }
+          if (amountBalanceReceiver.gt(0)) {
+            await this.setBalance(manager, chainTo, debridgeId, amountBalanceReceiver);
+          } else {
+            const isAllChainsSynced = await this.checkTimestaps(manager, validationTime);
+            if (isAllChainsSynced) {
+              throw new Error('all chains synced');
+            }
+            result = SubmisionBalanceStatusEnum.ON_HOLD;
+            return result;
           }
         } else {
           amountBalanceReceiver.plus(D);
           amountBalanceSender.minus(D);
         }
       }
-      //await this.setBalance(manager, chainTo, debridgeId, amountBalanceSender);
-      //await this.setBalance(manager, chainFrom, debridgeId, amountBalanceReceiver);
+
       result = SubmisionBalanceStatusEnum.CHECKED;
     } catch (e) {
       result = SubmisionBalanceStatusEnum.ERROR;
