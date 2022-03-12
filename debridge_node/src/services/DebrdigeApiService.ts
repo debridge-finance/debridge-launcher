@@ -25,7 +25,7 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
   constructor(readonly httpService: HttpService, private readonly configService: ConfigService) {
     super(httpService, new Logger(DebrdigeApiService.name), configService.get('API_BASE_URL'), '/Account/authenticate');
     this.web3 = createProxy(new Web3(), { logger: this.logger });
-    this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
+    this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), configService.get('KEYSTORE_PASSWORD'));
   }
 
   async onModuleInit() {
@@ -121,7 +121,7 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
 
   async notifyError(message: string) {
     const requestBody = {
-      message
+      message,
     } as ErrorNotificationDTO;
     this.logger.log(`notifyError is started; requestBody: ${JSON.stringify(requestBody)}`);
     const httpResult = await this.authRequest('/Validator/notifyError', requestBody, this.getLoginDto());
