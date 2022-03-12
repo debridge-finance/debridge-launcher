@@ -8,6 +8,21 @@
 
 # Changelog
 
+## v2.1.1(12.03.2022)
+* fix support for multinode rpc connection
+
+## How to update to v2.1.1
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+### 2. Run debridge-node
+```shell
+docker-compose up -d --build --remove-orphans
+```
+
+<br/>
+
 ## v2.1.0(09.03.2022)
 * Added support for multinode rpc connection
 * Validate nonce before saving event to the database
