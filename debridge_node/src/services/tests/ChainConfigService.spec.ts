@@ -46,7 +46,7 @@ jest.mock('../../config/chains_config.json', () => {
   ];
 });
 
-describe('ChainScanningService', () => {
+describe('ChainConfigService', () => {
   let service: ChainConfigService;
   let chainProvider: ChainProvider;
 
