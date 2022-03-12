@@ -1,8 +1,8 @@
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { Injectable, Logger } from '@nestjs/common';
 import { ChainScanStatus } from '../enums/ChainScanStatus';
-import chainConfigs from '../config/chains_config.json';
 import { AddNewEventsAction } from '../subscribe/actions/AddNewEventsAction';
+import { ChainConfigService } from './ChainConfigService';
 
 /**
  * Service for controlling scanning chain
@@ -10,7 +10,11 @@ import { AddNewEventsAction } from '../subscribe/actions/AddNewEventsAction';
 @Injectable()
 export class ChainScanningService {
   private readonly logger = new Logger(ChainScanningService.name);
-  constructor(private readonly schedulerRegistry: SchedulerRegistry, private readonly addNewEventsAction: AddNewEventsAction) {}
+  constructor(
+    private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly addNewEventsAction: AddNewEventsAction,
+    private readonly chainConfigService: ChainConfigService,
+  ) {}
 
   private static getIntervalName(chainId: number) {
     return `interval_${chainId}`;
@@ -65,9 +69,7 @@ export class ChainScanningService {
       }
     };
 
-    const chainDetail = chainConfigs.find(item => {
-      return item.chainId === chainId;
-    });
+    const chainDetail = this.chainConfigService.get(chainId);
 
     const interval = setInterval(callback, chainDetail.interval);
     this.schedulerRegistry.addInterval(intervalName, interval);

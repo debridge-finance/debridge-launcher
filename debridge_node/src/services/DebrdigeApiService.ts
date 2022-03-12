@@ -14,6 +14,7 @@ import { SubmissionEntity } from '../entities/SubmissionEntity';
 import { ConfirmNewAssetEntity } from '../entities/ConfirmNewAssetEntity';
 import { ConfrimNewAssetsResponseDTO } from '../dto/debridge_api/ConfrimNewAssetsResponseDTO';
 import { ConfrimNewAssetsRequestDTO } from '../dto/debridge_api/ConfrimNewAssetsRequestDTO';
+import { ErrorNotificationDTO } from '../dto/debridge_api/ErrorNotificationDTO';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
@@ -116,5 +117,16 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
     const result = httpResult.data as ConfrimNewAssetsResponseDTO;
     this.logger.log(`uploadConfirmNewAssetsToApi is finished`);
     return result;
+  }
+
+  async notifyError(message: string) {
+    const requestBody = {
+      message
+    } as ErrorNotificationDTO;
+    this.logger.log(`notifyError is started; requestBody: ${JSON.stringify(requestBody)}`);
+    const httpResult = await this.authRequest('/Validator/notifyError', requestBody, this.getLoginDto());
+
+    this.logger.verbose(`response: ${httpResult.data}`);
+    this.logger.log(`notifyError is finished`);
   }
 }

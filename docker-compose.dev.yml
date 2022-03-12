@@ -17,6 +17,11 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
+  debridge-api:
+    build: ./mocks/debridge-api
+    container_name: debridge-api${DOCKER_ID}
+    networks:
+      - debridge-node-network
   debridge-node:
     build: debridge_node
     container_name: debridge-node${DOCKER_ID}
@@ -47,6 +52,7 @@ services:
       - ENABLE_DATAFIX=${ENABLE_DATAFIX}
     depends_on:
       - postgres
+      - debridge-api
     networks:
       - debridge-node-network
 networks:
