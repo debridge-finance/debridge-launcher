@@ -138,7 +138,7 @@ export class AddNewEventsAction {
 
   /**
    * Process new transfers
-   * @param {EventData[]} events
+   * @param events
    * @param {number} chainIdFrom
    * @private
    */
@@ -220,15 +220,17 @@ export class AddNewEventsAction {
         `incorrect nonce error (missed_nonce): nonce: ${transferResult.nonce}; submissionId: ${transferResult.submissionId}`,
       );
       chainProvider.setProviderStatus(web3.chainProvider, false);
+      return NonceValidationEnum.MISSED_NONCE;
     } else if (transferResult.nonceValidationStatus === NonceValidationEnum.DUPLICATED_NONCE) {
       await debridgeApiService.notifyError(
         `incorrect nonce error (duplicated_nonce): nonce: ${transferResult.nonce}; submissionId: ${transferResult.submissionId}`,
       );
       chainScanningService.pause(chainId);
+      return NonceValidationEnum.DUPLICATED_NONCE;
     }
   }
 
-  async getBlockNumber(transferResult: ProcessNewTransferResult, toBlock: number): Promise<number | void> {
+  getBlockNumber(transferResult: ProcessNewTransferResult, toBlock: number): number | void {
     if (transferResult.status === ProcessNewTransferResultStatusEnum.SUCCESS) {
       return toBlock;
     } else {
@@ -254,8 +256,6 @@ export class AddNewEventsAction {
     if (fromBlock >= toBlock) return;
 
     /* get events */
-    const sentEvents = await registerInstance.getPastEvents('Sent', { fromBlock, toBlock });
-
-    return sentEvents;
+    return await registerInstance.getPastEvents('Sent', { fromBlock, toBlock });
   }
 }
