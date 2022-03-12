@@ -3,6 +3,11 @@ import Web3 from 'web3';
 import { ChainProvider } from './ChainConfigService';
 import { ConfigService } from '@nestjs/config';
 
+export class Web3Custom extends Web3 {
+  constructor(readonly chainProvider: string, httpProvider) {
+    super(httpProvider);
+  }
+}
 @Injectable()
 export class Web3Service {
   private readonly logger = new Logger(Web3Service.name);
@@ -13,7 +18,7 @@ export class Web3Service {
     this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT', '10000'));
   }
 
-  async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3> {
+  async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3Custom> {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
       if (this.providersMap.has(provider)) {
         const web3 = this.providersMap.get(provider);
@@ -25,13 +30,13 @@ export class Web3Service {
         this.logger.error(`Old provider ${provider} is not working`);
       }
 
-      const httpProvider = new Web3.providers.HttpProvider(provider, {
+      const httpProvider = new Web3Custom.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
         keepAlive: true,
         headers: chainProvider.getChainAuth(provider),
       });
 
-      const web3 = new Web3(httpProvider);
+      const web3 = new Web3Custom(provider, httpProvider);
       const isWorking = await this.checkConnectionHttpProvider(web3);
 
       if (!isWorking) {
@@ -65,12 +70,12 @@ export class Web3Service {
 
   async validateChainId(chainProvider: ChainProvider, provider: string) {
     try {
-      const httpProvider = new Web3.providers.HttpProvider(provider, {
+      const httpProvider = new Web3Custom.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
         keepAlive: false,
         headers: chainProvider.getChainAuth(provider),
       });
-      const web3 = new Web3(httpProvider);
+      const web3 = new Web3Custom(provider, httpProvider);
       const web3ChainId = await web3.eth.getChainId();
       if (web3ChainId !== chainProvider.getChainId()) {
         this.logger.error(`Checking correct RPC from config is failed (in config ${chainProvider.getChainId()} in rpc ${web3ChainId})`);

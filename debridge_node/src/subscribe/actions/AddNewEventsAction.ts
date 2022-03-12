@@ -15,7 +15,7 @@ import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 
 interface ProcessNewTransferResult {
   blockToOverwrite?: number;
-  status: 'incorrect_nonce' | 'success' | 'empty';
+  status: 'missed_nonce' | 'duplicated_nonce' | 'success' | 'empty';
   submissionId?: string;
   nonce?: number;
 }
@@ -94,16 +94,28 @@ export class AddNewEventsAction {
       });
       if (submission) {
         this.logger.verbose(`chainId: ${chainIdFrom}; Submission already found in db submissionId: ${submissionId}`);
-        blockToOverwrite = submission.blockNumber;
+        blockToOverwrite = submission.blockNumber; //
         continue;
       }
-
-      if (this.nonceControllingService.get(chainIdFrom) && nonce !== this.nonceControllingService.get(chainIdFrom) + 1) {
-        const message = `Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`;
+      
+      const nonceDb = this.nonceControllingService.get(chainIdFrom);
+      if (nonceDb && nonce <= nonceDb) {
+        const message = `Incorrect nonce (duplicated_nonce) for chainIdFrom: ${chainIdFrom}; nonce: ${nonce}; max nonce in db: ${nonceDb}`;
         this.logger.error(message);
         return {
           blockToOverwrite,
-          status: 'incorrect_nonce',
+          status: 'duplicated_nonce',
+          submissionId,
+          nonce,
+        };
+      }
+
+      if (nonceDb && nonce !== nonceDb + 1) {
+        const message = `Incorrect nonce (missed_nonce) for chainIdFrom: ${chainIdFrom}; nonce: ${nonce}; max nonce in db: ${nonceDb}`;
+        this.logger.error(message);
+        return {
+          blockToOverwrite,
+          status: 'missed_nonce',
           submissionId,
           nonce,
         };
@@ -156,7 +168,7 @@ export class AddNewEventsAction {
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
     this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
-    this.logger.verbose(`${chainId}> proceess> with> 0 checkNewEvents args: chainId: ${chainId}; from: ${from}; to: ${to}`);
+    this.logger.verbose(`process checkNewEvents - chainId: ${chainId}; from: ${from}; to: ${to}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       where: {
         chainId,
@@ -176,7 +188,9 @@ export class AddNewEventsAction {
     for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
       const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
       this.logger.log(`chainId: ${chainDetail.chainId}; supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
-
+      if (supportedChain.latestBlock === lastBlockOfPage) {
+        continue;
+      }
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
       this.logger.log(`chainId: ${chainDetail.chainId}; sentEvents: ${JSON.stringify(sentEvents)}`);
       if (!sentEvents || sentEvents.length === 0) {
@@ -189,25 +203,29 @@ export class AddNewEventsAction {
 
       const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
 
-      if (result.status === 'incorrect_nonce') {
-        this.logger.log(`chainId: ${chainDetail.chainId}; result.status: incorrect_nonce`);
-        this.chainScanningService.pause(chainId);
-        await this.debridgeApiService.notifyError(
-          `incorrect nonce error: nonce: ${result.nonce}; chainId: ${chainId}; submissionId: ${result.submissionId}`,
-        );
-        break;
-      }
-      if (result) {
-        const lastBlock = result.blockToOverwrite ? result.blockToOverwrite : toBlock;
-        if (supportedChain.latestBlock !== lastBlockOfPage) {
-          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlock}`);
-          await this.supportedChainRepository.update(chainId, {
-            latestBlock: lastBlock,
-          });
-        }
+      if (result.status === 'empty' || result.status === 'success') {
+        this.logger.log(`updateSupportedChainBlock; chainId: ${chainDetail.chainId}; key: latestBlock; value: ${toBlock};`);
+        await this.supportedChainRepository.update(chainId, {
+          latestBlock: toBlock,
+        });
       } else {
-        this.logger.error(`chainId: ${chainId}; Last block not updated. Found error in processNewTransfers`);
-        break;
+        if (result.status === 'missed_nonce') {
+          this.logger.error(`chainId: ${chainDetail.chainId}; result.status: incorrect_nonce (missed_nonce)`);
+          await this.debridgeApiService.notifyError(
+            `incorrect nonce error (missed_nonce): nonce: ${result.nonce}; chainId: ${chainId}; submissionId: ${result.submissionId}`,
+          );
+          chainDetail.providers.setProviderStatus(web3.chainProvider, false);
+        } else if (result.status === 'duplicated_nonce') {
+          this.logger.error(`chainId: ${chainDetail.chainId}; result.status: incorrect_nonce (duplicated_nonce)`);
+          await this.debridgeApiService.notifyError(
+            `incorrect nonce error (duplicated_nonce): nonce: ${result.nonce}; chainId: ${chainDetail.chainId}; submissionId: ${result.submissionId}`,
+          );
+          this.chainScanningService.pause(chainDetail.chainId);
+        }
+        this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${result.blockToOverwrite}`);
+        await this.supportedChainRepository.update(chainId, {
+          latestBlock: result.blockToOverwrite,
+        });
       }
     }
   }
