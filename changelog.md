@@ -8,8 +8,9 @@
 
 # Changelog
 
-## v2.1.1(12.03.2022)
+## v2.1.1(13.03.2022)
 * fix support for multinode rpc connection
+* fix nonce validation
 
 ## How to update to v2.1.1
 ```shell
