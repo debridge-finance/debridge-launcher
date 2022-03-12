@@ -12,7 +12,7 @@ export class ValidationBalanceService {
   async calculate(
     manager: EntityManager,
     submission: SubmissionEntity,
-    monitorEvent: MonitoringSentEventEntity,
+    monitoringEvent: MonitoringSentEventEntity,
   ): Promise<SubmisionBalanceStatusEnum> {
     let result: SubmisionBalanceStatusEnum;
     try {
@@ -26,6 +26,11 @@ export class ValidationBalanceService {
       const amountBalanceSender = new BigNumber(balanceSender.amount);
       const amountBalanceReceiver = new BigNumber(balanceReceiver.amount);
       const D = amount.plus(exectutionFee);
+
+      const sendEventNonce = event.returnValues.nonce;
+      const monitoringEventNonce = monitoringEvent.nonce;
+      
+      const lockedOrMintedAmount = monitoringEvent.lockedOrMintedAmount;
 
       if (event.event === 'Sent') {
         amountBalanceReceiver.plus(D);
@@ -68,7 +73,6 @@ export class ValidationBalanceService {
     }
     return result;
   }
-
   private async checkTimestaps(manager: EntityManager, currentTimestamp: Date) {
     const chains = await manager.find(SupportedChainEntity, {});
     return chains.every(chain => {

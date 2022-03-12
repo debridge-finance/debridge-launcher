@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { InjectEntityManager } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { EntityManager } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionBalanceStatusEnum } from '../../enums/SubmisionBalanceStatusEnum';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
@@ -13,7 +13,7 @@ import { ChainConfigService } from '../../services/ChainConfigService';
 import { NonceControllingService } from './NonceControllingService';
 import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
-import { MonitoringSendEventEntity } from '../../entities/MonitoringSendEventEntity';
+import { MonitoringSentEventEntity } from '../../entities/MonitoringSentEventEntity';
 import { BigNumber } from 'bignumber.js';
 import { TokenBalanceHistory } from '../../entities/TokenBalanceHistory';
 
