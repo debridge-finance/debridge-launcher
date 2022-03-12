@@ -111,7 +111,7 @@ export class AddNewEventsAction {
       const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
       this.logger.log(`supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
       if (supportedChain.latestBlock === lastBlockOfPage) {
-        this.logger.warn(`latestBlock in db ${supportedChain.latestBlock} = lastBlockOfPage ${lastBlockOfPage}`);
+        this.logger.warn(`latestBlock in db ${supportedChain.latestBlock} == lastBlockOfPage ${lastBlockOfPage}`);
         continue;
       }
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
@@ -126,7 +126,9 @@ export class AddNewEventsAction {
 
       const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
       await this.processValidationNonceError(web3, this.debridgeApiService, this.chainScanningService, result, chainId, chainDetail.providers);
-      const updatedBlock = await this.getBlockNumber(result, toBlock);
+      const updatedBlock = this.getBlockNumber(result, toBlock);
+
+      // updatedBlock can be undefined if incorrect nonce occures in the first event
       if (updatedBlock) {
         this.logger.log(`updateSupportedChainBlock; key: latestBlock; value: ${updatedBlock};`);
         await this.supportedChainRepository.update(chainId, {
@@ -166,7 +168,7 @@ export class AddNewEventsAction {
         const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${nonceDb} submissionId: ${submissionId}`;
         this.logger.error(message);
         return {
-          blockToOverwrite,
+          blockToOverwrite, // it would be empty only if incorrect nonce occures in the first event
           status: ProcessNewTransferResultStatusEnum.ERROR,
           nonceValidationStatus,
           submissionId,
@@ -246,7 +248,8 @@ export class AddNewEventsAction {
   validateNonce(nonceDb: number, nonce: number): NonceValidationEnum {
     if (nonceDb && nonce <= nonceDb) {
       return NonceValidationEnum.DUPLICATED_NONCE;
-    } else if (nonceDb && nonce !== nonceDb + 1) {
+    } else if ((nonceDb === undefined && nonce !== 1) || (nonceDb && nonce !== nonceDb + 1)) {
+      // (nonceDb === undefined && nonce !== 1) may occur in empty db
       return NonceValidationEnum.MISSED_NONCE;
     }
     return NonceValidationEnum.SUCCESS;
