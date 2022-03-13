@@ -20,8 +20,8 @@ export enum ProcessNewTransferResultStatusEnum {
 
 export enum NonceValidationEnum {
   SUCCESS,
-  DUPLICATED_NONCE,
   MISSED_NONCE,
+  DUPLICATED_NONCE,
 }
 
 interface ProcessNewTransferResult {
@@ -248,8 +248,8 @@ export class AddNewEventsAction {
   validateNonce(nonceDb: number, nonce: number): NonceValidationEnum {
     if (nonceDb && nonce <= nonceDb) {
       return NonceValidationEnum.DUPLICATED_NONCE;
-    } else if ((nonceDb === undefined && nonce !== 1) || (nonceDb && nonce !== nonceDb + 1)) {
-      // (nonceDb === undefined && nonce !== 1) may occur in empty db
+    } else if ((nonceDb === undefined && nonce !== 0) || (nonceDb != undefined && nonce !== nonceDb + 1)) {
+      // (nonceDb === undefined && nonce !== 0) may occur in empty db
       return NonceValidationEnum.MISSED_NONCE;
     }
     return NonceValidationEnum.SUCCESS;
