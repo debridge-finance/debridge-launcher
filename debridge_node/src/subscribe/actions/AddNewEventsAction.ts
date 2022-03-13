@@ -162,9 +162,9 @@ export class AddNewEventsAction {
       }
 
       const nonceDb = this.nonceControllingService.get(chainIdFrom);
-      const submissionWithCurNonce = this.submissionsRepository.findOne({
+      const submissionWithCurNonce = await this.submissionsRepository.findOne({
         where: {
-          chainIdFrom,
+          chainFrom: chainIdFrom,
           nonce,
         },
       });
@@ -255,6 +255,8 @@ export class AddNewEventsAction {
   validateNonce(nonceDb: number, nonce: number, nonceExists: boolean): NonceValidationEnum {
     if (nonceExists) {
       return NonceValidationEnum.DUPLICATED_NONCE;
+    } else if (!nonceExists && nonce <= nonceDb) {
+      return NonceValidationEnum.SUCCESS;
     } else if ((nonceDb === undefined && nonce !== 0) || (nonceDb != undefined && nonce !== nonceDb + 1)) {
       // (nonceDb === undefined && nonce !== 0) may occur in empty db
       return NonceValidationEnum.MISSED_NONCE;
