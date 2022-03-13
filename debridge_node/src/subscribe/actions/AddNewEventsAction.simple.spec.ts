@@ -55,6 +55,7 @@ describe('AddNewEventsActionSimple', () => {
   });
 
   it('AddNewEventsAction validateNonce', () => {
+    expect(service.validateNonce(100, 90, false)).toBe(NonceValidationEnum.SUCCESS);
     expect(service.validateNonce(10, 11, false)).toBe(NonceValidationEnum.SUCCESS);
     expect(service.validateNonce(undefined, 0, false)).toBe(NonceValidationEnum.SUCCESS);
     expect(service.validateNonce(0, 2, false)).toBe(NonceValidationEnum.MISSED_NONCE);
