@@ -1,16 +1,16 @@
-import { AddNewEventsAction, NonceValidationEnum, ProcessNewTransferResultStatusEnum } from './AddNewEventsAction';
-import { Web3Custom } from '../../services/Web3Service';
-import { AuthType, ChainProvider } from '../../services/ChainConfigService';
+import { AddNewEventsAction, NonceValidationEnum, ProcessNewTransferResultStatusEnum } from '../AddNewEventsAction';
+import { Web3Custom } from '../../../services/Web3Service';
+import { AuthType, ChainProvider } from '../../../services/ChainConfigService';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { DebrdigeApiService } from '../../services/DebrdigeApiService';
-import { ChainScanningService } from '../../services/ChainScanningService';
+import { DebrdigeApiService } from '../../../services/DebrdigeApiService';
+import { ChainScanningService } from '../../../services/ChainScanningService';
 
 describe('AddNewEventsActionSimple', () => {
   const provider = 'debridge.io';
   const chainId = 97;
-  const service = new AddNewEventsAction(null, null, null, null, null, null, null);
+  const serviceLocal = new AddNewEventsAction(null, null, null, null, null, null, null);
   const web3 = new Web3Custom(provider, null);
   const chainProvider = new ChainProvider(
     [
@@ -55,23 +55,23 @@ describe('AddNewEventsActionSimple', () => {
   });
 
   it('AddNewEventsAction validateNonce', () => {
-    expect(service.validateNonce(10, 11)).toBe(NonceValidationEnum.SUCCESS);
-    expect(service.validateNonce(undefined, 1)).toBe(NonceValidationEnum.SUCCESS);
-    expect(service.validateNonce(undefined, 11)).toBe(NonceValidationEnum.MISSED_NONCE);
-    expect(service.validateNonce(10, 12)).toBe(NonceValidationEnum.MISSED_NONCE);
-    expect(service.validateNonce(10, 9)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
-    expect(service.validateNonce(10, 10)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
+    expect(serviceLocal.validateNonce(10, 11)).toBe(NonceValidationEnum.SUCCESS);
+    expect(serviceLocal.validateNonce(undefined, 1)).toBe(NonceValidationEnum.SUCCESS);
+    expect(serviceLocal.validateNonce(undefined, 11)).toBe(NonceValidationEnum.MISSED_NONCE);
+    expect(serviceLocal.validateNonce(10, 12)).toBe(NonceValidationEnum.MISSED_NONCE);
+    expect(serviceLocal.validateNonce(10, 9)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
+    expect(serviceLocal.validateNonce(10, 10)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
   });
 
   it('AddNewEventsAction getBlockNumber', () => {
-    expect(service.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.SUCCESS }, 10)).toBe(10);
-    expect(service.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.ERROR, blockToOverwrite: 7 }, 10)).toBe(7);
-    expect(service.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.ERROR }, 10)).toBeUndefined();
+    expect(serviceLocal.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.SUCCESS }, 10)).toBe(10);
+    expect(serviceLocal.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.ERROR, blockToOverwrite: 7 }, 10)).toBe(7);
+    expect(serviceLocal.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.ERROR }, 10)).toBeUndefined();
   });
 
   it('AddNewEventsAction processValidationNonceError SUCCESS', async () => {
     await expect(
-      service.processValidationNonceError(
+      serviceLocal.processValidationNonceError(
         web3,
         debridgeApiService,
         chainScanningService,
@@ -85,7 +85,7 @@ describe('AddNewEventsActionSimple', () => {
   it('AddNewEventsAction processValidationNonceError DUPLICATED_NONCE', async () => {
     jest.spyOn(debridgeApiService, 'notifyError');
     jest.spyOn(chainScanningService, 'pause');
-    await service.processValidationNonceError(
+    await serviceLocal.processValidationNonceError(
       web3,
       debridgeApiService,
       chainScanningService,
@@ -102,7 +102,7 @@ describe('AddNewEventsActionSimple', () => {
     expect(chainScanningService.pause).toHaveBeenCalledWith(chainId);
 
     await expect(
-      service.processValidationNonceError(
+      serviceLocal.processValidationNonceError(
         web3,
         debridgeApiService,
         chainScanningService,
@@ -119,7 +119,7 @@ describe('AddNewEventsActionSimple', () => {
   it('AddNewEventsAction processValidationNonceError MISSED_NONCE', async () => {
     jest.spyOn(debridgeApiService, 'notifyError');
     jest.spyOn(chainProvider, 'setProviderStatus');
-    await service.processValidationNonceError(
+    await serviceLocal.processValidationNonceError(
       web3,
       debridgeApiService,
       chainScanningService,
@@ -136,7 +136,7 @@ describe('AddNewEventsActionSimple', () => {
     expect(chainProvider.setProviderStatus).toHaveBeenCalledWith(provider, false);
 
     await expect(
-      service.processValidationNonceError(
+      serviceLocal.processValidationNonceError(
         web3,
         debridgeApiService,
         chainScanningService,
