@@ -13,7 +13,7 @@ import Web3 from 'web3';
 import { readFileSync } from 'fs';
 import { Account } from 'web3-core';
 import { createProxy } from '../../utils/create.proxy';
-import { getTokenName } from '../../utils/get.token.name';
+import { getTokenName } from '../../utils/getTokenName';
 import { Web3Service } from '../../services/Web3Service';
 import { ChainConfigService } from '../../services/ChainConfigService';
 
