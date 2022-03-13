@@ -9,7 +9,7 @@ import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum
 import { Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService } from '../../services/ChainConfigService';
-import { NonceControllingService } from './NonceControllingService';
+import { NonceControllingService } from '../../services/NonceControllingService';
 import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 

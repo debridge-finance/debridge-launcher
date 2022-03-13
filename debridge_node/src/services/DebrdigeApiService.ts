@@ -121,7 +121,7 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
 
   async notifyError(message: string) {
     const requestBody = {
-      message
+      message,
     } as ErrorNotificationDTO;
     this.logger.log(`notifyError is started; requestBody: ${JSON.stringify(requestBody)}`);
     const httpResult = await this.authRequest('/Validator/notifyError', requestBody, this.getLoginDto());
