@@ -162,7 +162,14 @@ export class AddNewEventsAction {
       }
 
       const nonceDb = this.nonceControllingService.get(chainIdFrom);
-      const nonceValidationStatus = this.validateNonce(nonceDb, nonce);
+      const submissionWithCurNonce = this.submissionsRepository.findOne({
+        where: {
+          chainIdFrom,
+          nonce,
+        },
+      });
+      const nonceExists = submissionWithCurNonce ? true : false;
+      const nonceValidationStatus = this.validateNonce(nonceDb, nonce, nonceExists);
       this.logger.verbose(`Nonce validation status ${nonceValidationStatus}`);
       if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
         const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${nonceDb} submissionId: ${submissionId}`;
@@ -245,8 +252,8 @@ export class AddNewEventsAction {
    * @param nonceDb
    * @param nonce
    */
-  validateNonce(nonceDb: number, nonce: number): NonceValidationEnum {
-    if (nonceDb && nonce <= nonceDb) {
+  validateNonce(nonceDb: number, nonce: number, nonceExists: boolean): NonceValidationEnum {
+    if (nonceExists) {
       return NonceValidationEnum.DUPLICATED_NONCE;
     } else if ((nonceDb === undefined && nonce !== 0) || (nonceDb != undefined && nonce !== nonceDb + 1)) {
       // (nonceDb === undefined && nonce !== 0) may occur in empty db

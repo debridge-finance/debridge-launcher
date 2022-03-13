@@ -55,12 +55,12 @@ describe('AddNewEventsActionSimple', () => {
   });
 
   it('AddNewEventsAction validateNonce', () => {
-    expect(service.validateNonce(10, 11)).toBe(NonceValidationEnum.SUCCESS);
-    expect(service.validateNonce(undefined, 0)).toBe(NonceValidationEnum.SUCCESS);
-    expect(service.validateNonce(0, 2)).toBe(NonceValidationEnum.MISSED_NONCE);
-    expect(service.validateNonce(10, 12)).toBe(NonceValidationEnum.MISSED_NONCE);
-    expect(service.validateNonce(10, 9)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
-    expect(service.validateNonce(10, 10)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
+    expect(service.validateNonce(10, 11, false)).toBe(NonceValidationEnum.SUCCESS);
+    expect(service.validateNonce(undefined, 0, false)).toBe(NonceValidationEnum.SUCCESS);
+    expect(service.validateNonce(0, 2, false)).toBe(NonceValidationEnum.MISSED_NONCE);
+    expect(service.validateNonce(10, 12, false)).toBe(NonceValidationEnum.MISSED_NONCE);
+    expect(service.validateNonce(10, 9, true)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
+    expect(service.validateNonce(10, 10, true)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
   });
 
   it('AddNewEventsAction getBlockNumber', () => {
