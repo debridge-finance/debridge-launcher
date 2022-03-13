@@ -13,6 +13,10 @@ export class Web3Service {
     this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT', '10000'));
   }
 
+  web3(): Web3 {
+    return new Web3();
+  }
+
   async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3> {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
       if (this.providersMap.has(provider)) {

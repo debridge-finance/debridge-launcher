@@ -9,7 +9,6 @@ import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { abi as ERC20Abi } from '../../assets/ERC20.json';
-import Web3 from 'web3';
 import { readFileSync } from 'fs';
 import { Account } from 'web3-core';
 import { createProxy } from '../../utils/create.proxy';
@@ -31,10 +30,7 @@ export class CheckAssetsEventAction extends IAction {
   ) {
     super();
     this.logger = new Logger(CheckAssetsEventAction.name);
-    this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(
-      JSON.parse(readFileSync('./keystore.json', 'utf-8')),
-      process.env.KEYSTORE_PASSWORD,
-    );
+    this.account = this.web3Service.web3().eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
   }
 
   async process() {
