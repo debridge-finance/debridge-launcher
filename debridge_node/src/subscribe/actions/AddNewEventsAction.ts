@@ -6,16 +6,28 @@ import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
-import { Web3Service } from '../../services/Web3Service';
+import { Web3Custom, Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
-import { ChainConfigService } from '../../services/ChainConfigService';
+import { ChainConfigService, ChainProvider } from '../../services/ChainConfigService';
 import { NonceControllingService } from '../../services/NonceControllingService';
 import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 
+export enum ProcessNewTransferResultStatusEnum {
+  SUCCESS,
+  ERROR,
+}
+
+export enum NonceValidationEnum {
+  SUCCESS,
+  DUPLICATED_NONCE,
+  MISSED_NONCE,
+}
+
 interface ProcessNewTransferResult {
   blockToOverwrite?: number;
-  status: 'incorrect_nonce' | 'success' | 'empty';
+  status: ProcessNewTransferResultStatusEnum;
+  nonceValidationStatus?: NonceValidationEnum;
   submissionId?: string;
   nonce?: number;
 }
@@ -71,21 +83,72 @@ export class AddNewEventsAction {
   }
 
   /**
+   * Process events by period
+   * @param {string} chainId
+   * @param {number} from
+   * @param {number} to
+   */
+  async process(chainId: number, from: number = undefined, to: number = undefined) {
+    this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
+    this.logger.verbose(`process checkNewEvents - chainId: ${chainId}; from: ${from}; to: ${to}`);
+    const supportedChain = await this.supportedChainRepository.findOne({
+      where: {
+        chainId,
+      },
+    });
+    const chainDetail = this.chainConfigService.get(chainId);
+
+    const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
+
+    const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+
+    const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
+    let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
+
+    this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
+
+    for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
+      const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
+      this.logger.log(`supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
+      if (supportedChain.latestBlock === lastBlockOfPage) {
+        this.logger.warn(`latestBlock in db ${supportedChain.latestBlock} == lastBlockOfPage ${lastBlockOfPage}`);
+        continue;
+      }
+      const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
+      this.logger.log(`sentEvents: ${JSON.stringify(sentEvents)}`);
+      if (!sentEvents || sentEvents.length === 0) {
+        this.logger.verbose(`Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
+        await this.supportedChainRepository.update(chainId, {
+          latestBlock: lastBlockOfPage,
+        });
+        continue;
+      }
+
+      const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+      await this.processValidationNonceError(web3, this.debridgeApiService, this.chainScanningService, result, chainId, chainDetail.providers);
+      const updatedBlock = this.getBlockNumber(result, toBlock);
+
+      // updatedBlock can be undefined if incorrect nonce occures in the first event
+      if (updatedBlock) {
+        this.logger.log(`updateSupportedChainBlock; key: latestBlock; value: ${updatedBlock};`);
+        await this.supportedChainRepository.update(chainId, {
+          latestBlock: updatedBlock,
+        });
+      }
+    }
+  }
+
+  /**
    * Process new transfers
-   * @param {EventData[]} events
+   * @param events
    * @param {number} chainIdFrom
    * @private
    */
   async processNewTransfers(events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
-    if (!events) {
-      return {
-        status: 'empty',
-      };
-    }
     for (const sendEvent of events) {
       const submissionId = sendEvent.returnValues.submissionId;
-      this.logger.log(`chainId: ${chainIdFrom}; submissionId: ${submissionId}`);
+      this.logger.log(`submissionId: ${submissionId}`);
       const nonce = parseInt(sendEvent.returnValues.nonce);
       const submission = await this.submissionsRepository.findOne({
         where: {
@@ -93,17 +156,21 @@ export class AddNewEventsAction {
         },
       });
       if (submission) {
-        this.logger.verbose(`chainId: ${chainIdFrom}; Submission already found in db submissionId: ${submissionId}`);
+        this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
         blockToOverwrite = submission.blockNumber;
         continue;
       }
 
-      if (this.nonceControllingService.get(chainIdFrom) && nonce !== this.nonceControllingService.get(chainIdFrom) + 1) {
-        const message = `Incorrect nonce ${nonce} in scanning from ${chainIdFrom}`;
+      const nonceDb = this.nonceControllingService.get(chainIdFrom);
+      const nonceValidationStatus = this.validateNonce(nonceDb, nonce);
+      this.logger.verbose(`Nonce validation status ${nonceValidationStatus}`);
+      if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
+        const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${nonceDb} submissionId: ${submissionId}`;
         this.logger.error(message);
         return {
-          blockToOverwrite,
-          status: 'incorrect_nonce',
+          blockToOverwrite, // it would be empty only if incorrect nonce occures in the first event
+          status: ProcessNewTransferResultStatusEnum.ERROR,
+          nonceValidationStatus,
           submissionId,
           nonce,
         };
@@ -133,82 +200,65 @@ export class AddNewEventsAction {
         throw e;
       }
     }
-    this.logger.log(`chainIdFrom: ${chainIdFrom}; blockToOverwrite ${blockToOverwrite}`);
+    this.logger.log(`blockToOverwrite ${blockToOverwrite}`);
     return {
-      status: 'success',
+      status: ProcessNewTransferResultStatusEnum.SUCCESS,
     };
+  }
+
+  async processValidationNonceError(
+    web3: Web3Custom,
+    debridgeApiService: DebrdigeApiService,
+    chainScanningService: ChainScanningService,
+    transferResult: ProcessNewTransferResult,
+    chainId: number,
+    chainProvider: ChainProvider,
+  ) {
+    if (transferResult.status === ProcessNewTransferResultStatusEnum.SUCCESS) {
+      return;
+    }
+    if (transferResult.nonceValidationStatus === NonceValidationEnum.MISSED_NONCE) {
+      await debridgeApiService.notifyError(
+        `incorrect nonce error (missed_nonce): nonce: ${transferResult.nonce}; submissionId: ${transferResult.submissionId}`,
+      );
+      chainProvider.setProviderStatus(web3.chainProvider, false);
+      return NonceValidationEnum.MISSED_NONCE;
+    } else if (transferResult.nonceValidationStatus === NonceValidationEnum.DUPLICATED_NONCE) {
+      await debridgeApiService.notifyError(
+        `incorrect nonce error (duplicated_nonce): nonce: ${transferResult.nonce}; submissionId: ${transferResult.submissionId}`,
+      );
+      chainScanningService.pause(chainId);
+      return NonceValidationEnum.DUPLICATED_NONCE;
+    }
+  }
+
+  getBlockNumber(transferResult: ProcessNewTransferResult, toBlock: number): number | void {
+    if (transferResult.status === ProcessNewTransferResultStatusEnum.SUCCESS) {
+      return toBlock;
+    } else {
+      return transferResult.blockToOverwrite;
+    }
+  }
+
+  /**
+   * Validate nonce
+   * @param nonceDb
+   * @param nonce
+   */
+  validateNonce(nonceDb: number, nonce: number): NonceValidationEnum {
+    if (nonceDb && nonce <= nonceDb) {
+      return NonceValidationEnum.DUPLICATED_NONCE;
+    } else if ((nonceDb === undefined && nonce !== 1) || (nonceDb && nonce !== nonceDb + 1)) {
+      // (nonceDb === undefined && nonce !== 1) may occur in empty db
+      return NonceValidationEnum.MISSED_NONCE;
+    }
+    return NonceValidationEnum.SUCCESS;
   }
 
   async getEvents(registerInstance, fromBlock: number, toBlock) {
     if (fromBlock >= toBlock) return;
 
     /* get events */
-    const sentEvents = await registerInstance.getPastEvents('Sent', { fromBlock, toBlock });
-
-    return sentEvents;
-  }
-
-  /**
-   * Process events by period
-   * @param {string} chainId
-   * @param {number} from
-   * @param {number} to
-   */
-  async process(chainId: number, from: number = undefined, to: number = undefined) {
-    this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
-    this.logger.verbose(`${chainId}> proceess> with> 0 checkNewEvents args: chainId: ${chainId}; from: ${from}; to: ${to}`);
-    const supportedChain = await this.supportedChainRepository.findOne({
-      where: {
-        chainId,
-      },
-    });
-    const chainDetail = this.chainConfigService.get(chainId);
-
-    const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
-
-    const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
-
-    const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
-    let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
-
-    this.logger.debug(`chainId: ${chainDetail.chainId}; Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
-
-    for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
-      const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
-      this.logger.log(`chainId: ${chainDetail.chainId}; supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
-
-      const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
-      this.logger.log(`chainId: ${chainDetail.chainId}; sentEvents: ${JSON.stringify(sentEvents)}`);
-      if (!sentEvents || sentEvents.length === 0) {
-        this.logger.verbose(`chainId: ${chainDetail.chainId}; Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
-        await this.supportedChainRepository.update(chainId, {
-          latestBlock: lastBlockOfPage,
-        });
-        continue;
-      }
-
-      const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
-
-      if (result.status === 'incorrect_nonce') {
-        this.logger.log(`chainId: ${chainDetail.chainId}; result.status: incorrect_nonce`);
-        this.chainScanningService.pause(chainId);
-        await this.debridgeApiService.notifyError(
-          `incorrect nonce error: nonce: ${result.nonce}; chainId: ${chainId}; submissionId: ${result.submissionId}`,
-        );
-        break;
-      }
-      if (result) {
-        const lastBlock = result.blockToOverwrite ? result.blockToOverwrite : toBlock;
-        if (supportedChain.latestBlock !== lastBlockOfPage) {
-          this.logger.log(`updateSupportedChainBlock chainId: ${chainId}; key: latestBlock; value: ${lastBlock}`);
-          await this.supportedChainRepository.update(chainId, {
-            latestBlock: lastBlock,
-          });
-        }
-      } else {
-        this.logger.error(`chainId: ${chainId}; Last block not updated. Found error in processNewTransfers`);
-        break;
-      }
-    }
+    return await registerInstance.getPastEvents('Sent', { fromBlock, toBlock });
   }
 }
