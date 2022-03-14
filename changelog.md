@@ -9,7 +9,7 @@
 # Changelog
 
 ## v2.2.0(14.03.2022)
-* changed debridgeId calculation formula 
+* changed deployId calculation formula 
 
 ## How to update to v2.2.0
 ```shell
@@ -20,7 +20,25 @@ git pull origin mainnet
 ```shell
 docker-compose up -d --build --remove-orphans
 ```
+### 3. Regenerate signatures for deployed tokens in the postgres.
+```shell
+# get postgres container IPAddress
+docker inspect postgres_0 | grep "IPAddress"
 
+# run psql with given IPAddress, 
+psql -h IPAddress -U postgres 
+
+# connect to the ei_0 database
+\c ei_0
+```
+
+Execute sql scripts:
+```sql
+DELETE FROM "confirmNewAssets";
+
+UPDATE "submissions" SET "assetsStatus" = 1;
+```
+![update to v2.2.0](assets/how-to-update-v2_2_0.jpeg)
 <br/>
 
 ## v2.1.1(13.03.2022)
