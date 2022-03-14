@@ -8,7 +8,7 @@ import { getHeapSnapshot } from 'v8';
 export class MonitoringHandler {
   private readonly logger = new Logger(MonitoringHandler.name);
 
-  @Cron('* * * * *')
+  @Cron('*/10 * * * *')
   handleHeapInfo() {
     const startDateInfo = new Date().getTime();
     const heapStatistics = getHeapStatistics();
@@ -30,7 +30,7 @@ export class MonitoringHandler {
     });
 
     const snapshotStream = getHeapSnapshot();
-    const fileName = `./stats/${Date.now()}.heapsnapshot`;
+    const fileName = `./stats/dump.heapsnapshot`;
     const fileStream = createWriteStream(fileName);
     snapshotStream.pipe(fileStream);
   }
