@@ -8,11 +8,28 @@
 
 # Changelog
 
-## v2.1.0(17.02.2022)
+## v2.1.1(13.03.2022)
+* fix support for multinode rpc connection
+* fix nonce validation
+
+## How to update to v2.1.1
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+### 2. Run debridge-node
+```shell
+docker-compose up -d --build --remove-orphans
+```
+
+<br/>
+
+## v2.1.0(09.03.2022)
 * Added support for multinode rpc connection
 * Validate nonce before saving event to the database
 * Refactor debrige-node Dockerfile and docker-compose
 * Fix leaking connections to the rpc provider
+* Add basic auth for node rpc
 
 ## How to update to v2.1.0
 ```shell
@@ -30,8 +47,8 @@ ENABLE_DATAFIX=true
 ![update env vars](assets/changed-env-vars-v2_1_0.png)
 
 
-### 3. Update config/chains_config.json to set up multiple rpc providers:
-![multiple rpc providers](./assets/multiple-rpc-providers.png)
+### 3. Optional. If you need to use multiple rpc providers or setting up basic auth just update config/chains_config.json as follow::
+![multiple rpc providers](./assets/update-chains-config.png)
 ### 4. Run debridge-node
 ```shell
 docker-compose up -d --build --remove-orphans
