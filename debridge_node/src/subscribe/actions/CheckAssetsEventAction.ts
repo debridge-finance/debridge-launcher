@@ -89,12 +89,15 @@ export class CheckAssetsEventAction extends IAction {
           const tokenSymbol = await nativeTokenInstance.methods.symbol().call();
           const tokenDecimals = await nativeTokenInstance.methods.decimals().call();
           const prefix = 2;
-          //keccak256(abi.encodePacked(debridgeId, _name, _symbol, _decimals));
+
+          const nameKeccak = web3.utils.soliditySha3({ t: 'string', v: tokenName });
+          const symbolKeccak = web3.utils.soliditySha3({ t: 'string', v: tokenSymbol });
+
           const deployId = web3.utils.soliditySha3(
             { t: 'uint256', v: prefix },
             { t: 'bytes32', v: submission.debridgeId },
-            { t: 'string', v: tokenName },
-            { t: 'string', v: tokenSymbol },
+            { t: 'bytes32', v: nameKeccak },
+            { t: 'bytes32', v: symbolKeccak },
             { t: 'uint8', v: tokenDecimals },
           );
           this.logger.log(`prefix: ${prefix}`);
