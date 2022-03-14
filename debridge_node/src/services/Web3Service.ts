@@ -13,7 +13,7 @@ export class Web3Custom extends Web3 {
 export class Web3Service {
   private readonly logger = new Logger(Web3Service.name);
   private readonly web3Timeout: number;
-  private readonly providersMap = new Map();
+  private readonly providersMap = new Map<string, Web3Custom>();
 
   constructor(private readonly configService: ConfigService) {
     this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT', '10000'));
@@ -59,8 +59,8 @@ export class Web3Service {
     process.exit(1);
   }
 
-  private async checkConnectionHttpProvider(web3): Promise<boolean> {
-    const provider = web3.currentProvider.host;
+  private async checkConnectionHttpProvider(web3: Web3Custom): Promise<boolean> {
+    const provider = web3.chainProvider;
     try {
       this.logger.log(`Connection to ${provider} is started`);
       await web3.eth.getBlockNumber();
