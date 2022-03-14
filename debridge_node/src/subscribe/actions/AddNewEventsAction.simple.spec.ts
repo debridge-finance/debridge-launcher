@@ -10,7 +10,7 @@ import { ChainScanningService } from '../../services/ChainScanningService';
 describe('AddNewEventsActionSimple', () => {
   const provider = 'debridge.io';
   const chainId = 97;
-  const service = new AddNewEventsAction(null, null, null, null, null, null, null);
+  const service = new AddNewEventsAction(null, null, null, null, null, null, null, null);
   const web3 = new Web3Custom(provider, null);
   const chainProvider = new ChainProvider(
     [

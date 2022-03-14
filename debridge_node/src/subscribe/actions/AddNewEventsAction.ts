@@ -1,21 +1,20 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { EntityManager, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
+import { MonitoringSentEventEntity } from '../../entities/MonitoringSentEventEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
+import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
+import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { SubmisionBalanceStatusEnum } from '../../enums/SubmisionBalanceStatusEnum';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
-import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
-import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
-import { Web3Custom, Web3Service } from '../../services/Web3Service';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService, ChainProvider } from '../../services/ChainConfigService';
-import { NonceControllingService } from './NonceControllingService';
 import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
-import { MonitoringSentEventEntity } from '../../entities/MonitoringSentEventEntity';
-import { BigNumber } from 'bignumber.js';
-import { TokenBalanceHistory } from '../../entities/TokenBalanceHistory';
+import { Web3Custom, Web3Service } from '../../services/Web3Service';
+import { NonceControllingService } from './NonceControllingService';
 
 export enum ProcessNewTransferResultStatusEnum {
   SUCCESS,
