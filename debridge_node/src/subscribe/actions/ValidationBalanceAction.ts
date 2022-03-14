@@ -34,14 +34,12 @@ export class ValidationBalanceAction extends IAction {
         nonce: submission.nonce,
       });
       if (!monitoringSentEvent) {
-        break;
+        continue;
       }
       await this.entityManager.transaction(async transactionManager => {
         const status = await this.validationBalanceService.calculate(transactionManager, submission, monitoringSentEvent);
         if (status === SubmisionBalanceStatusEnum.ERROR) {
-          // TODO: nontify about error to debridgeApiService
           const sendEvent = JSON.parse(submission.rawEvent);
-
           await this.debridgeApiService.notifyError(
             `incorrect balance: submissionId: ${submission.submissionId}; sendEventAmount: ${sendEvent.returnValues.amount}, sendEventAmountFeeParams:${sendEvent.returnValues.feeParams}; monitoringEventLockedOrMinted: ${monitoringSentEvent.lockedOrMintedAmount}; monitoringEventTotalSupply: ${monitoringSentEvent.totalSupply};`,
           );

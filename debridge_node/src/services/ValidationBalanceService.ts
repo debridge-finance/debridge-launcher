@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { BigNumber } from 'bignumber.js';
 import { EntityManager } from 'typeorm';
 
@@ -8,20 +8,26 @@ import { SupportedChainEntity } from '../entities/SupportedChainEntity';
 import { TokenBalanceHistory } from '../entities/TokenBalanceHistory';
 import { SubmisionBalanceStatusEnum } from '../enums/SubmisionBalanceStatusEnum';
 
-interface NewBalances {
+export class NewBalances {
   reciever: BigNumber;
   sender: BigNumber;
   status: SubmisionBalanceStatusEnum;
+  constructor(status?: SubmisionBalanceStatusEnum) {
+    if (status) {
+      this.status = status;
+    }
+  }
 }
 
 @Injectable()
 export class ValidationBalanceService {
+  private readonly logger = new Logger(ValidationBalanceService.name);
   async calculate(
     manager: EntityManager,
     submission: SubmissionEntity,
     monitoringEvent: MonitoringSentEventEntity,
   ): Promise<SubmisionBalanceStatusEnum> {
-    let newBalances;
+    let newBalances = new NewBalances(SubmisionBalanceStatusEnum.ERROR);
     try {
       const { rawEvent, chainFrom, chainTo, debridgeId, updatedAt } = submission;
       const sendEvent = JSON.parse(rawEvent);
@@ -30,21 +36,11 @@ export class ValidationBalanceService {
 
       const balanceSender = await this.getBalance(manager, chainFrom, debridgeId);
       const balanceReceiver = await this.getBalance(manager, chainTo, debridgeId);
-      const balanceSenderAmountOld = new BigNumber(balanceSender.amount);
-      const balanceReceiverAmountOld = new BigNumber(balanceReceiver.amount);
 
-      newBalances = this.calculateNewBalances(
-        sendEvent.event,
-        balanceSenderAmountOld,
-        balanceReceiverAmountOld,
-        D,
-        chainFrom,
-        chainTo,
-        monitoringEvent,
-      );
+      newBalances = this.calculateNewBalances(sendEvent.event, balanceSender.amount, balanceReceiver.amount, D, chainFrom, chainTo, monitoringEvent);
       if (newBalances.status === SubmisionBalanceStatusEnum.CHECKED) {
-        await this.setBalance(manager, chainTo, debridgeId, newBalances.sender);
-        await this.setBalance(manager, chainFrom, debridgeId, newBalances.reciever);
+        await this.setBalance(manager, chainFrom, debridgeId, newBalances.sender);
+        await this.setBalance(manager, chainTo, debridgeId, newBalances.reciever);
       } else if (newBalances.status === SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION) {
         const isAllChainsSynced = await this.isAllChainsSynced(manager, updatedAt);
         if (isAllChainsSynced) {
@@ -53,6 +49,7 @@ export class ValidationBalanceService {
         newBalances.status = SubmisionBalanceStatusEnum.ON_HOLD;
       }
     } catch (e) {
+      this.logger.error(`failed to validate balance: ${e.message}`);
       newBalances.status = SubmisionBalanceStatusEnum.ERROR;
     }
     return newBalances.status;
@@ -67,14 +64,16 @@ export class ValidationBalanceService {
 
   calculateNewBalances(
     eventType: string,
-    balanceSenderAmountOld: BigNumber,
-    balanceReceiverAmountOld: BigNumber,
+    balanceSenderOld: string,
+    balanceRecieverOld: string,
     D: BigNumber,
     chainFrom: number,
     chainTo: number,
     monitoringEvent: MonitoringSentEventEntity,
   ): NewBalances {
-    let newBalances: NewBalances;
+    let newBalances = new NewBalances();
+    const balanceSenderAmountOld = new BigNumber(balanceSenderOld);
+    const balanceReceiverAmountOld = new BigNumber(balanceRecieverOld);
     if (eventType === 'Sent') {
       newBalances = this.calculateNewBalancesSent(balanceSenderAmountOld, balanceReceiverAmountOld, D, monitoringEvent.lockedOrMintedAmount);
     } else if (eventType === 'Burn') {
@@ -91,7 +90,7 @@ export class ValidationBalanceService {
   }
 
   calculateNewBalancesSent(recieverAmount: BigNumber, senderAmount: BigNumber, D: BigNumber, lockedOrMintedAmount: number): NewBalances {
-    let newBalances: NewBalances;
+    const newBalances = new NewBalances();
     const monitoringEventLockedOrMintedAmount = new BigNumber(lockedOrMintedAmount);
     newBalances.sender = senderAmount.plus(D);
     newBalances.reciever = recieverAmount.plus(D);
@@ -103,6 +102,7 @@ export class ValidationBalanceService {
 
     return newBalances;
   }
+
   calculateNewBalancesBurn(
     recieverAmount: BigNumber,
     senderAmount: BigNumber,
@@ -111,9 +111,9 @@ export class ValidationBalanceService {
     chainTo: number,
     lockedOrMintedAmount: number,
   ): NewBalances {
-    let newBalances: NewBalances;
+    const newBalances = new NewBalances();
     const monitoringEventLockedOrMintedAmount = new BigNumber(lockedOrMintedAmount);
-    // return to native chain
+    // is not return to native chain
     if (chainFrom !== chainTo) {
       newBalances.reciever = recieverAmount.plus(D);
       newBalances.sender = senderAmount.minus(D);
@@ -122,11 +122,12 @@ export class ValidationBalanceService {
       } else {
         newBalances.status = SubmisionBalanceStatusEnum.CHECKED;
       }
+      // return to native chain
     } else {
       newBalances.reciever = recieverAmount.minus(D);
       newBalances.sender = senderAmount.minus(D);
 
-      if (newBalances.sender.lt(0) || newBalances.sender.lt(0) || newBalances.sender !== monitoringEventLockedOrMintedAmount) {
+      if (newBalances.reciever.lt(0) || newBalances.sender.lt(0) || newBalances.sender !== monitoringEventLockedOrMintedAmount) {
         newBalances.status = SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION;
       } else {
         newBalances.status = SubmisionBalanceStatusEnum.CHECKED;
@@ -135,92 +136,12 @@ export class ValidationBalanceService {
     return newBalances;
   }
 
-  //   if (balanceSenderAmountOld.gt(0)) {
-  //     await this.setBalance(manager, chainTo, debridgeId, balanceSenderAmountOld);
-  //   } else {
-  //     const isAllChainsSynced = await this.checkTimestaps(manager, validationTime);
-  //     if (isAllChainsSynced) {
-  //       throw new Error('all chains synced');
-  //     }
-  //     result = SubmisionBalanceStatusEnum.ON_HOLD;
-  //     return result;
-  //   }
-  //   if (balanceReceiverAmountOld.gt(0)) {
-  //     await this.setBalance(manager, chainTo, debridgeId, balanceReceiverAmountOld);
-  //   } else {
-  //     const isAllChainsSynced = await this.checkTimestaps(manager, validationTime);
-  //     if (isAllChainsSynced) {
-  //       throw new Error('all chains synced');
-  //     }
-  //     result = SubmisionBalanceStatusEnum.ON_HOLD;
-  //     return result;
-  //   }
-  // } else {
-  //   balanceReceiverAmountOld.plus(D);
-  //   balanceSenderAmountOld.minus(D);
-  // }
   private async isAllChainsSynced(manager: EntityManager, currentTimestamp: Date) {
     const chains = await manager.find(SupportedChainEntity, {});
     return chains.every(chain => {
       return currentTimestamp.getTime() >= chain.validationTimestamp.getTime();
     });
   }
-
-  //private readonly manager: EntityManager, private readonly event, private readonly monitoringEvent
-
-  /*private async calculateBalance(manager: EntityManager, web3, chainId: string, event) {
-    const submissionId = event.returnValues.submissionId;
-
-
-    const debridgeId = event.returnValues.debridgeId;
-    const chainIdTo = event.returnValues.chainIdTo;
-    const balanceSender = await this.getBalance(manager, chainId, debridgeId);
-    const balanceReceiver = await this.getBalance(manager, chainIdTo, debridgeId);
-
-
-
-    const monitorSendEvent = await manager.findOne(MonitoringSendEventEntity, {
-      submissionId,
-    });
-
-    if (!monitorSendEvent) {
-      const message = `Not found monitoring event for submissionId ${submissionId}`;
-      this.logger.warn(message);
-      throw new Error(message);
-    }
-    if (monitorSendEvent.nonce !== event.nonce) {
-      const message = `Monitring event nonce does not equal to send event nonce ${monitorSendEvent.nonce} !== ${event.nonce}`;
-      this.logger.warn(message);
-      throw new Error(message);
-    }
-
-    if (event.event === 'Sent') {
-      this.getBalanceForSent(balanceSenderAmountOld, balanceReceiverAmountOld, D);
-    } else if (event.event === 'Burn') {
-      balanceSenderAmountOld.plus(D);
-      balanceReceiverAmountOld.plus(D);
-    }
-
-    const useAssetFee = event.returnValues.feeParams[3];
-    const transferFee = new BigNumber(event.returnValues.feeParams[2]);
-    const fixFee = new BigNumber(event.returnValues.feeParams[1]);
-
-    const assetComission = useAssetFee ? transferFee.plus(fixFee) : transferFee;
-    const Dfrom = amount.plus(assetComission).plus(exectutionFee);
-    const Dto = assetComission.plus(exectutionFee);
-  }
-
-
-
-  private async getBalanceForSend(balanceSenderAmountOld: BigNumber, balanceReceiverAmountOld: BigNumber, D: BigNumber) {
-    return;
-  }
-  private async getBalanceForBurn() {
-    return;
-  }
-  private async validateBalance(): Promise<SubmisionBalanceStatusEnum> {
-    return SubmisionBalanceStatusEnum.CHECKED;
-  }*/
 
   private async getBalance(entityManager: EntityManager, chainId: number, debridgeId: string): Promise<TokenBalanceHistory> {
     const balance = await entityManager.findOne(TokenBalanceHistory, {
