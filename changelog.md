@@ -8,6 +8,21 @@
 
 # Changelog
 
+## v2.2.0(14.03.2022)
+* changed debridgeId calculation formula 
+
+## How to update to v2.2.0
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+### 2. Run debridge-node
+```shell
+docker-compose up -d --build --remove-orphans
+```
+
+<br/>
+
 ## v2.1.1(13.03.2022)
 * fix support for multinode rpc connection
 * fix nonce validation
