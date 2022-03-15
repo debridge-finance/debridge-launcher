@@ -150,7 +150,8 @@ export class AddNewEventsAction {
   async processNewTransfers(events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
 
-    for (const sendEvent of events) {
+    for (const sendEvent of events.sort(i => i.returnValues.nonce)) {
+      // for (const sendEvent of events.sort(i => i.returnValues.nonce)) {
       const submissionId = sendEvent.returnValues.submissionId;
       this.logger.log(`submissionId: ${submissionId}`);
       const nonce = parseInt(sendEvent.returnValues.nonce);
@@ -165,6 +166,7 @@ export class AddNewEventsAction {
       if (submission) {
         this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
         blockToOverwrite = submission.blockNumber;
+        this.nonceControllingService.set(chainIdFrom, submission.nonce);
         continue;
       }
 
@@ -185,7 +187,9 @@ export class AddNewEventsAction {
       });
       const nonceExists = submissionWithCurNonce ? true : false;
       const nonceValidationStatus = this.validateNonce(maxNonceFromDb, nonce, nonceExists);
+
       this.logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
+
       if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
         const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
         const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${maxNonceFromDb}; submissionId: ${submissionId}; blockToOverwrite: ${blockToOverwrite}; submissionWithMaxNonceDb.blockNumber: ${submissionWithMaxNonceDb.blockNumber}`;
