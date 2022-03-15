@@ -49,7 +49,7 @@ export class AddNewEventsAction {
     private readonly web3Service: Web3Service,
     private readonly nonceControllingService: NonceControllingService,
     private readonly debridgeApiService: DebrdigeApiService,
-  ) { }
+  ) {}
 
   async action(chainId: number) {
     if (this.locker.get(chainId)) {
@@ -75,7 +75,7 @@ export class AddNewEventsAction {
       }
       await this.chainingScanningMap.get(chainId).process(chainId);
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Error in action: ${e.message}`);
     } finally {
       this.locker.set(chainId, false);
       this.logger.log(`Is unlocked chainId: ${chainId}`);
@@ -125,9 +125,7 @@ export class AddNewEventsAction {
       }
 
       const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
-      const updatedBlock = result.status === ProcessNewTransferResultStatusEnum.SUCCESS
-        ? lastBlockOfPage
-        : result.blockToOverwrite;
+      const updatedBlock = result.status === ProcessNewTransferResultStatusEnum.SUCCESS ? lastBlockOfPage : result.blockToOverwrite;
 
       // updatedBlock can be undefined if incorrect nonce occures in the first event
       if (updatedBlock) {
@@ -151,10 +149,14 @@ export class AddNewEventsAction {
    */
   async processNewTransfers(events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
+
     for (const sendEvent of events) {
       const submissionId = sendEvent.returnValues.submissionId;
       this.logger.log(`submissionId: ${submissionId}`);
       const nonce = parseInt(sendEvent.returnValues.nonce);
+
+      // check nonce collission
+      // check if submission from rpc with the same submissionId have the same nonce
       const submission = await this.submissionsRepository.findOne({
         where: {
           submissionId,
@@ -166,7 +168,15 @@ export class AddNewEventsAction {
         continue;
       }
 
-      const nonceDb = this.nonceControllingService.get(chainIdFrom);
+      const maxNonceFromDb = this.nonceControllingService.get(chainIdFrom);
+
+      const submissionWithMaxNonceDb = await this.submissionsRepository.findOne({
+        where: {
+          chainFrom: chainIdFrom,
+          nonce: maxNonceFromDb,
+        },
+      });
+
       const submissionWithCurNonce = await this.submissionsRepository.findOne({
         where: {
           chainFrom: chainIdFrom,
@@ -174,13 +184,14 @@ export class AddNewEventsAction {
         },
       });
       const nonceExists = submissionWithCurNonce ? true : false;
-      const nonceValidationStatus = this.validateNonce(nonceDb, nonce, nonceExists);
-      this.logger.verbose(`Nonce validation status ${nonceValidationStatus}`);
+      const nonceValidationStatus = this.validateNonce(maxNonceFromDb, nonce, nonceExists);
+      this.logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
       if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
-        const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${nonceDb} submissionId: ${submissionId}`;
+        const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
+        const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${maxNonceFromDb}; submissionId: ${submissionId}; blockToOverwrite: ${blockToOverwrite}; submissionWithMaxNonceDb.blockNumber: ${submissionWithMaxNonceDb.blockNumber}`;
         this.logger.error(message);
         return {
-          blockToOverwrite, // it would be empty only if incorrect nonce occures in the first event
+          blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
           status: ProcessNewTransferResultStatusEnum.ERROR,
           nonceValidationStatus,
           submissionId,
@@ -212,7 +223,6 @@ export class AddNewEventsAction {
         throw e;
       }
     }
-    this.logger.log(`blockToOverwrite ${blockToOverwrite}`);
     return {
       status: ProcessNewTransferResultStatusEnum.SUCCESS,
     };
@@ -241,11 +251,11 @@ export class AddNewEventsAction {
     }
   }
 
-
   /**
    * Validate nonce
    * @param nonceDb
    * @param nonce
+   * @param nonceExists
    */
   validateNonce(nonceDb: number, nonce: number, nonceExists: boolean): NonceValidationEnum {
     if (nonceExists) {
