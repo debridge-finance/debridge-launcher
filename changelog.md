@@ -8,6 +8,22 @@
 
 # Changelog
 
+## v2.2.1(16.03.2022)
+* fix nonce validation for historical data
+
+## How to update to v2.2.1
+
+### Pull latest changes
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+
+### Run debridge-node
+```shell
+docker-compose up -d --build --remove-orphans
+```
+
 ## v2.2.0(14.03.2022)
 * changed deployId calculation formula 
 
