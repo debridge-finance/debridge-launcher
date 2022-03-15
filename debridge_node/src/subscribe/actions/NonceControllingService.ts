@@ -14,7 +14,11 @@ export class NonceControllingService implements OnModuleInit {
 
   async onModuleInit() {
     const chains = await this.entityManager.query(`
- SELECT "chainFrom", MAX(nonce) FROM public.submissions GROUP BY "chainFrom"
+    SELECT "chainFrom", MAX(nonce) 
+      FROM public.submissions as submissions 
+      JOIN public.supported_chains as chains 
+      ON (chains."chainId" = submissions."chainFrom") 
+      WHERE submissions."blockNumber" <= chains."latestBlock"  GROUP BY "chainFrom"
         `);
     for (const { chainFrom, max } of chains) {
       this.maxNonceChains.set(chainFrom, max);
