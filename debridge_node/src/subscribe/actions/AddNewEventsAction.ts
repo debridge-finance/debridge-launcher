@@ -49,7 +49,7 @@ export class AddNewEventsAction {
     private readonly web3Service: Web3Service,
     private readonly nonceControllingService: NonceControllingService,
     private readonly debridgeApiService: DebrdigeApiService,
-  ) {}
+  ) { }
 
   async action(chainId: number) {
     if (this.locker.get(chainId)) {
@@ -125,8 +125,9 @@ export class AddNewEventsAction {
       }
 
       const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
-      await this.processValidationNonceError(web3, this.debridgeApiService, this.chainScanningService, result, chainId, chainDetail.providers);
-      const updatedBlock = this.getBlockNumber(result, toBlock);
+      const updatedBlock = result.status === ProcessNewTransferResultStatusEnum.SUCCESS
+        ? lastBlockOfPage
+        : result.blockToOverwrite;
 
       // updatedBlock can be undefined if incorrect nonce occures in the first event
       if (updatedBlock) {
@@ -134,6 +135,10 @@ export class AddNewEventsAction {
         await this.supportedChainRepository.update(chainId, {
           latestBlock: updatedBlock,
         });
+      }
+      if (result.status != ProcessNewTransferResultStatusEnum.SUCCESS) {
+        await this.processValidationNonceError(web3, this.debridgeApiService, this.chainScanningService, result, chainId, chainDetail.providers);
+        break;
       }
     }
   }
@@ -221,9 +226,6 @@ export class AddNewEventsAction {
     chainId: number,
     chainProvider: ChainProvider,
   ) {
-    if (transferResult.status === ProcessNewTransferResultStatusEnum.SUCCESS) {
-      return;
-    }
     if (transferResult.nonceValidationStatus === NonceValidationEnum.MISSED_NONCE) {
       await debridgeApiService.notifyError(
         `incorrect nonce error (missed_nonce): nonce: ${transferResult.nonce}; submissionId: ${transferResult.submissionId}`,
@@ -239,13 +241,6 @@ export class AddNewEventsAction {
     }
   }
 
-  getBlockNumber(transferResult: ProcessNewTransferResult, toBlock: number): number | void {
-    if (transferResult.status === ProcessNewTransferResultStatusEnum.SUCCESS) {
-      return toBlock;
-    } else {
-      return transferResult.blockToOverwrite;
-    }
-  }
 
   /**
    * Validate nonce
