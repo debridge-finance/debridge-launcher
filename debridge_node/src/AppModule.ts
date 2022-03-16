@@ -18,7 +18,7 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { OrbitDbService } from './services/OrbitDbService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
-import { NonceControllingService } from './subscribe/actions/NonceControllingService';
+import { NonceControllingService } from './services/NonceControllingService';
 import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';

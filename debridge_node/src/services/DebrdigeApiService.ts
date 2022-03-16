@@ -7,7 +7,6 @@ import { Account } from 'web3-core';
 import Web3 from 'web3';
 import { readFileSync } from 'fs';
 import { ProgressInfoDTO, ValidationProgressDTO } from '../dto/debridge_api/ValidationProgressDTO';
-import { createProxy } from '../utils/create.proxy';
 import { UpdateOrbirDbDTO } from '../dto/debridge_api/UpdateOrbirDbDTO';
 import { HttpAuthService } from './HttpAuthService';
 import { SubmissionEntity } from '../entities/SubmissionEntity';
@@ -15,6 +14,7 @@ import { ConfirmNewAssetEntity } from '../entities/ConfirmNewAssetEntity';
 import { ConfrimNewAssetsResponseDTO } from '../dto/debridge_api/ConfrimNewAssetsResponseDTO';
 import { ConfrimNewAssetsRequestDTO } from '../dto/debridge_api/ConfrimNewAssetsRequestDTO';
 import { ErrorNotificationDTO } from '../dto/debridge_api/ErrorNotificationDTO';
+import { Web3Service } from './Web3Service';
 
 @Injectable()
 export class DebrdigeApiService extends HttpAuthService implements OnModuleInit {
@@ -22,10 +22,10 @@ export class DebrdigeApiService extends HttpAuthService implements OnModuleInit 
   private account: Account;
   private web3: Web3;
 
-  constructor(readonly httpService: HttpService, private readonly configService: ConfigService) {
+  constructor(readonly web3Service: Web3Service, readonly httpService: HttpService, private readonly configService: ConfigService) {
     super(httpService, new Logger(DebrdigeApiService.name), configService.get('API_BASE_URL'), '/Account/authenticate');
-    this.web3 = createProxy(new Web3(), { logger: this.logger });
-    this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), configService.get('KEYSTORE_PASSWORD'));
+    this.web3 = web3Service.web3();
+    this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
   }
 
   async onModuleInit() {

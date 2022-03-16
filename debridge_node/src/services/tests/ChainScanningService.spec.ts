@@ -3,6 +3,22 @@ import { ChainScanningService } from '../ChainScanningService';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AddNewEventsAction } from '../../subscribe/actions/AddNewEventsAction';
 import { ChainScanStatus } from '../../enums/ChainScanStatus';
+import { ChainConfigService } from '../ChainConfigService';
+
+jest.mock('../../config/chains_config.json', () => {
+  return [
+    {
+      chainId: 97,
+      name: 'ETHEREUM',
+      debridgeAddr: '0x43dE2d77BF8027e25dBD179B491e8d64f38398aA',
+      firstStartBlock: 13665321,
+      provider: 'https://debridge.io',
+      interval: 10000,
+      blockConfirmation: 12,
+      maxBlockRange: 5000,
+    },
+  ];
+});
 
 describe('ChainScanningService', () => {
   let service: ChainScanningService;
@@ -20,6 +36,7 @@ describe('ChainScanningService', () => {
           },
         },
         ChainScanningService,
+        ChainConfigService,
       ],
     }).compile();
     service = module.get(ChainScanningService);
