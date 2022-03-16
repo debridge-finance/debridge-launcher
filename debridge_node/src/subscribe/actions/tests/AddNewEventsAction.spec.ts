@@ -56,7 +56,8 @@ describe('AddNewEventsActionSimple', () => {
 
   it('AddNewEventsAction validateNonce', () => {
     expect(serviceLocal.validateNonce(10, 11, false)).toBe(NonceValidationEnum.SUCCESS);
-    expect(serviceLocal.validateNonce(undefined, 1, false)).toBe(NonceValidationEnum.SUCCESS);
+    expect(serviceLocal.validateNonce(undefined, 0, false)).toBe(NonceValidationEnum.SUCCESS);
+    expect(serviceLocal.validateNonce(undefined, 1, false)).toBe(NonceValidationEnum.MISSED_NONCE);
     expect(serviceLocal.validateNonce(undefined, 11, false)).toBe(NonceValidationEnum.MISSED_NONCE);
     expect(serviceLocal.validateNonce(10, 12, false)).toBe(NonceValidationEnum.MISSED_NONCE);
     expect(serviceLocal.validateNonce(10, 9, true)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
