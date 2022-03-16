@@ -36,7 +36,6 @@ interface ProcessNewTransferResult {
 export class AddNewEventsAction {
   private logger = new Logger(AddNewEventsAction.name);
   private readonly locker = new Map();
-  private readonly chainingScanningMap = new Map<number, AddNewEventsAction>();
 
   constructor(
     @Inject(forwardRef(() => ChainScanningService))
@@ -59,21 +58,7 @@ export class AddNewEventsAction {
     try {
       this.locker.set(chainId, true);
       this.logger.log(`Is locked chainId: ${chainId}`);
-      if (!this.chainingScanningMap.has(chainId)) {
-        this.chainingScanningMap.set(
-          chainId,
-          new AddNewEventsAction(
-            this.chainScanningService,
-            this.supportedChainRepository,
-            this.submissionsRepository,
-            this.chainConfigService,
-            this.web3Service,
-            this.nonceControllingService,
-            this.debridgeApiService,
-          ),
-        );
-      }
-      await this.chainingScanningMap.get(chainId).process(chainId);
+      await this.process(chainId);
     } catch (e) {
       this.logger.error(`Error in action: ${e.message}`);
     } finally {

@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { getHeapStatistics, getHeapCodeStatistics, getHeapSpaceStatistics } from 'v8';
-import { writeFile } from 'fs';
+import { createWriteStream, writeFile, rmSync } from 'fs';
+import { getHeapSnapshot } from 'v8';
 
 @Injectable()
 export class MonitoringHandler {
@@ -27,5 +28,11 @@ export class MonitoringHandler {
         this.logger.log(`get heap info is finished ${(endDateInfo - startDateInfo) / 1000}s`);
       }
     });
+
+    const snapshotStream = getHeapSnapshot();
+    const fileName = `./stats/${Date.now()}.heapsnapshot`;
+    rmSync(fileName);
+    const fileStream = createWriteStream(fileName);
+    snapshotStream.pipe(fileStream);
   }
 }
