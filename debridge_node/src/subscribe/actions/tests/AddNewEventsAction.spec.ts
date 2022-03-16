@@ -55,18 +55,12 @@ describe('AddNewEventsActionSimple', () => {
   });
 
   it('AddNewEventsAction validateNonce', () => {
-    expect(serviceLocal.validateNonce(10, 11)).toBe(NonceValidationEnum.SUCCESS);
-    expect(serviceLocal.validateNonce(undefined, 1)).toBe(NonceValidationEnum.SUCCESS);
-    expect(serviceLocal.validateNonce(undefined, 11)).toBe(NonceValidationEnum.MISSED_NONCE);
-    expect(serviceLocal.validateNonce(10, 12)).toBe(NonceValidationEnum.MISSED_NONCE);
-    expect(serviceLocal.validateNonce(10, 9)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
-    expect(serviceLocal.validateNonce(10, 10)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
-  });
-
-  it('AddNewEventsAction getBlockNumber', () => {
-    expect(serviceLocal.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.SUCCESS }, 10)).toBe(10);
-    expect(serviceLocal.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.ERROR, blockToOverwrite: 7 }, 10)).toBe(7);
-    expect(serviceLocal.getBlockNumber({ status: ProcessNewTransferResultStatusEnum.ERROR }, 10)).toBeUndefined();
+    expect(serviceLocal.validateNonce(10, 11, false)).toBe(NonceValidationEnum.SUCCESS);
+    expect(serviceLocal.validateNonce(undefined, 1, false)).toBe(NonceValidationEnum.SUCCESS);
+    expect(serviceLocal.validateNonce(undefined, 11, false)).toBe(NonceValidationEnum.MISSED_NONCE);
+    expect(serviceLocal.validateNonce(10, 12, false)).toBe(NonceValidationEnum.MISSED_NONCE);
+    expect(serviceLocal.validateNonce(10, 9, true)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
+    expect(serviceLocal.validateNonce(10, 10, true)).toBe(NonceValidationEnum.DUPLICATED_NONCE);
   });
 
   it('AddNewEventsAction processValidationNonceError SUCCESS', async () => {
