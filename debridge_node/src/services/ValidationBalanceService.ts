@@ -9,8 +9,8 @@ import { TokenBalanceHistory } from '../entities/TokenBalanceHistory';
 import { SubmisionBalanceStatusEnum } from '../enums/SubmisionBalanceStatusEnum';
 
 export class NewBalances {
-  reciever: BigNumber;
   sender: BigNumber;
+  reciever: BigNumber;
   status: SubmisionBalanceStatusEnum;
   constructor(status?: SubmisionBalanceStatusEnum) {
     if (status) {
@@ -64,37 +64,30 @@ export class ValidationBalanceService {
 
   calculateNewBalances(
     eventType: string,
-    balanceSenderOld: string,
-    balanceRecieverOld: string,
+    balanceSender: string,
+    balanceReciever: string,
     D: BigNumber,
     chainFrom: number,
     chainTo: number,
     monitoringEvent: MonitoringSentEventEntity,
   ): NewBalances {
     let newBalances = new NewBalances();
-    const balanceSenderAmountOld = new BigNumber(balanceSenderOld);
-    const balanceReceiverAmountOld = new BigNumber(balanceRecieverOld);
+    const senderAmount = new BigNumber(balanceSender);
+    const recieverAmount = new BigNumber(balanceReciever);
+    const lockedOrMintedAmount = new BigNumber(monitoringEvent.lockedOrMintedAmount);
     if (eventType === 'Sent') {
-      newBalances = this.calculateNewBalancesSent(balanceSenderAmountOld, balanceReceiverAmountOld, D, monitoringEvent.lockedOrMintedAmount);
+      newBalances = this.calculateNewBalancesSent(senderAmount, recieverAmount, D, lockedOrMintedAmount);
     } else if (eventType === 'Burn') {
-      newBalances = this.calculateNewBalancesBurn(
-        balanceSenderAmountOld,
-        balanceReceiverAmountOld,
-        D,
-        chainFrom,
-        chainTo,
-        monitoringEvent.lockedOrMintedAmount,
-      );
+      newBalances = this.calculateNewBalancesBurn(senderAmount, recieverAmount, D, chainFrom, chainTo, monitoringEvent.lockedOrMintedAmount);
     }
     return newBalances;
   }
 
-  calculateNewBalancesSent(recieverAmount: BigNumber, senderAmount: BigNumber, D: BigNumber, lockedOrMintedAmount: number): NewBalances {
+  calculateNewBalancesSent(senderAmount: BigNumber, recieverAmount: BigNumber, D: BigNumber, lockedOrMintedAmount: BigNumber): NewBalances {
     const newBalances = new NewBalances();
-    const monitoringEventLockedOrMintedAmount = new BigNumber(lockedOrMintedAmount);
     newBalances.sender = senderAmount.plus(D);
     newBalances.reciever = recieverAmount.plus(D);
-    if (newBalances.sender === monitoringEventLockedOrMintedAmount) {
+    if (newBalances.sender.eq(lockedOrMintedAmount)) {
       newBalances.status = SubmisionBalanceStatusEnum.CHECKED;
     } else {
       newBalances.status = SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION;
