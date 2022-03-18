@@ -86,6 +86,8 @@ export class AddNewEventsAction {
     const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
 
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+    // @ts-ignore
+    web3.eth.setProvider = registerInstance.setProvider;
 
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
     let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
