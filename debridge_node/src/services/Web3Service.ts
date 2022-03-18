@@ -11,6 +11,7 @@ export class Web3Custom extends Web3 {
 
 @Injectable()
 export class Web3Service {
+  private readonly providersMap = new Map<string, Web3Custom>();
   private readonly logger = new Logger(Web3Service.name);
   private readonly web3Timeout: number;
 
@@ -24,9 +25,19 @@ export class Web3Service {
 
   async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3Custom> {
     for (const provider of [...chainProvider.getNotFailedProviders(), ...chainProvider.getFailedProviders()]) {
+      if (this.providersMap.has(provider)) {
+        const web3 = this.providersMap.get(provider);
+        const isWorking = await this.checkConnectionHttpProvider(web3);
+        if (isWorking) {
+          this.logger.verbose(`Old provider is working`);
+          return web3;
+        }
+        this.logger.error(`Old provider ${provider} is not working`);
+      }
+
       const httpProvider = new Web3Custom.providers.HttpProvider(provider, {
         timeout: this.web3Timeout,
-        keepAlive: false,
+        keepAlive: true,
         headers: chainProvider.getChainAuth(provider),
       });
 
@@ -41,6 +52,7 @@ export class Web3Service {
         await this.validateChainId(chainProvider, provider);
       }
       chainProvider.setProviderStatus(provider, true);
+      this.providersMap.set(provider, web3);
       return web3;
     }
     this.logger.error(`Cann't connect to any provider ${chainProvider.getAllProviders()}`);
