@@ -60,7 +60,7 @@ export class AddNewEventsAction {
       this.logger.log(`Is locked chainId: ${chainId}`);
       await this.process(chainId);
     } catch (e) {
-      this.logger.error(`Error in action: ${e.message}`);
+      this.logger.error(`Error in scanning ${chainId} action: ${e.message} ${JSON.stringify(e)}`);
     } finally {
       this.locker.set(chainId, false);
       this.logger.log(`Is unlocked chainId: ${chainId}`);
