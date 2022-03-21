@@ -8,6 +8,25 @@
 
 # Changelog
 
+## v2.2.2(21.03.2022)
+* fix memory leak issue
+* don't exit if there are no valid rpc's for the chain
+* add unit tests
+
+## How to update to v2.2.2
+### Pull latest changes
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+
+### Run debridge-node
+```shell
+docker-compose up -d --build --remove-orphans
+```
+
+<br/>
+
 ## v2.2.1(16.03.2022)
 * fix nonce validation for historical data
 
@@ -23,6 +42,8 @@ git pull origin mainnet
 ```shell
 docker-compose up -d --build --remove-orphans
 ```
+
+<br/>
 
 ## v2.2.0(14.03.2022)
 * changed deployId calculation formula 
@@ -55,6 +76,7 @@ DELETE FROM "confirmNewAssets";
 UPDATE "submissions" SET "assetsStatus" = 1;
 ```
 ![update to v2.2.0](assets/how-to-update-v2_2_0.jpeg)
+
 <br/>
 
 ## v2.1.1(13.03.2022)
