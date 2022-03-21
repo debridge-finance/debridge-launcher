@@ -3,7 +3,6 @@ import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupportedChainEntity } from '../entities/SupportedChainEntity';
-import { AddNewEventsAction } from './actions/AddNewEventsAction';
 import { SignAction } from './actions/SignAction';
 import { UploadToIPFSAction } from './actions/UploadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
@@ -18,8 +17,6 @@ export class SubscribeHandler implements OnModuleInit {
   private readonly logger = new Logger(SubscribeHandler.name);
 
   constructor(
-    private readonly schedulerRegistry: SchedulerRegistry,
-    private readonly addNewEventsAction: AddNewEventsAction,
     private readonly signAction: SignAction,
     private readonly uploadToIPFSAction: UploadToIPFSAction,
     private readonly uploadToApiAction: UploadToApiAction,

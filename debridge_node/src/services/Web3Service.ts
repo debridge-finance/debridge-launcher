@@ -11,9 +11,9 @@ export class Web3Custom extends Web3 {
 
 @Injectable()
 export class Web3Service {
+  private readonly providersMap = new Map<string, Web3Custom>();
   private readonly logger = new Logger(Web3Service.name);
   private readonly web3Timeout: number;
-  private readonly providersMap = new Map<string, Web3Custom>();
 
   constructor(private readonly configService: ConfigService) {
     this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT', '10000'));

@@ -34,9 +34,8 @@ interface ProcessNewTransferResult {
 
 @Injectable()
 export class AddNewEventsAction {
-  private logger = new Logger(AddNewEventsAction.name);
+  private readonly logger = new Logger(AddNewEventsAction.name);
   private readonly locker = new Map();
-  private readonly chainingScanningMap = new Map<number, AddNewEventsAction>();
 
   constructor(
     @Inject(forwardRef(() => ChainScanningService))
@@ -59,23 +58,9 @@ export class AddNewEventsAction {
     try {
       this.locker.set(chainId, true);
       this.logger.log(`Is locked chainId: ${chainId}`);
-      if (!this.chainingScanningMap.has(chainId)) {
-        this.chainingScanningMap.set(
-          chainId,
-          new AddNewEventsAction(
-            this.chainScanningService,
-            this.supportedChainRepository,
-            this.submissionsRepository,
-            this.chainConfigService,
-            this.web3Service,
-            this.nonceControllingService,
-            this.debridgeApiService,
-          ),
-        );
-      }
-      await this.chainingScanningMap.get(chainId).process(chainId);
+      await this.process(chainId);
     } catch (e) {
-      this.logger.error(`Error in action: ${e.message}`);
+      this.logger.error(`Error in scanning ${chainId} action: ${e.message} ${JSON.stringify(e)}`);
     } finally {
       this.locker.set(chainId, false);
       this.logger.log(`Is unlocked chainId: ${chainId}`);
@@ -89,8 +74,8 @@ export class AddNewEventsAction {
    * @param {number} to
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
-    this.logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
-    this.logger.verbose(`process checkNewEvents - chainId: ${chainId}; from: ${from}; to: ${to}`);
+    const logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
+    logger.verbose(`process checkNewEvents - chainId: ${chainId}; from: ${from}; to: ${to}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       where: {
         chainId,
@@ -101,35 +86,37 @@ export class AddNewEventsAction {
     const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
 
     const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+    // @ts-ignore
+    web3.eth.setProvider = registerInstance.setProvider;
 
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
     let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
 
-    this.logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
+    logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
 
     for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
       const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
-      this.logger.log(`supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
+      logger.log(`supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
       if (supportedChain.latestBlock === lastBlockOfPage) {
-        this.logger.warn(`latestBlock in db ${supportedChain.latestBlock} == lastBlockOfPage ${lastBlockOfPage}`);
+        logger.warn(`latestBlock in db ${supportedChain.latestBlock} == lastBlockOfPage ${lastBlockOfPage}`);
         continue;
       }
       const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
-      this.logger.log(`sentEvents: ${JSON.stringify(sentEvents)}`);
+      logger.log(`sentEvents: ${JSON.stringify(sentEvents)}`);
       if (!sentEvents || sentEvents.length === 0) {
-        this.logger.verbose(`Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
+        logger.verbose(`Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
         await this.supportedChainRepository.update(chainId, {
           latestBlock: lastBlockOfPage,
         });
         continue;
       }
 
-      const result = await this.processNewTransfers(sentEvents, supportedChain.chainId);
+      const result = await this.processNewTransfers(logger, sentEvents, supportedChain.chainId);
       const updatedBlock = result.status === ProcessNewTransferResultStatusEnum.SUCCESS ? lastBlockOfPage : result.blockToOverwrite;
 
       // updatedBlock can be undefined if incorrect nonce occures in the first event
       if (updatedBlock) {
-        this.logger.log(`updateSupportedChainBlock; key: latestBlock; value: ${updatedBlock};`);
+        logger.log(`updateSupportedChainBlock; key: latestBlock; value: ${updatedBlock};`);
         await this.supportedChainRepository.update(chainId, {
           latestBlock: updatedBlock,
         });
@@ -143,17 +130,18 @@ export class AddNewEventsAction {
 
   /**
    * Process new transfers
+   * @param logger
    * @param events
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
+  async processNewTransfers(logger: Logger, events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
 
     for (const sendEvent of events.sort(i => i.returnValues.nonce)) {
       // for (const sendEvent of events.sort(i => i.returnValues.nonce)) {
       const submissionId = sendEvent.returnValues.submissionId;
-      this.logger.log(`submissionId: ${submissionId}`);
+      logger.log(`submissionId: ${submissionId}`);
       const nonce = parseInt(sendEvent.returnValues.nonce);
 
       // check nonce collission
@@ -164,7 +152,7 @@ export class AddNewEventsAction {
         },
       });
       if (submission) {
-        this.logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
+        logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
         blockToOverwrite = submission.blockNumber;
         this.nonceControllingService.set(chainIdFrom, submission.nonce);
         continue;
@@ -188,12 +176,12 @@ export class AddNewEventsAction {
       const nonceExists = submissionWithCurNonce ? true : false;
       const nonceValidationStatus = this.validateNonce(maxNonceFromDb, nonce, nonceExists);
 
-      this.logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
+      logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
 
       if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
         const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
         const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${maxNonceFromDb}; submissionId: ${submissionId}; blockToOverwrite: ${blockToOverwrite}; submissionWithMaxNonceDb.blockNumber: ${submissionWithMaxNonceDb.blockNumber}`;
-        this.logger.error(message);
+        logger.error(message);
         return {
           blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
           status: ProcessNewTransferResultStatusEnum.ERROR,
@@ -223,7 +211,7 @@ export class AddNewEventsAction {
         blockToOverwrite = sendEvent.blockNumber;
         this.nonceControllingService.set(chainIdFrom, nonce);
       } catch (e) {
-        this.logger.error(`Error in saving ${submissionId}`);
+        logger.error(`Error in saving ${submissionId}`);
         throw e;
       }
     }
