@@ -55,8 +55,9 @@ export class Web3Service {
       this.providersMap.set(provider, web3);
       return web3;
     }
-    this.logger.error(`Cann't connect to any provider ${chainProvider.getAllProviders()}`);
-    process.exit(1);
+    const err = `Cann't connect to any provider ${chainProvider.getAllProviders()}`;
+    this.logger.error(err);
+    throw new Error(err);
   }
 
   private async checkConnectionHttpProvider(web3: Web3Custom): Promise<boolean> {

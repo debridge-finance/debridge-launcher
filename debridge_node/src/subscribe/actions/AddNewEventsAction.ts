@@ -60,7 +60,7 @@ export class AddNewEventsAction {
       this.logger.log(`Is locked chainId: ${chainId}`);
       await this.process(chainId);
     } catch (e) {
-      this.logger.error(`Error in scanning ${chainId} action: ${e.message} ${JSON.stringify(e)}`);
+      this.logger.error(`Error while scanning chainId: ${chainId}; error: ${e.message} ${JSON.stringify(e)}`);
     } finally {
       this.locker.set(chainId, false);
       this.logger.log(`Is unlocked chainId: ${chainId}`);
@@ -138,8 +138,7 @@ export class AddNewEventsAction {
   async processNewTransfers(logger: Logger, events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
 
-    for (const sendEvent of events.sort(i => i.returnValues.nonce)) {
-      // for (const sendEvent of events.sort(i => i.returnValues.nonce)) {
+    for (const sendEvent of events) {
       const submissionId = sendEvent.returnValues.submissionId;
       logger.log(`submissionId: ${submissionId}`);
       const nonce = parseInt(sendEvent.returnValues.nonce);
