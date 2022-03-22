@@ -1,38 +1,40 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AppController } from './api/AppController';
+import { AuthService } from './api/auth/auth.service';
+import { JwtStrategy } from './api/auth/jwt.strategy';
+import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
+import { RescanService } from './api/services/RescanService';
+import { DataFixModule } from './datafixes/DataFixModule';
+import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
+import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
+import { MonitoringSentEventEntity } from './entities/MonitoringSentEventEntity';
 import { SubmissionEntity } from './entities/SubmissionEntity';
 import { SupportedChainEntity } from './entities/SupportedChainEntity';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './api/auth/jwt.strategy';
-import { AuthService } from './api/auth/auth.service';
-import { ScheduleModule } from '@nestjs/schedule';
-import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
-import { SignAction } from './subscribe/actions/SignAction';
-import { SubscribeHandler } from './subscribe/SubscribeHandler';
-import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
-import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
-import { OrbitDbService } from './services/OrbitDbService';
-import { DebrdigeApiService } from './services/DebrdigeApiService';
-import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
-import { NonceControllingService } from './subscribe/actions/NonceControllingService';
-import { RescanService } from './api/services/RescanService';
-import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
-import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
-import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 import { MonitoringModule } from './monitoring/MonitoringModule';
-import { Web3Service } from './services/Web3Service';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
-import { ChainScanningService } from './services/ChainScanningService';
 import { ChainConfigService } from './services/ChainConfigService';
-import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
-import { DataFixModule } from './datafixes/DataFixModule';
-import { ValidationBalanceAction } from './subscribe/actions/ValidationBalanceAction';
+import { ChainScanningService } from './services/ChainScanningService';
+import { DebrdigeApiService } from './services/DebrdigeApiService';
+import { OrbitDbService } from './services/OrbitDbService';
 import { ValidationBalanceService } from './services/ValidationBalanceService';
+import { Web3Service } from './services/Web3Service';
+import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
+import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
+import { NonceControllingService } from './subscribe/actions/NonceControllingService';
+import { SignAction } from './subscribe/actions/SignAction';
+import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
+import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
+import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
+import { ValidationBalanceAction } from './subscribe/actions/ValidationBalanceAction';
+import { SubscribeHandler } from './subscribe/SubscribeHandler';
 
 @Module({
   imports: [
@@ -63,10 +65,10 @@ import { ValidationBalanceService } from './services/ValidationBalanceService';
         password: configService.get('POSTGRES_PASSWORD', 'password'),
         database: configService.get('POSTGRES_DATABASE', 'postgres'),
         synchronize: true,
-        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity],
+        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, MonitoringSentEventEntity],
       }),
     }),
-    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity]),
+    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, MonitoringSentEventEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
