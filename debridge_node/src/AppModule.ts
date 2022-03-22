@@ -23,7 +23,6 @@ import { RescanService } from './api/services/RescanService';
 import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
-import { MonitoringModule } from './monitoring/MonitoringModule';
 import { Web3Service } from './services/Web3Service';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -46,7 +45,6 @@ import { DataFixModule } from './datafixes/DataFixModule';
         limit: configService.get('THROTTLER_LIMIT', 10),
       }),
     }),
-    MonitoringModule,
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
