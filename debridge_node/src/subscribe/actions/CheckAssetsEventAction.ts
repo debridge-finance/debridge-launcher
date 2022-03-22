@@ -9,11 +9,10 @@ import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
 import { abi as ERC20Abi } from '../../assets/ERC20.json';
-import Web3 from 'web3';
 import { readFileSync } from 'fs';
 import { Account } from 'web3-core';
 import { createProxy } from '../../utils/create.proxy';
-import { getTokenName } from '../../utils/get.token.name';
+import { getTokenName } from '../../utils/getTokenName';
 import { Web3Service } from '../../services/Web3Service';
 import { ChainConfigService } from '../../services/ChainConfigService';
 
@@ -31,10 +30,7 @@ export class CheckAssetsEventAction extends IAction {
   ) {
     super();
     this.logger = new Logger(CheckAssetsEventAction.name);
-    this.account = createProxy(new Web3(), { logger: this.logger }).eth.accounts.decrypt(
-      JSON.parse(readFileSync('./keystore.json', 'utf-8')),
-      process.env.KEYSTORE_PASSWORD,
-    );
+    this.account = this.web3Service.web3().eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), process.env.KEYSTORE_PASSWORD);
   }
 
   async process() {
@@ -89,12 +85,15 @@ export class CheckAssetsEventAction extends IAction {
           const tokenSymbol = await nativeTokenInstance.methods.symbol().call();
           const tokenDecimals = await nativeTokenInstance.methods.decimals().call();
           const prefix = 2;
-          //keccak256(abi.encodePacked(debridgeId, _name, _symbol, _decimals));
+
+          const nameKeccak = web3.utils.soliditySha3({ t: 'string', v: tokenName });
+          const symbolKeccak = web3.utils.soliditySha3({ t: 'string', v: tokenSymbol });
+
           const deployId = web3.utils.soliditySha3(
             { t: 'uint256', v: prefix },
             { t: 'bytes32', v: submission.debridgeId },
-            { t: 'string', v: tokenName },
-            { t: 'string', v: tokenSymbol },
+            { t: 'bytes32', v: nameKeccak },
+            { t: 'bytes32', v: symbolKeccak },
             { t: 'uint8', v: tokenDecimals },
           );
           this.logger.log(`prefix: ${prefix}`);

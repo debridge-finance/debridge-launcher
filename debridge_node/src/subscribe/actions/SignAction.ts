@@ -9,7 +9,7 @@ import Web3 from 'web3';
 import { readFileSync } from 'fs';
 import { Account } from 'web3-core';
 import { ConfigService } from '@nestjs/config';
-import { createProxy } from '../../utils/create.proxy';
+import { Web3Service } from '../../services/Web3Service';
 
 //Simple action that sign submissionId and save signatures to DB
 @Injectable()
@@ -18,6 +18,7 @@ export class SignAction extends IAction {
   private account: Account;
 
   constructor(
+    private readonly web3Service: Web3Service,
     @InjectRepository(SubmissionEntity)
     private readonly submissionsRepository: Repository<SubmissionEntity>,
     @InjectRepository(ConfirmNewAssetEntity)
@@ -26,7 +27,7 @@ export class SignAction extends IAction {
   ) {
     super();
     this.logger = new Logger(SignAction.name);
-    this.web3 = createProxy(new Web3(), { logger: this.logger });
+    this.web3 = this.web3Service.web3();
     this.account = this.web3.eth.accounts.decrypt(JSON.parse(readFileSync('./keystore.json', 'utf-8')), configService.get('KEYSTORE_PASSWORD'));
   }
 
@@ -46,7 +47,7 @@ export class SignAction extends IAction {
           submissionId: submission.submissionId,
         },
         {
-          signature: signature,
+          signature,
           status: SubmisionStatusEnum.SIGNED,
         },
       );

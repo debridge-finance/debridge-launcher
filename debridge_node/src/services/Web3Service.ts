@@ -8,14 +8,19 @@ export class Web3Custom extends Web3 {
     super(httpProvider);
   }
 }
+
 @Injectable()
 export class Web3Service {
+  private readonly providersMap = new Map<string, Web3Custom>();
   private readonly logger = new Logger(Web3Service.name);
   private readonly web3Timeout: number;
-  private readonly providersMap = new Map();
 
   constructor(private readonly configService: ConfigService) {
     this.web3Timeout = parseInt(configService.get('WEB3_TIMEOUT', '10000'));
+  }
+
+  web3(): Web3 {
+    return new Web3();
   }
 
   async web3HttpProvider(chainProvider: ChainProvider): Promise<Web3Custom> {
@@ -50,12 +55,13 @@ export class Web3Service {
       this.providersMap.set(provider, web3);
       return web3;
     }
-    this.logger.error(`Cann't connect to any provider ${chainProvider.getAllProviders()}`);
-    process.exit(1);
+    const err = `Cann't connect to any provider ${chainProvider.getAllProviders()}`;
+    this.logger.error(err);
+    throw new Error(err);
   }
 
-  private async checkConnectionHttpProvider(web3): Promise<boolean> {
-    const provider = web3.currentProvider.host;
+  private async checkConnectionHttpProvider(web3: Web3Custom): Promise<boolean> {
+    const provider = web3.chainProvider;
     try {
       this.logger.log(`Connection to ${provider} is started`);
       await web3.eth.getBlockNumber();
