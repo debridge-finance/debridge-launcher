@@ -8,7 +8,7 @@
 
 # Changelog
 
-## v2.2.2(21.03.2022)
+## v2.2.2(22.03.2022)
 * fix memory leak issue
 * don't exit if there are no valid rpc's for the chain
 * add unit tests
