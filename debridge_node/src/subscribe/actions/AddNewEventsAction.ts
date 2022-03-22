@@ -11,11 +11,10 @@ import { SubmisionBalanceStatusEnum } from '../../enums/SubmisionBalanceStatusEn
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService, ChainProvider } from '../../services/ChainConfigService';
-import { NonceControllingService } from '../../services/NonceControllingService';
 import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
+import { NonceControllingService } from '../../services/NonceControllingService';
 import { Web3Custom, Web3Service } from '../../services/Web3Service';
-import { NonceControllingService } from './NonceControllingService';
 
 export enum ProcessNewTransferResultStatusEnum {
   SUCCESS,

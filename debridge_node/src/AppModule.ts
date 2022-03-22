@@ -1,36 +1,37 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD, APP_GUARD } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerGuard, ThrottlerGuard, ThrottlerModule, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './api/AppController';
 import { AuthService } from './api/auth/auth.service';
 import { JwtStrategy } from './api/auth/jwt.strategy';
-import { GetSupportedChainsService, GetSupportedChainsService } from './api/services/GetSupportedChainsService';
-import { RescanService, RescanService } from './api/services/RescanService';
-import { DataFixModule, DataFixModule } from './datafixes/DataFixModule';
-import { FixNotExistsNonceBlockNumber, FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
-import { ConfirmNewAssetEntity, ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
+import { GetSupportedChainsService } from './api/services/GetSupportedChainsService';
+import { RescanService } from './api/services/RescanService';
+import { DataFixModule } from './datafixes/DataFixModule';
+import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
+import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { MonitoringSentEventEntity } from './entities/MonitoringSentEventEntity';
 import { SubmissionEntity } from './entities/SubmissionEntity';
 import { SupportedChainEntity } from './entities/SupportedChainEntity';
-import { ChainConfigService, ChainConfigService } from './services/ChainConfigService';
-import { ChainScanningService, ChainScanningService } from './services/ChainScanningService';
-import { DebrdigeApiService, DebrdigeApiService } from './services/DebrdigeApiService';
+import { ChainConfigService } from './services/ChainConfigService';
+import { ChainScanningService } from './services/ChainScanningService';
+import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { NonceControllingService } from './services/NonceControllingService';
-import { OrbitDbService, OrbitDbService } from './services/OrbitDbService';
-import { ValidationBalanceService } from './services/ValidationBalanceService';
-import { Web3Service, Web3Service } from './services/Web3Service';
+import { OrbitDbService } from './services/OrbitDbService';
+import { Web3Service } from './services/Web3Service';
 import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
 import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
+import { SignAction } from './subscribe/actions/SignAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
+import { SubscribeHandler } from './subscribe/SubscribeHandler';
 
 @Module({
   imports: [
@@ -88,8 +89,6 @@ import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
     StatisticToApiAction,
     ChainScanningService,
     ChainConfigService,
-    ValidationBalanceAction,
-    ValidationBalanceService,
     FixNotExistsNonceBlockNumber,
     {
       provide: APP_GUARD,
