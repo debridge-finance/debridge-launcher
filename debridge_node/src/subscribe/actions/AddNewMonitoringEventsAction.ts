@@ -3,16 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
-import { SubmissionEntity } from '../../entities/SubmissionEntity';
+import { MonitoringSentEventEntity } from '../../entities/MonitoringSentEventEntity';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
-import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
-import { SubmisionBalanceStatusEnum } from '../../enums/SubmisionBalanceStatusEnum';
-import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
-import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
 import { ChainConfigService, ChainProvider } from '../../services/ChainConfigService';
 import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
-import { NonceControllingService } from '../../services/NonceControllingService';
+import { NonceMonitoringEventsControllingService } from '../../services/NonceMonitoringEventsControllingService';
 import { Web3Custom, Web3Service } from '../../services/Web3Service';
 
 export enum ProcessNewTransferResultStatusEnum {
@@ -35,8 +31,8 @@ interface ProcessNewTransferResult {
 }
 
 @Injectable()
-export class AddNewEventsAction {
-  private readonly logger = new Logger(AddNewEventsAction.name);
+export class AddNewMonitoringEventsAction {
+  private readonly logger = new Logger(AddNewMonitoringEventsAction.name);
   private readonly locker = new Map();
 
   constructor(
@@ -44,11 +40,11 @@ export class AddNewEventsAction {
     private readonly chainScanningService: ChainScanningService,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
-    @InjectRepository(SubmissionEntity)
-    private readonly submissionsRepository: Repository<SubmissionEntity>,
+    @InjectRepository(MonitoringSentEventEntity)
+    private readonly monitoringSentEventRepository: Repository<MonitoringSentEventEntity>,
     private readonly chainConfigService: ChainConfigService,
     private readonly web3Service: Web3Service,
-    private readonly nonceControllingService: NonceControllingService,
+    private readonly nonceMonitoringEventsControllingService: NonceMonitoringEventsControllingService,
     private readonly debridgeApiService: DebrdigeApiService,
   ) {}
 
@@ -76,7 +72,7 @@ export class AddNewEventsAction {
    * @param {number} to
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
-    const logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
+    const logger = new Logger(`${AddNewMonitoringEventsAction.name} chainId ${chainId}`);
     logger.verbose(`process checkNewEvents - chainId: ${chainId}; from: ${from}; to: ${to}`);
     const supportedChain = await this.supportedChainRepository.findOne({
       where: {
@@ -84,43 +80,41 @@ export class AddNewEventsAction {
       },
     });
     const chainDetail = this.chainConfigService.get(chainId);
-
     const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
-
-    const registerInstance = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+    const contract = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
     // @ts-ignore
-    web3.eth.setProvider = registerInstance.setProvider;
+    web3.eth.setProvider = contract.setProvider;
 
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
-    let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
+    let fromBlock = from || (supportedChain.latestBlockMonitoring > 0 ? supportedChain.latestBlockMonitoring : toBlock - 1);
 
     logger.debug(`Getting events from ${fromBlock} to ${toBlock} ${supportedChain.network}`);
 
     for (fromBlock; fromBlock < toBlock; fromBlock += chainDetail.maxBlockRange) {
       const lastBlockOfPage = Math.min(fromBlock + chainDetail.maxBlockRange, toBlock);
       logger.log(`supportedChain.network: ${supportedChain.network} ${fromBlock}-${lastBlockOfPage}`);
-      if (supportedChain.latestBlock === lastBlockOfPage) {
-        logger.warn(`latestBlock in db ${supportedChain.latestBlock} == lastBlockOfPage ${lastBlockOfPage}`);
+      if (supportedChain.latestBlockMonitoring === lastBlockOfPage) {
+        logger.warn(`latestBlockMonitoring in db ${supportedChain.latestBlockMonitoring} == lastBlockOfPage ${lastBlockOfPage}`);
         continue;
       }
-      const sentEvents = await this.getEvents(registerInstance, fromBlock, lastBlockOfPage);
-      logger.log(`sentEvents: ${JSON.stringify(sentEvents)}`);
-      if (!sentEvents || sentEvents.length === 0) {
+      const monitoringSentEvents = await this.getEvents(contract, fromBlock, lastBlockOfPage);
+      logger.log(`monitoringSentEvents: ${JSON.stringify(monitoringSentEvents)}`);
+      if (!monitoringSentEvents || monitoringSentEvents.length === 0) {
         logger.verbose(`Not found any events for ${chainId} ${fromBlock} - ${lastBlockOfPage}`);
         await this.supportedChainRepository.update(chainId, {
-          latestBlock: lastBlockOfPage,
+          latestBlockMonitoring: lastBlockOfPage,
         });
         continue;
       }
 
-      const result = await this.processNewTransfers(logger, sentEvents, supportedChain.chainId);
+      const result = await this.processNewTransfers(logger, monitoringSentEvents, supportedChain.chainId);
       const updatedBlock = result.status === ProcessNewTransferResultStatusEnum.SUCCESS ? lastBlockOfPage : result.blockToOverwrite;
 
       // updatedBlock can be undefined if incorrect nonce occures in the first event
       if (updatedBlock) {
-        logger.log(`updateSupportedChainBlock; key: latestBlock; value: ${updatedBlock};`);
+        logger.log(`updateSupportedChainBlock; key: latestBlockMonitoring; value: ${updatedBlock};`);
         await this.supportedChainRepository.update(chainId, {
-          latestBlock: updatedBlock,
+          latestBlockMonitoring: updatedBlock,
         });
       }
       if (result.status != ProcessNewTransferResultStatusEnum.SUCCESS) {
@@ -140,42 +134,41 @@ export class AddNewEventsAction {
   async processNewTransfers(logger: Logger, events: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
 
-    for (const sendEvent of events) {
-      const submissionId = sendEvent.returnValues.submissionId;
+    for (const event of events) {
+      const submissionId = event.returnValues.submissionId;
       logger.log(`submissionId: ${submissionId}`);
-      const nonce = parseInt(sendEvent.returnValues.nonce);
+      const nonce = parseInt(event.returnValues.nonce);
 
       // check nonce collission
       // check if submission from rpc with the same submissionId have the same nonce
-      const submission = await this.submissionsRepository.findOne({
+      const monitoringSentEvent = await this.monitoringSentEventRepository.findOne({
         where: {
           submissionId,
         },
       });
-      if (submission) {
-        logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
-        blockToOverwrite = submission.blockNumber;
-        this.nonceControllingService.set(chainIdFrom, submission.nonce);
+      if (monitoringSentEvent) {
+        logger.verbose(`monitoringSentEvent already found in db submissionId: ${submissionId}`);
+        // blockToOverwrite = monitoringSentEvent.blockNumber;
+        this.nonceMonitoringEventsControllingService.set(chainIdFrom, monitoringSentEvent.nonce);
         continue;
       }
 
-      const maxNonceFromDb = this.nonceControllingService.get(chainIdFrom);
+      const maxNonceFromDb = this.nonceMonitoringEventsControllingService.get(chainIdFrom);
 
-      const submissionWithMaxNonceDb = await this.submissionsRepository.findOne({
+      const monitoringWithMaxNonceDb = await this.monitoringSentEventRepository.findOne({
         where: {
           chainFrom: chainIdFrom,
           nonce: maxNonceFromDb,
         },
       });
 
-      const nonceExists = await this.isSubmissionExists(chainIdFrom, nonce);
+      const nonceExists = await this.isMonitoringEventExists(chainIdFrom, nonce);
       const nonceValidationStatus = this.validateNonce(maxNonceFromDb, nonce, nonceExists);
-
       logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
 
       if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
-        const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
-        const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${maxNonceFromDb}; submissionId: ${submissionId}; blockToOverwrite: ${blockToOverwrite}; submissionWithMaxNonceDb.blockNumber: ${submissionWithMaxNonceDb.blockNumber}`;
+        const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : monitoringWithMaxNonceDb.blockNumber;
+        const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${maxNonceFromDb}; submissionId: ${submissionId}; blockToOverwrite: ${blockToOverwrite}; monitoringWithMaxNonceDb.blockNumber: ${monitoringWithMaxNonceDb.blockNumber}`;
         logger.error(message);
         return {
           blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
@@ -187,43 +180,34 @@ export class AddNewEventsAction {
       }
 
       try {
-        await this.submissionsRepository.save({
-          submissionId: submissionId,
-          txHash: sendEvent.transactionHash,
-          chainFrom: chainIdFrom,
-          chainTo: sendEvent.returnValues.chainIdTo,
-          debridgeId: sendEvent.returnValues.debridgeId,
-          receiverAddr: sendEvent.returnValues.receiver,
-          amount: sendEvent.returnValues.amount,
-          status: SubmisionStatusEnum.NEW,
-          ipfsStatus: UploadStatusEnum.NEW,
-          apiStatus: UploadStatusEnum.NEW,
-          assetsStatus: SubmisionAssetsStatusEnum.NEW,
-          rawEvent: JSON.stringify(sendEvent),
-          blockNumber: sendEvent.blockNumber,
-          balanceStatus: SubmisionBalanceStatusEnum.RECIEVED,
+        await this.monitoringSentEventRepository.save({
+          submissionId,
           nonce,
-        } as SubmissionEntity);
-        blockToOverwrite = sendEvent.blockNumber;
-        this.nonceControllingService.set(chainIdFrom, nonce);
+          blockNumber: event.blockNumber,
+          lockedOrMintedAmount: event.returnValues.lockedOrMintedAmount,
+          totalSupply: event.returnValues.totalSupply,
+          chainId: chainIdFrom,
+        } as MonitoringSentEventEntity);
+        blockToOverwrite = event.blockNumber;
+        this.nonceMonitoringEventsControllingService.set(chainIdFrom, nonce);
       } catch (e) {
         logger.error(`Error in saving ${submissionId}`);
         throw e;
       }
+      return {
+        status: ProcessNewTransferResultStatusEnum.SUCCESS,
+      };
     }
-    return {
-      status: ProcessNewTransferResultStatusEnum.SUCCESS,
-    };
   }
 
-  async isSubmissionExists(chainIdFrom: number, nonce: number): Promise<boolean> {
-    const submission = await this.submissionsRepository.findOne({
+  async isMonitoringEventExists(chainIdFrom: number, nonce: number): Promise<boolean> {
+    const monitoringEvent = await this.monitoringSentEventRepository.findOne({
       where: {
         chainFrom: chainIdFrom,
         nonce,
       },
     });
-    if (submission) {
+    if (monitoringEvent) {
       return true;
     }
     return false;
@@ -270,10 +254,10 @@ export class AddNewEventsAction {
     return NonceValidationEnum.SUCCESS;
   }
 
-  async getEvents(registerInstance, fromBlock: number, toBlock) {
+  async getEvents(contract, fromBlock: number, toBlock) {
     if (fromBlock >= toBlock) return;
 
     /* get events */
-    return await registerInstance.getPastEvents('Sent', { fromBlock, toBlock });
+    return await contract.getPastEvents('MonitoringSendEvent', { fromBlock, toBlock });
   }
 }

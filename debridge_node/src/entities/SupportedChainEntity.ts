@@ -15,7 +15,7 @@ export class SupportedChainEntity {
   @Column({
     nullable: true,
   })
-  latestValidationBlock?: number;
+  latestBlockMonitoring?: number;
 
   @Column({
     nullable: true,

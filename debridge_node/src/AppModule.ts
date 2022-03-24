@@ -23,6 +23,7 @@ import { ChainConfigService } from './services/ChainConfigService';
 import { ChainScanningService } from './services/ChainScanningService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { NonceControllingService } from './services/NonceControllingService';
+import { NonceMonitoringEventsControllingService } from './services/NonceMonitoringEventsControllingService';
 import { OrbitDbService } from './services/OrbitDbService';
 import { Web3Service } from './services/Web3Service';
 import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
@@ -81,6 +82,7 @@ import { SubscribeHandler } from './subscribe/SubscribeHandler';
     UploadToIPFSAction,
     UploadToApiAction,
     NonceControllingService,
+    NonceMonitoringEventsControllingService,
     CheckAssetsEventAction,
     SubscribeHandler,
     GetSupportedChainsService,

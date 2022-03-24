@@ -10,6 +10,9 @@ export class MonitoringSentEventEntity {
   nonce: number;
 
   @Column()
+  blockNumber: number;
+
+  @Column()
   lockedOrMintedAmount: number;
 
   @Column()
