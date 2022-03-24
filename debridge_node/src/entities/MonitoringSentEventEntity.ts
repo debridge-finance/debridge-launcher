@@ -13,10 +13,10 @@ export class MonitoringSentEventEntity {
   blockNumber: number;
 
   @Column()
-  lockedOrMintedAmount: number;
+  lockedOrMintedAmount: string;
 
   @Column()
-  totalSupply: number;
+  totalSupply: string;
 
   @Column()
   chainId: number;

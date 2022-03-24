@@ -31,8 +31,8 @@ export class ValidationBalanceService {
     try {
       const { rawEvent, chainFrom, chainTo, debridgeId, updatedAt } = submission;
       const sendEvent = JSON.parse(rawEvent);
-
-      const D = this.calculateDelta(sendEvent.returnValues.amount, sendEvent.returnValues.feeParams);
+      const protocolFee = sendEvent.returnValues.feeParams[1];
+      const D = this.calculateDelta(sendEvent.returnValues.amount, protocolFee);
 
       const balanceSender = await this.getBalance(manager, chainFrom, debridgeId);
       const balanceReceiver = await this.getBalance(manager, chainTo, debridgeId);
@@ -102,7 +102,7 @@ export class ValidationBalanceService {
     D: BigNumber,
     chainFrom: number,
     chainTo: number,
-    lockedOrMintedAmount: number,
+    lockedOrMintedAmount: string,
   ): NewBalances {
     const newBalances = new NewBalances();
     const monitoringEventLockedOrMintedAmount = new BigNumber(lockedOrMintedAmount);

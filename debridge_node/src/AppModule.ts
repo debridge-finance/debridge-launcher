@@ -19,12 +19,13 @@ import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { MonitoringSentEventEntity } from './entities/MonitoringSentEventEntity';
 import { SubmissionEntity } from './entities/SubmissionEntity';
 import { SupportedChainEntity } from './entities/SupportedChainEntity';
+import { TokenBalanceHistory } from './entities/TokenBalanceHistory';
 import { ChainConfigService } from './services/ChainConfigService';
 import { ChainScanningService } from './services/ChainScanningService';
 import { DebrdigeApiService } from './services/DebrdigeApiService';
 import { NonceControllingService } from './services/NonceControllingService';
-import { NonceMonitoringEventsControllingService } from './services/NonceMonitoringEventsControllingService';
 import { OrbitDbService } from './services/OrbitDbService';
+import { ValidationBalanceService } from './services/ValidationBalanceService';
 import { Web3Service } from './services/Web3Service';
 import { AddNewEventsAction } from './subscribe/actions/AddNewEventsAction';
 import { CheckAssetsEventAction } from './subscribe/actions/CheckAssetsEventAction';
@@ -32,6 +33,7 @@ import { SignAction } from './subscribe/actions/SignAction';
 import { StatisticToApiAction } from './subscribe/actions/StatisticToApiAction';
 import { UploadToApiAction } from './subscribe/actions/UploadToApiAction';
 import { UploadToIPFSAction } from './subscribe/actions/UploadToIPFSAction';
+import { ValidationBalanceAction } from './subscribe/actions/ValidationBalanceAction';
 import { SubscribeHandler } from './subscribe/SubscribeHandler';
 
 @Module({
@@ -62,10 +64,10 @@ import { SubscribeHandler } from './subscribe/SubscribeHandler';
         password: configService.get('POSTGRES_PASSWORD', 'password'),
         database: configService.get('POSTGRES_DATABASE', 'postgres'),
         synchronize: true,
-        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, MonitoringSentEventEntity],
+        entities: [SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, MonitoringSentEventEntity, TokenBalanceHistory],
       }),
     }),
-    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, MonitoringSentEventEntity]),
+    TypeOrmModule.forFeature([SubmissionEntity, SupportedChainEntity, ConfirmNewAssetEntity, MonitoringSentEventEntity, TokenBalanceHistory]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
@@ -82,8 +84,9 @@ import { SubscribeHandler } from './subscribe/SubscribeHandler';
     UploadToIPFSAction,
     UploadToApiAction,
     NonceControllingService,
-    NonceMonitoringEventsControllingService,
     CheckAssetsEventAction,
+    ValidationBalanceAction,
+    ValidationBalanceService,
     SubscribeHandler,
     GetSupportedChainsService,
     OrbitDbService,

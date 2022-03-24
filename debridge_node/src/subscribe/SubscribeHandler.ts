@@ -6,6 +6,7 @@ import { SupportedChainEntity } from '../entities/SupportedChainEntity';
 import { SignAction } from './actions/SignAction';
 import { UploadToIPFSAction } from './actions/UploadToIPFSAction';
 import { UploadToApiAction } from './actions/UploadToApiAction';
+import { ValidationBalanceAction } from './actions/ValidationBalanceAction';
 import { CheckAssetsEventAction } from './actions/CheckAssetsEventAction';
 import { StatisticToApiAction } from './actions/StatisticToApiAction';
 import { Web3Service } from '../services/Web3Service';
@@ -22,6 +23,7 @@ export class SubscribeHandler implements OnModuleInit {
     private readonly uploadToApiAction: UploadToApiAction,
     private readonly checkAssetsEventAction: CheckAssetsEventAction,
     private readonly statisticToApiAction: StatisticToApiAction,
+    private readonly validateBalanceAction: ValidationBalanceAction,
     @InjectRepository(SupportedChainEntity)
     private readonly supportedChainRepository: Repository<SupportedChainEntity>,
     private readonly web3Service: Web3Service,
@@ -85,6 +87,11 @@ export class SubscribeHandler implements OnModuleInit {
   @Cron('*/3 * * * * *')
   async Sign() {
     await this.signAction.action();
+  }
+
+  @Cron('*/3 * * * * *')
+  async ValidateBalanceAction() {
+    await this.validateBalanceAction.action();
   }
 
   //TODO: comment out when go orbitDb will ready
