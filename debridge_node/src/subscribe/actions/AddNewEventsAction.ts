@@ -29,6 +29,7 @@ export enum NonceValidationEnum {
 
 interface ProcessNewTransferResult {
   blockToOverwrite?: number;
+  blockTimestamp?: number;
   status: ProcessNewTransferResultStatusEnum;
   nonceValidationStatus?: NonceValidationEnum;
   submissionId?: string;
@@ -94,7 +95,6 @@ export class AddNewEventsAction {
     const contract = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
     // @ts-ignore
     web3.eth.setProvider = contract.setProvider;
-
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
     let fromBlock = from || (supportedChain.latestBlock > 0 ? supportedChain.latestBlock : toBlock - 1);
 
@@ -118,14 +118,17 @@ export class AddNewEventsAction {
         continue;
       }
 
-      const result = await this.processNewTransfers(logger, sentEvents, monitoringSentEvents, supportedChain.chainId);
+      const result = await this.processNewTransfers(logger, web3, sentEvents, monitoringSentEvents, supportedChain.chainId);
       const updatedBlock = result.status === ProcessNewTransferResultStatusEnum.SUCCESS ? lastBlockOfPage : result.blockToOverwrite;
 
       // updatedBlock can be undefined if incorrect nonce occures in the first event
       if (updatedBlock) {
         logger.log(`updateSupportedChainBlock; key: latestBlock; value: ${updatedBlock};`);
+        const block = await web3.eth.getBlock(updatedBlock);
+        const blockTimestamp = parseInt(block.timestamp.toString());
         await this.supportedChainRepository.update(chainId, {
           latestBlock: updatedBlock,
+          validationTimestamp: blockTimestamp,
         });
       }
       if (result.status != ProcessNewTransferResultStatusEnum.SUCCESS) {
@@ -143,7 +146,13 @@ export class AddNewEventsAction {
    * @param {number} chainIdFrom
    * @private
    */
-  async processNewTransfers(logger: Logger, sentEvents: any[], monitoringSentEvents: any[], chainIdFrom: number): Promise<ProcessNewTransferResult> {
+  async processNewTransfers(
+    logger: Logger,
+    web3: Web3Custom,
+    sentEvents: any[],
+    monitoringSentEvents: any[],
+    chainIdFrom: number,
+  ): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
     const monitoringSentEventsMap = new Map<string, any>();
     for (const event of monitoringSentEvents) {
@@ -179,31 +188,33 @@ export class AddNewEventsAction {
       });
 
       const nonceExists = await this.isSubmissionExists(chainIdFrom, nonce);
-      const nonceValidationStatus = this.validateNonce(maxNonceFromDb, nonce, nonceExists);
+      const nonceValidationStatus = this.getNonceStatus(maxNonceFromDb, nonce, nonceExists);
 
       logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
+      const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
+      const block = await web3.eth.getBlock(blockNumber);
+      const blockTimestamp = parseInt(block.timestamp.toString());
 
       if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
-        const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
         const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${maxNonceFromDb}; submissionId: ${submissionId}; blockToOverwrite: ${blockToOverwrite}; submissionWithMaxNonceDb.blockNumber: ${submissionWithMaxNonceDb.blockNumber}`;
         logger.error(message);
         return {
           blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
+          blockTimestamp,
           status: ProcessNewTransferResultStatusEnum.ERROR,
           nonceValidationStatus,
           submissionId,
           nonce,
         };
       }
-
       const monitoringSentEvent = monitoringSentEventsMap.get(submissionId);
       const monitoringSentEventNonce = parseInt(sendEvent.returnValues.nonce);
 
       if (!monitoringSentEvent || monitoringSentEventNonce !== nonce) {
         logger.error(`Monitoring event for submissionId: ${submissionId}; with nonce: ${nonce} not found;`);
-        const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
         return {
           blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
+          blockTimestamp,
           status: ProcessNewTransferResultStatusEnum.ERROR,
           submissionId,
           nonce,
@@ -239,6 +250,7 @@ export class AddNewEventsAction {
           assetsStatus: SubmisionAssetsStatusEnum.NEW,
           rawEvent: JSON.stringify(sendEvent),
           blockNumber: sendEvent.blockNumber,
+          blockTimestamp: blockTimestamp,
           balanceStatus: SubmisionBalanceStatusEnum.RECIEVED,
           nonce,
         } as SubmissionEntity);
@@ -296,7 +308,7 @@ export class AddNewEventsAction {
    * @param nonce
    * @param nonceExists
    */
-  validateNonce(nonceDb: number, nonce: number, nonceExists: boolean): NonceValidationEnum {
+  getNonceStatus(nonceDb: number, nonce: number, nonceExists: boolean): NonceValidationEnum {
     if (nonceExists) {
       return NonceValidationEnum.DUPLICATED_NONCE;
     } else if (!nonceExists && nonce <= nonceDb) {

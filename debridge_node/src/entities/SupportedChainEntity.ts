@@ -19,6 +19,7 @@ export class SupportedChainEntity {
 
   @Column({
     nullable: true,
+    type: 'bigint',
   })
-  validationTimestamp?: Date;
+  validationTimestamp: number;
 }

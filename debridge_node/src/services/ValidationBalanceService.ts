@@ -29,7 +29,7 @@ export class ValidationBalanceService {
   ): Promise<SubmisionBalanceStatusEnum> {
     let newBalances = new NewBalances(SubmisionBalanceStatusEnum.ERROR);
     try {
-      const { rawEvent, chainFrom, chainTo, debridgeId, updatedAt } = submission;
+      const { rawEvent, chainFrom, chainTo, debridgeId, blockTimestamp } = submission;
       const sendEvent = JSON.parse(rawEvent);
       const protocolFee = sendEvent.returnValues.feeParams[1];
       const D = this.calculateDelta(sendEvent.returnValues.amount, protocolFee);
@@ -42,7 +42,7 @@ export class ValidationBalanceService {
         await this.setBalance(manager, chainFrom, debridgeId, newBalances.sender);
         await this.setBalance(manager, chainTo, debridgeId, newBalances.reciever);
       } else if (newBalances.status === SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION) {
-        const isAllChainsSynced = await this.isAllChainsSynced(manager, updatedAt);
+        const isAllChainsSynced = await this.isAllChainsSynced(manager, blockTimestamp);
         if (isAllChainsSynced) {
           throw new Error('all chains already synced');
         }
@@ -129,10 +129,10 @@ export class ValidationBalanceService {
     return newBalances;
   }
 
-  private async isAllChainsSynced(manager: EntityManager, currentTimestamp: Date) {
+  private async isAllChainsSynced(manager: EntityManager, currentTimestamp: number) {
     const chains = await manager.find(SupportedChainEntity, {});
     return chains.every(chain => {
-      return currentTimestamp.getTime() >= chain.validationTimestamp.getTime();
+      return currentTimestamp <= chain.validationTimestamp;
     });
   }
 

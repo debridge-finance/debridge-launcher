@@ -83,6 +83,10 @@ export class SubmissionEntity {
   @Index()
   blockNumber: number;
 
+  @Column({ nullable: true, type: 'bigint' })
+  @Index()
+  blockTimestamp: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
