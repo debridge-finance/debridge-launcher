@@ -1,8 +1,10 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BigNumber } from 'bignumber.js';
 import { Repository } from 'typeorm';
 
 import { abi as deBridgeGateAbi } from '../../assets/DeBridgeGate.json';
+import { MonitoringSentEventEntity } from '../../entities/MonitoringSentEventEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SupportedChainEntity } from '../../entities/SupportedChainEntity';
 import { SubmisionAssetsStatusEnum } from '../../enums/SubmisionAssetsStatusEnum';
@@ -14,7 +16,6 @@ import { ChainScanningService } from '../../services/ChainScanningService';
 import { DebrdigeApiService } from '../../services/DebrdigeApiService';
 import { NonceControllingService } from '../../services/NonceControllingService';
 import { Web3Custom, Web3Service } from '../../services/Web3Service';
-import { MonitoringSentEventEntity } from '../../entities/MonitoringSentEventEntity';
 
 export enum ProcessNewTransferResultStatusEnum {
   SUCCESS,
@@ -306,7 +307,7 @@ export class AddNewEventsAction {
           debridgeId: sendEvent.returnValues.debridgeId,
           receiverAddr: sendEvent.returnValues.receiver,
           amount: sendEvent.returnValues.amount,
-          executionFee: executionFee.toString(),
+          executionFee: executionFee,
           status: SubmisionStatusEnum.NEW,
           ipfsStatus: UploadStatusEnum.NEW,
           apiStatus: UploadStatusEnum.NEW,
@@ -389,11 +390,13 @@ export class AddNewEventsAction {
     /* get events */
     return await contract.getPastEvents(eventType, { fromBlock, toBlock });
   }
-  getExecutionFee(autoParams: string): number {
+  getExecutionFee(autoParams: string): string {
     if (!autoParams || autoParams.length < 130) {
-      return 0;
+      return '0';
     }
-    const executionFee = '0x' + autoParams.slice(66, 130);
-    return parseInt(executionFee);
+    const executionFeeDirty = '0x' + autoParams.slice(66, 130);
+    const executionFee = new BigNumber(executionFeeDirty);
+
+    return executionFee.toString();
   }
 }
