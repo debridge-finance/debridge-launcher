@@ -25,22 +25,50 @@ export class ValidationBalanceService {
   async calculate(
     manager: EntityManager,
     submission: SubmissionEntity,
-    monitoringEvent: MonitoringSentEventEntity,
+    firstMonitoringBlockConfigs: Map<number, number>,
   ): Promise<SubmisionBalanceStatusEnum> {
     let newBalances = new NewBalances(SubmisionBalanceStatusEnum.ERROR);
     try {
-      const { rawEvent, chainFrom, chainTo, debridgeId, blockTimestamp } = submission;
-      const sendEvent = JSON.parse(rawEvent);
-      const protocolFee = sendEvent.returnValues.feeParams[1];
-      const D = this.calculateDelta(sendEvent.returnValues.amount, protocolFee);
+      const { amount, executionFee, rawEvent, chainFrom, chainTo, debridgeId, blockTimestamp } = submission;
+      const D = this.calculateDelta(amount, executionFee);
 
       const balanceSender = await this.getBalance(manager, chainFrom, debridgeId);
       const balanceReceiver = await this.getBalance(manager, chainTo, debridgeId);
 
-      newBalances = this.calculateNewBalances(sendEvent.event, balanceSender.amount, balanceReceiver.amount, D, chainFrom, chainTo, monitoringEvent);
+      const sendEvent = JSON.parse(rawEvent);
+
+      // For events which happend before monitoring events were implemented, we just need to calculate new balances without comparing with monitoringEvent.lockedOrMintedAmount
+      if (submission.blockNumber < firstMonitoringBlockConfigs.get(submission.chainFrom)) {
+        newBalances = this.calculateNewBalancesWithoutValidation(
+          sendEvent.event,
+          balanceSender.amount,
+          balanceReceiver.amount,
+          D,
+          chainFrom,
+          chainTo,
+        );
+      } else {
+        const monitoringEvent = await manager.findOne(MonitoringSentEventEntity, {
+          submissionId: submission.submissionId,
+          nonce: submission.nonce,
+        });
+        if (!monitoringEvent) {
+          return SubmisionBalanceStatusEnum.ON_HOLD;
+        }
+        newBalances = this.calculateNewBalances(
+          sendEvent.event,
+          balanceSender.amount,
+          balanceReceiver.amount,
+          D,
+          chainFrom,
+          chainTo,
+          monitoringEvent,
+        );
+      }
+
       if (newBalances.status === SubmisionBalanceStatusEnum.CHECKED) {
-        await this.setBalance(manager, chainFrom, debridgeId, newBalances.sender);
-        await this.setBalance(manager, chainTo, debridgeId, newBalances.reciever);
+        await this.setBalance(manager, chainFrom, debridgeId, blockTimestamp, newBalances.sender);
+        await this.setBalance(manager, chainTo, debridgeId, blockTimestamp, newBalances.reciever);
       } else if (newBalances.status === SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION) {
         const isAllChainsSynced = await this.isAllChainsSynced(manager, blockTimestamp);
         if (isAllChainsSynced) {
@@ -87,7 +115,7 @@ export class ValidationBalanceService {
     const newBalances = new NewBalances();
     newBalances.sender = senderAmount.plus(D);
     newBalances.reciever = recieverAmount.plus(D);
-    if (newBalances.sender.eq(lockedOrMintedAmount)) {
+    if (newBalances.sender.lte(lockedOrMintedAmount)) {
       newBalances.status = SubmisionBalanceStatusEnum.CHECKED;
     } else {
       newBalances.status = SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION;
@@ -128,6 +156,65 @@ export class ValidationBalanceService {
     }
     return newBalances;
   }
+  calculateNewBalancesWithoutValidation(
+    eventType: string,
+    balanceSender: string,
+    balanceReciever: string,
+    D: BigNumber,
+    chainFrom: number,
+    chainTo: number,
+  ): NewBalances {
+    let newBalances = new NewBalances();
+    const senderAmount = new BigNumber(balanceSender);
+    const recieverAmount = new BigNumber(balanceReciever);
+
+    if (eventType === 'Sent') {
+      newBalances = this.calculateNewBalancesWithoutValidationSent(senderAmount, recieverAmount, D);
+    } else if (eventType === 'Burn') {
+      newBalances = this.calculateNewBalancesWithoutValidationBurn(senderAmount, recieverAmount, D, chainFrom, chainTo);
+    }
+    return newBalances;
+  }
+
+  calculateNewBalancesWithoutValidationSent(senderAmount: BigNumber, recieverAmount: BigNumber, D: BigNumber): NewBalances {
+    const newBalances = new NewBalances();
+    newBalances.sender = senderAmount.plus(D);
+    newBalances.reciever = recieverAmount.plus(D);
+    newBalances.status = SubmisionBalanceStatusEnum.CHECKED;
+
+    return newBalances;
+  }
+
+  calculateNewBalancesWithoutValidationBurn(
+    recieverAmount: BigNumber,
+    senderAmount: BigNumber,
+    D: BigNumber,
+    chainFrom: number,
+    chainTo: number,
+  ): NewBalances {
+    const newBalances = new NewBalances();
+    // is not return to native chain
+    if (chainFrom !== chainTo) {
+      newBalances.reciever = recieverAmount.plus(D);
+      newBalances.sender = senderAmount.minus(D);
+      if (newBalances.sender.lt(0)) {
+        newBalances.status = SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION;
+      } else {
+        newBalances.status = SubmisionBalanceStatusEnum.CHECKED;
+      }
+      // return to native chain
+    } else {
+      newBalances.reciever = recieverAmount.minus(D);
+      newBalances.sender = senderAmount.minus(D);
+
+      if (newBalances.reciever.lt(0) || newBalances.sender.lt(0)) {
+        newBalances.status = SubmisionBalanceStatusEnum.WHAIT_FOR_CHAINS_SYNCHRONIZATION;
+      } else {
+        newBalances.status = SubmisionBalanceStatusEnum.CHECKED;
+      }
+    }
+    return newBalances;
+  }
 
   private async isAllChainsSynced(manager: EntityManager, currentTimestamp: number) {
     const chains = await manager.find(SupportedChainEntity, {});
@@ -155,7 +242,7 @@ export class ValidationBalanceService {
     return balance;
   }
 
-  private async setBalance(entityManager: EntityManager, chainId: number, debridgeId: string, amount: BigNumber) {
+  private async setBalance(entityManager: EntityManager, chainId: number, debridgeId: string, blockTimestamp: number, amount: BigNumber) {
     return entityManager.update(
       TokenBalanceHistory,
       {
@@ -164,6 +251,7 @@ export class ValidationBalanceService {
       },
       {
         amount: amount.toString(),
+        blockTimestamp: blockTimestamp.toString(),
       },
     );
   }

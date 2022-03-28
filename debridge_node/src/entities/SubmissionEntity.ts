@@ -29,6 +29,9 @@ export class SubmissionEntity {
   @Column()
   amount: string;
 
+  @Column({ nullable: true })
+  executionFee: string;
+
   @Column()
   rawEvent: string;
 

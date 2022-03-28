@@ -140,6 +140,7 @@ export class ChainConfig {
   name: string;
   debridgeAddr: string;
   firstStartBlock: number;
+  firstMonitoringBlock: number;
   providers: ChainProvider;
   interval: number;
   blockConfirmation: number;
@@ -162,6 +163,7 @@ export class ChainConfigService {
         name: config.name,
         debridgeAddr: config.debridgeAddr,
         firstStartBlock: config.firstStartBlock,
+        firstMonitoringBlock: config.firstMonitoringBlock,
         providers: this.generateChainProvides(config),
         interval: config.interval,
         blockConfirmation: config.blockConfirmation,
@@ -209,19 +211,19 @@ export class ChainConfigService {
       return {
         provider: config,
         isValid: false,
-        isActive: true,
+        isActive: false,
         authType: AuthType.NONE,
       };
     } else {
       config.isValid = false;
-      config.isActive = true;
+      config.isActive = false;
       let authType = AuthType.NONE;
       if (config.user) {
         authType = AuthType.BASIC;
       }
       return {
         isValid: false,
-        isActive: true,
+        isActive: false,
         provider: config.provider,
         user: config.user,
         password: config.password,

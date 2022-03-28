@@ -4,6 +4,7 @@
     "name": "ETHEREUM",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 13665321,
+    "firstMonitoringBlock": 14217404,
     "providers": [
       {
         "provider": "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
@@ -23,6 +24,7 @@
     "name": "BSC",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 12861230,
+    "firstMonitoringBlock": 15307466,
     "provider": "https://bsc-dataseed1.defibit.io/",
     "interval": 10000,
     "blockConfirmation": 12,
@@ -33,6 +35,7 @@
     "name": "HECO",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 10232530,
+    "firstMonitoringBlock": 12708158,
     "provider": "https://http-mainnet.hecochain.com",
     "interval": 10000,
     "blockConfirmation": 12,
@@ -43,6 +46,7 @@
     "name": "MATIC",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 21672977,
+    "firstMonitoringBlock": 25012659,
     "provider": "https://polygon-rpc.com/",
     "interval": 10000,
     "blockConfirmation": 256,
@@ -53,6 +57,7 @@
     "name": "ARBITRUM",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 3245540,
+    "firstMonitoringBlock": 6180888,
     "provider": "https://arb1.arbitrum.io/rpc",
     "interval": 10000,
     "blockConfirmation": 12,

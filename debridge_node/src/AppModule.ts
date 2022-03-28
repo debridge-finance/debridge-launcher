@@ -15,6 +15,8 @@ import { GetSupportedChainsService } from './api/services/GetSupportedChainsServ
 import { RescanService } from './api/services/RescanService';
 import { DataFixModule } from './datafixes/DataFixModule';
 import { FixNotExistsNonceBlockNumber } from './datafixes/FixNotExistsNonceBlockNumber';
+import { FixNotExistsExecutionFee } from './datafixes/FixNotExistsExecutionFee';
+import { FixNotExistsBlockTimestamp } from './datafixes/FixNotExistsBlockTimestamp';
 import { ConfirmNewAssetEntity } from './entities/ConfirmNewAssetEntity';
 import { MonitoringSentEventEntity } from './entities/MonitoringSentEventEntity';
 import { SubmissionEntity } from './entities/SubmissionEntity';
@@ -95,6 +97,8 @@ import { SubscribeHandler } from './subscribe/SubscribeHandler';
     ChainScanningService,
     ChainConfigService,
     FixNotExistsNonceBlockNumber,
+    FixNotExistsExecutionFee,
+    FixNotExistsBlockTimestamp,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

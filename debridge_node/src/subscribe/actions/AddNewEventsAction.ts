@@ -29,7 +29,6 @@ export enum NonceValidationEnum {
 
 interface ProcessNewTransferResult {
   blockToOverwrite?: number;
-  blockTimestamp?: number;
   status: ProcessNewTransferResultStatusEnum;
   nonceValidationStatus?: NonceValidationEnum;
   submissionId?: string;
@@ -80,6 +79,9 @@ export class AddNewEventsAction {
    * @param {number} to
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
+    if (chainId != 1) {
+      return;
+    }
     const logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
     logger.verbose(`process checkNewEvents - chainId: ${chainId}; from: ${from}; to: ${to}`);
     const supportedChain = await this.supportedChainRepository.findOne({
@@ -93,6 +95,7 @@ export class AddNewEventsAction {
     const web3 = await this.web3Service.web3HttpProvider(chainDetail.providers);
 
     const contract = new web3.eth.Contract(deBridgeGateAbi as any, chainDetail.debridgeAddr);
+
     // @ts-ignore
     web3.eth.setProvider = contract.setProvider;
     const toBlock = to || (await web3.eth.getBlockNumber()) - chainDetail.blockConfirmation;
@@ -118,7 +121,14 @@ export class AddNewEventsAction {
         continue;
       }
 
-      const result = await this.processNewTransfers(logger, web3, sentEvents, monitoringSentEvents, supportedChain.chainId);
+      const result = await this.processNewTransfers(
+        logger,
+        web3,
+        sentEvents,
+        monitoringSentEvents,
+        supportedChain.chainId,
+        chainDetail.firstMonitoringBlock,
+      );
       const updatedBlock = result.status === ProcessNewTransferResultStatusEnum.SUCCESS ? lastBlockOfPage : result.blockToOverwrite;
 
       // updatedBlock can be undefined if incorrect nonce occures in the first event
@@ -152,6 +162,7 @@ export class AddNewEventsAction {
     sentEvents: any[],
     monitoringSentEvents: any[],
     chainIdFrom: number,
+    firstMonitoringBlock: number,
   ): Promise<ProcessNewTransferResult> {
     let blockToOverwrite;
     const monitoringSentEventsMap = new Map<string, any>();
@@ -171,68 +182,119 @@ export class AddNewEventsAction {
           submissionId,
         },
       });
-      if (submission) {
-        logger.verbose(`Submission already found in db submissionId: ${submissionId}`);
+      const monitoring = await this.monitoringSentEventRepository.findOne({
+        where: {
+          submissionId,
+          nonce: submission.nonce,
+        },
+      });
+      if (submission && monitoring) {
+        logger.verbose(`Submission and monitoring event already found in db; submissionId: ${submissionId}`);
         blockToOverwrite = submission.blockNumber;
         this.nonceControllingService.set(chainIdFrom, submission.nonce);
         continue;
       }
 
-      const maxNonceFromDb = this.nonceControllingService.get(chainIdFrom);
+      if (submission && submission.blockNumber < firstMonitoringBlock) {
+        logger.verbose(`Submission already found in db; submissionId: ${submissionId}`);
+        blockToOverwrite = submission.blockNumber;
+        this.nonceControllingService.set(chainIdFrom, submission.nonce);
+        continue;
+      }
 
+      // validate nonce
+      const maxNonceFromDb = this.nonceControllingService.get(chainIdFrom);
       const submissionWithMaxNonceDb = await this.submissionsRepository.findOne({
         where: {
           chainFrom: chainIdFrom,
           nonce: maxNonceFromDb,
         },
       });
-
       const nonceExists = await this.isSubmissionExists(chainIdFrom, nonce);
       const nonceValidationStatus = this.getNonceStatus(maxNonceFromDb, nonce, nonceExists);
 
       logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
+
       const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
       const block = await web3.eth.getBlock(blockNumber);
       const blockTimestamp = parseInt(block.timestamp.toString());
+      const executionFee = this.getExecutionFee(sendEvent.returnValues.autoParams);
+
+      // fullfill historical data.
+      if (
+        submission &&
+        !monitoring &&
+        nonceValidationStatus == NonceValidationEnum.DUPLICATED_NONCE &&
+        sendEvent.blockNumber >= firstMonitoringBlock
+      ) {
+        const monitoringSentEvent = monitoringSentEventsMap.get(submissionId);
+        const monitoringSentEventNonce = parseInt(sendEvent.returnValues.nonce);
+        if (!monitoringSentEvent || monitoringSentEventNonce !== nonce) {
+          logger.error(`Monitoring event for submissionId: ${submissionId}; with nonce: ${nonce} not found in the map;`);
+          return {
+            blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
+            status: ProcessNewTransferResultStatusEnum.ERROR,
+            submissionId,
+            nonce,
+          };
+        }
+
+        try {
+          await this.monitoringSentEventRepository.save({
+            submissionId,
+            nonce: monitoringSentEventNonce,
+            blockNumber: monitoringSentEvent.blockNumber,
+            lockedOrMintedAmount: monitoringSentEvent.returnValues.lockedOrMintedAmount,
+            totalSupply: monitoringSentEvent.returnValues.totalSupply,
+            chainId: chainIdFrom,
+          } as MonitoringSentEventEntity);
+        } catch (e) {
+          logger.error(`Error in saving monitoringSentEvent submissionId: ${submissionId}; nonce: ${nonce}`);
+          throw e;
+        }
+        logger.verbose(`Monitoring event for submissionId: ${submissionId}; with nonce: ${nonce} was added to the db;`);
+
+        continue;
+      }
 
       if (nonceValidationStatus !== NonceValidationEnum.SUCCESS) {
         const message = `Incorrect nonce (${nonceValidationStatus}) for nonce: ${nonce}; max nonce in db: ${maxNonceFromDb}; submissionId: ${submissionId}; blockToOverwrite: ${blockToOverwrite}; submissionWithMaxNonceDb.blockNumber: ${submissionWithMaxNonceDb.blockNumber}`;
         logger.error(message);
         return {
           blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
-          blockTimestamp,
           status: ProcessNewTransferResultStatusEnum.ERROR,
           nonceValidationStatus,
           submissionId,
           nonce,
         };
       }
-      const monitoringSentEvent = monitoringSentEventsMap.get(submissionId);
-      const monitoringSentEventNonce = parseInt(sendEvent.returnValues.nonce);
 
-      if (!monitoringSentEvent || monitoringSentEventNonce !== nonce) {
-        logger.error(`Monitoring event for submissionId: ${submissionId}; with nonce: ${nonce} not found;`);
-        return {
-          blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
-          blockTimestamp,
-          status: ProcessNewTransferResultStatusEnum.ERROR,
-          submissionId,
-          nonce,
-        };
-      }
+      if (sendEvent.blockNumber >= firstMonitoringBlock) {
+        const monitoringSentEvent = monitoringSentEventsMap.get(submissionId);
+        const monitoringSentEventNonce = parseInt(sendEvent.returnValues.nonce);
+        if (!monitoringSentEvent || monitoringSentEventNonce !== nonce) {
+          logger.error(`Monitoring event for submissionId: ${submissionId}; with nonce: ${nonce} not found;`);
+          return {
+            blockToOverwrite: blockNumber, // it would be empty only if incorrect nonce occures in the first event
+            status: ProcessNewTransferResultStatusEnum.ERROR,
+            submissionId,
+            nonce,
+          };
+        }
 
-      try {
-        await this.monitoringSentEventRepository.save({
-          submissionId,
-          nonce: monitoringSentEventNonce,
-          blockNumber: monitoringSentEvent.blockNumber,
-          lockedOrMintedAmount: monitoringSentEvent.returnValues.lockedOrMintedAmount,
-          totalSupply: monitoringSentEvent.returnValues.totalSupply,
-          chainId: chainIdFrom,
-        } as MonitoringSentEventEntity);
-      } catch (e) {
-        logger.error(`Error in saving monitoringSentEvent submissionId: ${submissionId}; nonce: ${nonce}`);
-        throw e;
+        try {
+          await this.monitoringSentEventRepository.save({
+            submissionId,
+            nonce: monitoringSentEventNonce,
+            blockNumber: monitoringSentEvent.blockNumber,
+            lockedOrMintedAmount: monitoringSentEvent.returnValues.lockedOrMintedAmount,
+            totalSupply: monitoringSentEvent.returnValues.totalSupply,
+            chainId: chainIdFrom,
+          } as MonitoringSentEventEntity);
+        } catch (e) {
+          logger.error(`Error in saving monitoringSentEvent submissionId: ${submissionId}; nonce: ${nonce}`);
+          throw e;
+        }
       }
 
       try {
@@ -244,6 +306,7 @@ export class AddNewEventsAction {
           debridgeId: sendEvent.returnValues.debridgeId,
           receiverAddr: sendEvent.returnValues.receiver,
           amount: sendEvent.returnValues.amount,
+          executionFee: executionFee.toString(),
           status: SubmisionStatusEnum.NEW,
           ipfsStatus: UploadStatusEnum.NEW,
           apiStatus: UploadStatusEnum.NEW,
@@ -325,5 +388,12 @@ export class AddNewEventsAction {
 
     /* get events */
     return await contract.getPastEvents(eventType, { fromBlock, toBlock });
+  }
+  getExecutionFee(autoParams: string): number {
+    if (!autoParams || autoParams.length < 130) {
+      return 0;
+    }
+    const executionFee = '0x' + autoParams.slice(66, 130);
+    return parseInt(executionFee);
   }
 }
