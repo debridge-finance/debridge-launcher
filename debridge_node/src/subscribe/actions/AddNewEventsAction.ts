@@ -80,9 +80,6 @@ export class AddNewEventsAction {
    * @param {number} to
    */
   async process(chainId: number, from: number = undefined, to: number = undefined) {
-    if (chainId != 1) {
-      return;
-    }
     const logger = new Logger(`${AddNewEventsAction.name} chainId ${chainId}`);
     logger.verbose(`process checkNewEvents - chainId: ${chainId}; from: ${from}; to: ${to}`);
     const supportedChain = await this.supportedChainRepository.findOne({
