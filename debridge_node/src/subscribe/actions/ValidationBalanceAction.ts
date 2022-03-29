@@ -27,7 +27,7 @@ export class ValidationBalanceAction extends IAction {
   async process(): Promise<void> {
     // TODO: probably we need to add limit here. to do it u need to use createQueryBuilder
     const submissions = await this.entityManager.find(SubmissionEntity, {
-      where: [{ balanceStatus: In([SubmisionBalanceStatusEnum.RECIEVED, SubmisionBalanceStatusEnum.ON_HOLD]) }, { blockTimestamp: Not(IsNull()) }],
+      where: [{ balanceStatus: In([SubmisionBalanceStatusEnum.RECIEVED, SubmisionBalanceStatusEnum.ON_HOLD]), blockTimestamp: Not(IsNull()) }],
       order: {
         blockTimestamp: 'ASC',
         nonce: 'ASC',
