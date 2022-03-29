@@ -60,6 +60,9 @@ export class SubmissionEntity {
   @Index()
   status: SubmisionStatusEnum;
 
+  // @Column({
+  //   default: SubmisionBalanceStatusEnum.RECIEVED,
+  // })
   @Column({
     default: SubmisionBalanceStatusEnum.RECIEVED,
   })
