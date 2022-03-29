@@ -40,9 +40,7 @@ export class FixNotExistsExecutionFee implements OnModuleInit {
     this.logger.log(`Start setting ExecutionFee if not exists`);
     let size = 0;
     do {
-      const { rows: records } = await queryFunc(
-        `SELECT  "submissionId", "rawEvent" FROM submissions WHERE "executionFee" IS NULL or "executionFee" = '0' LIMIT 100`,
-      );
+      const { rows: records } = await queryFunc(`SELECT  "submissionId", "rawEvent" FROM submissions WHERE "executionFee" IS NULL LIMIT 100`);
       size = records.length;
       await Promise.allSettled(
         records.map(submission => {
