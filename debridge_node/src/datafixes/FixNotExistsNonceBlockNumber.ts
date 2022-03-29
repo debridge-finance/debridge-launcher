@@ -20,7 +20,7 @@ export class FixNotExistsNonceBlockNumber implements OnModuleInit {
 
   async onModuleInit() {
     this.logger.log('datafix service started');
-    if (this.configService.get('ENABLE_DATAFIX') !== 'true') {
+    if (this.configService.get('ENABLE_DATAFIX_BLOCKNUMBER_NONCE') !== 'true') {
       await this.pool.end();
       return;
     }
