@@ -77,7 +77,7 @@ export class ValidationBalanceService {
         newBalances.status = SubmisionBalanceStatusEnum.ON_HOLD;
       }
     } catch (e) {
-      this.logger.error(`failed to validate balance: ${e.message}`);
+      this.logger.error(`failed to validate balance for submission: ${submission.submissionId}; err: ${e.message}`);
       newBalances.status = SubmisionBalanceStatusEnum.ERROR;
     }
     return newBalances.status;
@@ -251,7 +251,7 @@ export class ValidationBalanceService {
       },
       {
         amount: amount.toString(),
-        blockTimestamp: blockTimestamp.toString(),
+        blockTimestamp: blockTimestamp,
       },
     );
   }

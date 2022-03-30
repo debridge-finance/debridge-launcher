@@ -45,9 +45,9 @@ export class ValidationBalanceAction extends IAction {
         const status = await this.validationBalanceService.calculate(transactionManager, submission, firstMonitoringBlockConfigs);
         if (status === SubmisionBalanceStatusEnum.ERROR) {
           const sendEvent = JSON.parse(submission.rawEvent);
-          await this.debridgeApiService.notifyError(
-            `incorrect balance: submissionId: ${submission.submissionId}; sendEventAmount: ${sendEvent.returnValues.amount}; sendEventExecutionFeeParams: ${submission.executionFee};`,
-          );
+          const errMsg = `incorrect balance: submissionId: ${submission.submissionId}; sendEventAmount: ${sendEvent.returnValues.amount}; sendEventExecutionFeeParams: ${submission.executionFee};`;
+          this.logger.error(errMsg);
+          await this.debridgeApiService.notifyError(errMsg);
           this.chainScanningService.pause(submission.chainFrom);
           throw new Error(`failed to proccess submission ${submission.submissionId}`);
         }

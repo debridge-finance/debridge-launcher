@@ -211,8 +211,6 @@ export class AddNewEventsAction {
       const nonceExists = await this.isSubmissionExists(chainIdFrom, nonce);
       const nonceValidationStatus = this.getNonceStatus(maxNonceFromDb, nonce, nonceExists);
 
-      logger.verbose(`Nonce validation status ${nonceValidationStatus}; maxNonceFromDb: ${maxNonceFromDb}; nonce: ${nonce};`);
-
       const blockNumber = blockToOverwrite !== undefined ? blockToOverwrite : submissionWithMaxNonceDb.blockNumber;
       const block = await web3.eth.getBlock(blockNumber);
       const blockTimestamp = parseInt(block.timestamp.toString());

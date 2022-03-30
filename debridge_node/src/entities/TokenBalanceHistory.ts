@@ -12,6 +12,6 @@ export class TokenBalanceHistory {
   @Column()
   amount: string;
 
-  @Column({ nullable: true })
-  blockTimestamp: string;
+  @Column({ nullable: true, type: 'bigint' })
+  blockTimestamp: number;
 }
