@@ -67,6 +67,7 @@ services:
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - ORBITDB_URL=${ORBITDB_URL}
+      - SUBMISSIONS_BATCH_SIZE=${SUBMISSIONS_BATCH_SIZE}
     depends_on:
       - postgres
     networks:
