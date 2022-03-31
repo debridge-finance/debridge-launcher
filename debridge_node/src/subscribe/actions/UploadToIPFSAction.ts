@@ -31,6 +31,7 @@ export class UploadToIPFSAction extends IAction {
     });
     const pageSize = this.orbitDbService.getBatchSize();
     const size = Math.ceil(submissions.length / pageSize);
+    this.logger.log(`process UploadToIPFSAction; pageSize: ${pageSize}`);
     this.logger.log(`process UploadToIPFSAction; size: ${size}`);
     for (let pageNumber = 0; pageNumber < size; pageNumber++) {
       const skip = pageNumber * pageSize;

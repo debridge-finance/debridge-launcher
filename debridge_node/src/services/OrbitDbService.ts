@@ -118,6 +118,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
         receiverAddr: submission.receiverAddr,
       };
     });
+    this.logger.log(`start addHashSubmissions; data.length: ${data.length}`);
 
     const response = (await this.authRequest('/api/submissions', { data })).data;
     const submissionIds = data.map(submission => submission.submissionId);
