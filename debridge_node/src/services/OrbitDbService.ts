@@ -33,7 +33,7 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       login: configService.get('ORBITDB_LOGIN'),
       password: configService.get('ORBITDB_PASSWORD'),
     } as UserLoginDto);
-    this.signedSubmissionsBatchSize = parseInt(configService.get('SUBMISSIONS_BATCH_SIZE'));
+    this.signedSubmissionsBatchSize = parseInt(configService.get('SUBMISSIONS_BATCH_SIZE', '500'));
   }
 
   async onModuleInit() {
