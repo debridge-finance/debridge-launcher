@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IAction } from './IAction';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+
+import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
 import { SubmissionEntity } from '../../entities/SubmissionEntity';
 import { SubmisionStatusEnum } from '../../enums/SubmisionStatusEnum';
-import { OrbitDbService } from '../../services/OrbitDbService';
 import { UploadStatusEnum } from '../../enums/UploadStatusEnum';
-import { ConfirmNewAssetEntity } from '../../entities/ConfirmNewAssetEntity';
+import { OrbitDbService } from '../../services/OrbitDbService';
+import { IAction } from './IAction';
 
 @Injectable()
 export class UploadToIPFSAction extends IAction {
@@ -28,29 +29,22 @@ export class UploadToIPFSAction extends IAction {
       status: SubmisionStatusEnum.SIGNED,
       ipfsStatus: UploadStatusEnum.NEW,
     });
-
-    for (const submission of submissions) {
-      const [logHash, doscHash] = await this.orbitDbService.addSignedSubmission(submission.submissionId, submission.signature, {
-        txHash: submission.txHash,
-        submissionId: submission.submissionId,
-        chainFrom: submission.chainFrom,
-        chainTo: submission.chainTo,
-        debridgeId: submission.debridgeId,
-        receiverAddr: submission.receiverAddr,
-        amount: submission.amount,
-        eventRaw: submission.rawEvent,
-      });
-      this.logger.log(`uploaded ${submission.submissionId} ipfsLogHash: ${logHash} ipfsKeyHash: ${doscHash}`);
+    const pageSize = this.orbitDbService.getBatchSize();
+    const size = Math.ceil(submissions.length / pageSize);
+    for (let pageNumber = 0; pageNumber < size; pageNumber++) {
+      const skip = pageNumber * pageSize;
+      const end = Math.min((pageNumber + 1) * pageSize, submissions.length);
+      const { hash, submissionIds } = await this.orbitDbService.addHashSubmissions(submissions.slice(skip, end));
       await this.submissionsRepository.update(
         {
-          submissionId: submission.submissionId,
+          submissionId: In(submissionIds),
         },
         {
           ipfsStatus: UploadStatusEnum.UPLOADED,
-          ipfsLogHash: logHash,
-          ipfsKeyHash: doscHash,
+          ipfsHash: hash,
         },
       );
+      this.logger.log(`uploaded submissionIds to the orbitdb:${JSON.stringify(submissionIds)}`);
     }
 
     //Process Assets
@@ -60,28 +54,24 @@ export class UploadToIPFSAction extends IAction {
     });
 
     for (const asset of assets) {
-      const [logHash, doscHash] = await this.orbitDbService.addConfirmNewAssets(asset.deployId, asset.signature, {
-        debridgeId: asset.debridgeId,
-        deployId: asset.deployId,
-        nativeChainId: asset.nativeChainId,
-        tokenAddress: asset.tokenAddress,
-        name: asset.name,
-        symbol: asset.symbol,
-        decimals: asset.decimals,
-        submissionTxHash: asset.submissionTxHash,
-        submissionChainFrom: asset.submissionChainFrom,
-        submissionChainTo: asset.submissionChainTo,
-      });
+      const hash = await this.orbitDbService.addConfirmNewAssets(
+        asset.deployId,
+        asset.signature,
+        asset.tokenAddress,
+        asset.name,
+        asset.symbol,
+        asset.nativeChainId,
+        asset.decimals,
+      );
 
-      this.logger.log(`uploaded deployId ${asset.deployId} ipfsLogHash: ${logHash} ipfsKeyHash: ${doscHash}`);
+      this.logger.log(`uploaded deployId ${asset.deployId} ipfsLogHash: ${hash}`);
       await this.confirmNewAssetEntityRepository.update(
         {
           deployId: asset.deployId,
         },
         {
           ipfsStatus: UploadStatusEnum.UPLOADED,
-          ipfsLogHash: logHash,
-          ipfsKeyHash: doscHash,
+          ipfsHash: hash,
         },
       );
     }

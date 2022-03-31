@@ -1,0 +1,39 @@
+EnvPrefix: dev
+log:
+  level: debug
+server:
+  basePath: /api
+  address: 0.0.0.0:3000
+  readtimeout: 30s
+  writetimeout: 30s
+  middlewares:
+    enable:
+      - auth
+      - logger
+      - requestid
+      - limit
+      - log
+    auth:
+      username: username
+      password: password
+      jwt: jwt_secret
+      unprotected:
+        - /api/auth: {}
+    limit:
+      body: 100MB
+    log: {}
+    logger: {}
+    requestid: {}
+api: {}
+services:
+  ipfs:
+    repo: "./data"
+    IPFSConfig: "./configs/ipfs"
+  orbitdb:
+    repo: "./data/orbitdb"
+  submission:
+    limit: -1
+    name: "submissions"
+  asset:
+    limit: -1
+    name: "assets"

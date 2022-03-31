@@ -17,6 +17,24 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
+  orbitdb:
+    image: debridgefinance/orbitdb-go:v1.0.1
+    container_name: orbitdb${DOCKER_ID}
+    ports:
+      - "3000:3000"
+      - "4001:4001"
+    environment:
+      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_USERNAME=${ORBITDB_LOGIN}
+      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_PASSWORD=${ORBITDB_PASSWORD}
+      - ORBITDB_API_SERVER_MIDDLEWARES_AUTH_JWT=${ORBITDB_JWT_SECRET}
+      - ORBITDB_API_API_SUBMISSION_MAXBATCHSIZE={SUBMISSIONS_BATCH_SIZE}
+      - ORBITDB_API_SERVICES_SUBMISSION_LIMIT=-1
+      - ORBITDB_API_SERVICES_ASSET_LIMIT=-1
+    volumes:
+      - "./data:/app/data"
+      - "./config/orbitdb:/app/configs"
+    networks:
+      - debridge-node-network
   debridge-node:
     build: debridge_node
     container_name: debridge-node${DOCKER_ID}
@@ -45,6 +63,10 @@ services:
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
       - WEB3_TIMEOUT=${WEB3_TIMEOUT}
       - ENABLE_DATAFIX=${ENABLE_DATAFIX}
+      - ORBITDB_JWT_SECRET=${ORBITDB_JWT_SECRET}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - ORBITDB_URL=${ORBITDB_URL}
     depends_on:
       - postgres
     networks:

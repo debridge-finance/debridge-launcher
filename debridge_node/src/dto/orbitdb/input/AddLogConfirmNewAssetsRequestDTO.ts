@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
 export class AddLogConfirmNewAssetsRequestDTO {
   @IsNotEmpty()
@@ -10,5 +10,22 @@ export class AddLogConfirmNewAssetsRequestDTO {
   signature: string;
 
   @IsNotEmpty()
-  sendEvent: any;
+  @IsString()
+  tokenAddress: string;
+
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  symbol: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  nativeChainId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  decimals: number;
 }

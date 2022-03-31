@@ -1,34 +1,43 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { DebrdigeApiService } from './DebrdigeApiService';
 import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { readFileSync } from 'fs';
+import { Repository } from 'typeorm';
+
 import { UserLoginDto } from '../api/auth/user.login.dto';
-import { HttpAuthService } from './HttpAuthService';
-import { GetNamesResponseDTO } from '../dto/orbitdb/output/GetNamesResponseDTO';
-import { AddDocsConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddDocsConfirmNewAssetsRequestDTO';
-import { AddDocsSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddDocsSignedSubmissionRequestDTO';
 import { AddLogConfirmNewAssetsRequestDTO } from '../dto/orbitdb/input/AddLogConfirmNewAssetsRequestDTO';
 import { AddLogSignedSubmissionRequestDTO } from '../dto/orbitdb/input/AddLogSignedSubmissionRequestDTO';
-import { readFileSync } from 'fs';
+import { GetAddressResponseDTO } from '../dto/orbitdb/output/GetAddressResponseDTO';
+import { SubmissionEntity } from '../entities/SubmissionEntity';
+import { DebrdigeApiService } from './DebrdigeApiService';
+import { HttpAuthService } from './HttpAuthService';
 
 @Injectable()
 export class OrbitDbService extends HttpAuthService implements OnModuleInit {
   private readonly UPDATE_ORBITDB_INTERVAL = 5000; //5s
 
+  private readonly signedSubmissionsBatchSize: number;
+  private readonly signedSubmissionsUploadTimeout: number;
+
+  private readonly signedSubmissions: AddLogSignedSubmissionRequestDTO[] = [];
+
   constructor(
     private readonly debrdigeApiService: DebrdigeApiService,
     readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    @InjectRepository(SubmissionEntity)
+    private readonly submissionsRepository: Repository<SubmissionEntity>,
   ) {
-    super(httpService, new Logger(OrbitDbService.name), configService.get('ORBITDB_URL'), '/login', {
+    super(httpService, new Logger(OrbitDbService.name), configService.get('ORBITDB_URL'), '/api/auth', {
       login: configService.get('ORBITDB_LOGIN'),
       password: configService.get('ORBITDB_PASSWORD'),
     } as UserLoginDto);
+    this.signedSubmissionsBatchSize = parseInt(configService.get('SUBMISSIONS_BATCH_SIZE'));
   }
 
   async onModuleInit() {
-    //TODO: comment out when go orbitDb will ready
-    // await this.init();
+    await this.init();
   }
 
   async init() {
@@ -36,19 +45,21 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
       this.logger.log(`updateOrbitDbInterval interval is started`);
       const updateOrbitDbInterval = setInterval(async () => {
         this.logger.verbose(`updateOrbitDbInterval is working`);
-        let response: GetNamesResponseDTO;
+        let responseSubmission: GetAddressResponseDTO;
+        let responseAsset: GetAddressResponseDTO;
         try {
-          response = (await this.authRequest('/names', {})).data as GetNamesResponseDTO;
+          responseSubmission = (await this.authRequest('/api/submission/address', {})).data as GetAddressResponseDTO;
+          responseAsset = (await this.authRequest('/api/asset/address', {})).data as GetAddressResponseDTO;
         } catch (e) {
           this.logger.error(`Error in getNames orbitdb request ${e.message}`);
         }
-        const orbitDocsDb = response?.orbitDocsDb;
-        const orbitLogsDb = response?.orbitLogsDb;
-        const { version } = JSON.parse(readFileSync('./package.json', { encoding: 'utf8' }));
+        const submissionAddress = responseSubmission?.address;
+        const assetAddress = responseAsset?.address;
+        // const { version } = JSON.parse(readFileSync('./package.json', { encoding: 'utf8' }));
 
-        if (orbitDocsDb && orbitLogsDb) {
+        if (submissionAddress && assetAddress) {
           try {
-            await this.debrdigeApiService.updateOrbitDb({ orbitDocsDb, orbitLogsDb, nodeVersion: version });
+            // await this.debrdigeApiService.updateOrbitDb({ submissionAddress, assetAddress, nodeVersion: version });
             clearInterval(updateOrbitDbInterval);
             this.logger.log(`working updateOrbitDbInterval is finished`);
           } catch (e) {
@@ -62,67 +73,54 @@ export class OrbitDbService extends HttpAuthService implements OnModuleInit {
     }
   }
 
-  async addSignedSubmission(submissionId: string, signature: string, sendEvent: any): Promise<[string, string]> {
-    this.logger.log(`addSignedSubmission start submissionId: ${submissionId}, signature: ${signature}`);
-    const logHash = await this.addLogSignedSubmission(submissionId, signature, sendEvent);
-    const docsHash = await this.addDocsSignedSubmission(submissionId, signature, sendEvent);
-    return [logHash, docsHash];
+  getBatchSize(): number {
+    return this.signedSubmissionsBatchSize;
   }
 
-  async addConfirmNewAssets(deployId: string, signature: string, sendEvent: any): Promise<[string, string]> {
-    this.logger.log(`addConfirmNewAssets start deployId: ${deployId}, signature: ${signature}`);
-    const logHash = await this.addLogConfirmNewAssets(deployId, signature, sendEvent);
-    const docsHash = await this.addDocsConfirmNewAssets(deployId, signature, sendEvent);
-    return [logHash, docsHash];
-  }
-
-  async addLogSignedSubmission(submissionId: string, signature: string, sendEvent: any): Promise<string> {
-    const value = {
-      submissionId,
-      signature,
-      sendEvent,
-    } as AddLogSignedSubmissionRequestDTO;
-    this.logger.verbose(value);
-    const hash = (await this.authRequest('/addLogSignedSubmission', value)).data;
-    this.logger.log(`addLogSignedSubmission hash: ${hash}`);
-    return hash;
-  }
-
-  async addLogConfirmNewAssets(deployId: string, signature: string, sendEvent: any): Promise<string> {
+  async addConfirmNewAssets(
+    deployId: string,
+    signature: string,
+    tokenAddress: string,
+    name: string,
+    symbol: string,
+    nativeChainId: number,
+    decimals: number,
+  ): Promise<string> {
     const value = {
       deployId,
       signature,
-      sendEvent,
+      tokenAddress,
+      name,
+      symbol,
+      nativeChainId,
+      decimals,
     } as AddLogConfirmNewAssetsRequestDTO;
     this.logger.verbose(value);
-    const hash = (await this.authRequest('/addLogConfirmNewAssets', value)).data;
+    const hash = (await this.authRequest('/api/assets', value)).data;
     this.logger.log(`addLogConfirmNewAssets hash: ${hash}`);
     return hash;
   }
 
-  async addDocsSignedSubmission(submissionId: string, signature: string, sendEvent: any): Promise<string> {
-    const value = {
-      submissionId,
-      signature: signature,
-      sendEvent,
-    } as AddDocsSignedSubmissionRequestDTO;
-    this.logger.verbose(value);
-    // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-    const hash = (await this.authRequest('/addDocsSignedSubmission', value)).data;
-    this.logger.log(`addDocsSignedSubmission hash: ${hash}`);
-    return hash;
-  }
+  async addHashSubmissions(submissions: SubmissionEntity[]) {
+    this.logger.log(`start addHashSubmissions`);
+    if (!submissions) {
+      return;
+    }
+    const data = submissions.map(submission => {
+      return {
+        submissionId: submission.submissionId,
+        signature: submission.signature,
+        debridgeId: submission.debridgeId,
+        txHash: submission.txHash,
+        chainFrom: submission.chainFrom,
+        chainTo: submission.chainTo,
+        amount: submission.amount,
+        receiverAddr: submission.receiverAddr,
+      };
+    });
 
-  async addDocsConfirmNewAssets(deployId: string, signature: string, sendEvent: any): Promise<string> {
-    const value = {
-      deployId,
-      signature,
-      sendEvent,
-    } as AddDocsConfirmNewAssetsRequestDTO;
-    this.logger.verbose(value);
-    const hash = (await this.authRequest('/addDocsConfirmNewAssets', value)).data;
-    // await db.put({ _id: 'test', name: 'test-doc-db', category: 'distributed' })
-    this.logger.log(`addDocsConfirmNewAssets hash: ${hash}`);
-    return hash;
+    const response = (await this.authRequest('/api/submissions', { data })).data;
+    const submissionIds = data.map(submission => submission.submissionId);
+    return { hash: response.hash, submissionIds };
   }
 }
