@@ -31,10 +31,13 @@ export class UploadToIPFSAction extends IAction {
     });
     const pageSize = this.orbitDbService.getBatchSize();
     const size = Math.ceil(submissions.length / pageSize);
+    this.logger.log(`process UploadToIPFSAction; size: ${size}`);
     for (let pageNumber = 0; pageNumber < size; pageNumber++) {
       const skip = pageNumber * pageSize;
       const end = Math.min((pageNumber + 1) * pageSize, submissions.length);
       const { hash, submissionIds } = await this.orbitDbService.addHashSubmissions(submissions.slice(skip, end));
+      this.logger.log(`process UploadToIPFSAction; submissionIds.length: ${submissionIds.length}`);
+
       await this.submissionsRepository.update(
         {
           submissionId: In(submissionIds),
