@@ -18,7 +18,7 @@ services:
     networks:
       - debridge-node-network
   orbitdb:
-    image: debridgefinance/orbitdb-go:v1.0.1
+    image: debridgefinance/orbitdb-go:v1.0.2
     container_name: orbitdb${DOCKER_ID}
     ports:
       - "3000:3000"
