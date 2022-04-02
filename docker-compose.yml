@@ -1,7 +1,7 @@
 version: "3.6"
 services:
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.8.0
+    image: docker.elastic.co/logstash/logstash:6.8.0
     ports:
       - ${GELF_PORT}:${GELF_PORT}/udp
     volumes:
