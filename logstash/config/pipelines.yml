@@ -1,0 +1,3 @@
+- pipeline.id: logs
+  queue.type: persisted
+  path.config: /usr/share/logstash/pipelines/*.conf
