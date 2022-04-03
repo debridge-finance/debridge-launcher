@@ -2,8 +2,6 @@ version: "3.6"
 services:
   logstash:
     image: docker.elastic.co/logstash/logstash:6.8.0
-    ports:
-      - ${GELF_PORT}:${GELF_PORT}/udp
     volumes:
       - ./logstash/config:/usr/share/logstash/config
       - ./logstash/pipelines:/usr/share/logstash/pipelines
@@ -13,6 +11,8 @@ services:
       - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
       - ELASTICSEARCH_INDEX_PREFIX=${ELASTICSEARCH_INDEX_PREFIX}
       - GELF_PORT=${GELF_PORT}
+    networks:
+      - debridge-node-network
   postgres:
     image: postgres:14.1
     container_name: postgres${DOCKER_ID}
@@ -28,11 +28,6 @@ services:
     volumes:
       - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
-    logging:
-      driver: "gelf"
-      options:
-        gelf-address: "udp://localhost:${GELF_PORT}"
-        tag: "debridge-node"
     depends_on:
       - logstash
     networks:
@@ -65,11 +60,8 @@ services:
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
       - WEB3_TIMEOUT=${WEB3_TIMEOUT}
       - ENABLE_DATAFIX=${ENABLE_DATAFIX}
-    logging:
-      driver: "gelf"
-      options:
-        gelf-address: "udp://localhost:${GELF_PORT}"
-        tag: "debridge-node"
+      - GELF_PORT=${GELF_PORT}
+      - GELF_HOST=${GELF_HOST}
     depends_on:
       - postgres
       - logstash
