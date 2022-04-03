@@ -2,6 +2,7 @@ version: "3.6"
 services:
   logstash:
     image: docker.elastic.co/logstash/logstash:6.8.0
+    container_name: logstash{DOCKER_ID}
     volumes:
       - ./logstash/config:/usr/share/logstash/config
       - ./logstash/pipelines:/usr/share/logstash/pipelines
