@@ -1,6 +1,6 @@
 import { ConsoleLogger } from '@nestjs/common';
 import * as Sentry from '@sentry/minimal';
-import * as gelfLog from 'gelf-pro';
+import gelfLog from 'gelf-pro';
 
 export class Logger extends ConsoleLogger {
   constructor() {
