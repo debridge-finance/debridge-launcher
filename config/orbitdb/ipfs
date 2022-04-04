@@ -33,8 +33,8 @@
     },
     "AutoNAT": {},
     "Bootstrap": [
-        "/ip4/95.216.194.223/tcp/4001/p2p/12D3KooWPhUWiMzBPdWfhT1J4TWaWCxdpSo66avNenJ9PHHX59HV",
-        "/ip4/95.216.194.223/udp/4001/quic/p2p/12D3KooWPhUWiMzBPdWfhT1J4TWaWCxdpSo66avNenJ9PHHX59HV",
+        "/ip4/95.217.159.8/tcp/4001/p2p/12D3KooWPhUWiMzBPdWfhT1J4TWaWCxdpSo66avNenJ9PHHX59HV",
+        "/ip4/95.217.159.8/udp/4001/quic/p2p/12D3KooWPhUWiMzBPdWfhT1J4TWaWCxdpSo66avNenJ9PHHX59HV",
         "/ip4/23.88.113.7/tcp/4001/p2p/12D3KooWG7AHaLojsApVSYiCJquJqQLmgncQhey1mrAyDaJiTaRH",
         "/ip4/23.88.113.7/udp/4001/quic/p2p/12D3KooWG7AHaLojsApVSYiCJquJqQLmgncQhey1mrAyDaJiTaRH",
         "/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
