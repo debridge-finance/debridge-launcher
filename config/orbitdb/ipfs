@@ -33,10 +33,8 @@
     },
     "AutoNAT": {},
     "Bootstrap": [
-        "/ip4/95.217.159.8/tcp/4001/p2p/12D3KooWS4RTzHrtEY1VcdccxAFzQ5L8wQmsoVFyPTq8uAJCqebG",
-        "/ip4/161.35.31.27/tcp/4001/p2p/12D3KooWAfR9K7y4Y63dbCJ3io58dgTtFM3F2nycFWLo1LJg3Z1k",
-        "/ip4/164.90.237.61/tcp/4001/p2p/12D3KooWDZxx4TMUjQzqqQAdZKUWNWAamcoBkMWBKfNnfLMSM6mP",
-        "/dnsaddr/londonswarm.debridge.io/p2p/12D3KooWA84FLvoJb2QPut134ej9s4hukwmwpZ5DQXbebNBfogdk",
+        "/ip4/23.88.113.7/tcp/4001/p2p/12D3KooWFD4Y4zoFL73UY981e5H9VcDWsHQzk8epqwLxEpGYAwba",
+        "/ip4/23.88.113.7/udp/4001/quic/p2p/12D3KooWFD4Y4zoFL73UY981e5H9VcDWsHQzk8epqwLxEpGYAwba",
         "/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
         "/ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
         "/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
@@ -134,7 +132,15 @@
         "IPNS": "/ipns"
     },
     "Peering": {
-        "Peers": null
+        "Peers": [
+            {
+                "ID": "12D3KooWFD4Y4zoFL73UY981e5H9VcDWsHQzk8epqwLxEpGYAwba",
+                "Addrs": [
+                    "/ip4/23.88.113.7/tcp/4001",
+                    "/ip4/23.88.113.7/udp/4001/quic"
+                ]
+            }
+        ]
     },
     "Pinning": {
         "RemoteServices": {}
