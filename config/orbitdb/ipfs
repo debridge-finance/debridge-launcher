@@ -33,10 +33,6 @@
     },
     "AutoNAT": {},
     "Bootstrap": [
-        "/ip4/95.217.159.8/tcp/4001/p2p/12D3KooWPhUWiMzBPdWfhT1J4TWaWCxdpSo66avNenJ9PHHX59HV",
-        "/ip4/95.217.159.8/udp/4001/quic/p2p/12D3KooWPhUWiMzBPdWfhT1J4TWaWCxdpSo66avNenJ9PHHX59HV",
-        "/ip4/23.88.113.7/tcp/4001/p2p/12D3KooWG7AHaLojsApVSYiCJquJqQLmgncQhey1mrAyDaJiTaRH",
-        "/ip4/23.88.113.7/udp/4001/quic/p2p/12D3KooWG7AHaLojsApVSYiCJquJqQLmgncQhey1mrAyDaJiTaRH",
         "/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
         "/ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
         "/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
@@ -133,17 +129,7 @@
         "IPFS": "/ipfs",
         "IPNS": "/ipns"
     },
-    "Peering": {
-        "Peers": [
-            {
-                "Addrs": [
-                    "/ip4/23.88.113.7/tcp/4001",
-                    "/ip4/23.88.113.7/udp/4001/quic"
-                ],
-                "ID": "12D3KooWLFQfE8m46nUGyr32rwVzMbAn57U5bV4trdq1SAzMkyf6"
-            }
-        ]
-    },
+    "Peering": null,
     "Pinning": {
         "RemoteServices": {}
     },
