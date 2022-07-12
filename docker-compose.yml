@@ -18,7 +18,7 @@ services:
     networks:
       - debridge-node-network
   debridge-solanadatareader:
-    image: debridgefinance/solana-events-reader-api:0.0.25
+    image: debridgefinance/solana-events-reader-api:0.0.26
     restart: unless-stopped
     container_name: debridge-solanadatareader${DOCKER_ID}
     environment:
@@ -29,7 +29,6 @@ services:
       - POSTGRES_DATABASE=${POSTGRES_DATABASE}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - SOLANA_RPC=${SOLANA_RPC}
-      - SOLANA_WS=${SOLANA_WS}
       - DEBRIDGE_PK=${DEBRIDGE_PK}
       - SETTINGS_PK=${SETTINGS_PK}
       - DEBRIDGE_API=${SOLANA_DEBRIDGE_API}
