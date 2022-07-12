@@ -31,7 +31,6 @@ services:
       - SOLANA_RPC=${SOLANA_RPC}
       - DEBRIDGE_PK=${DEBRIDGE_PK}
       - SETTINGS_PK=${SETTINGS_PK}
-      - DEBRIDGE_API=${SOLANA_DEBRIDGE_API}
       - SENTRY_DSN=${SOLANA_DATA_READER_API_SENTRY_DSN}
     depends_on:
       - postgres
