@@ -7,7 +7,7 @@
     "provider": "",
     "interval": 10000,
     "blockConfirmation": 0,
-    "maxBlockRange": 9
+    "maxBlockRange": 0
   },
   {
     "chainId": 1,
