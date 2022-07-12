@@ -54,7 +54,7 @@ Not used next properties: provider, blockConfirmation, maxBlockRange, debridgeAd
 
 ### 4. Run debridge-node
 ```shell
-docker-compose up -d --build --remove-orphans
+docker-compose up -d 
 ```
 
 ## v2.2.2(21.03.2022)
