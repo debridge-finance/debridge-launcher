@@ -1,5 +1,15 @@
 [
   {
+    "chainId": 7565164,
+    "name": "SOLANA",
+    "debridgeAddr": "",
+    "firstStartBlock": 0,
+    "provider": "",
+    "interval": 10000,
+    "blockConfirmation": 0,
+    "maxBlockRange": 9
+  },
+  {
     "chainId": 1,
     "name": "ETHEREUM",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
