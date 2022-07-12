@@ -16,13 +16,13 @@
 * add checking .env
 
 ## How to update to v2.3.2
-### Pull latest changes
+### 1. Pull latest changes
 ```shell
 git checkout mainnet
 git pull origin mainnet
 ```
 
-### Add to env
+### 2. Add to env
 ```
 SOLANA_DATA_READER_PORT=3007
 SOLANA_RPC=
@@ -37,7 +37,7 @@ SOLANA_GET_EVENTS_BATCH_SIZE=200
 SOLANA_API_REQUEST_TIMEOUT=30000
 ```
 
-### Add to array in config/chains_config.json
+### 3. Add to array in config/chains_config.json
 ```
 {
 "chainId": 7565164,
@@ -51,6 +51,11 @@ SOLANA_API_REQUEST_TIMEOUT=30000
 }
 ```
 Not used next properties: provider, blockConfirmation, maxBlockRange, debridgeAddr. Keep it in json to consistency data.
+
+### 4. Run debridge-node
+```shell
+docker-compose up -d --build --remove-orphans
+```
 
 ## v2.2.2(21.03.2022)
 * fix memory leak issue
