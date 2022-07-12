@@ -17,8 +17,30 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
+  debridge-solanadatareader:
+    image: debridgefinance/solana-events-reader-api:0.0.25
+    restart: unless-stopped
+    container_name: debridge-solanadatareader${DOCKER_ID}
+    environment:
+      - PORT=${SOLANA_DATA_READER_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - SOLANA_RPC=${SOLANA_RPC}
+      - SOLANA_WS=${SOLANA_WS}
+      - DEBRIDGE_PK=${DEBRIDGE_PK}
+      - SETTINGS_PK=${SETTINGS_PK}
+      - DEBRIDGE_API=${SOLANA_DEBRIDGE_API}
+      - SENTRY_DSN=${SOLANA_DATA_READER_API_SENTRY_DSN}
+    depends_on:
+      - postgres
+    networks:
+      - debridge-node-network
   debridge-node:
-    build: debridge_node
+    image: debridgefinance/debridge-node:2.3.2
+    #build: debridge_node
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
@@ -45,6 +67,13 @@ services:
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
       - WEB3_TIMEOUT=${WEB3_TIMEOUT}
       - ENABLE_DATAFIX=${ENABLE_DATAFIX}
+      - SOLANA_DATA_READER_API_BASE_URL=${SOLANA_DATA_READER_API_BASE_URL}
+      - SOLANA_GET_HISTORICAL_BATCH_SIZE=${SOLANA_GET_HISTORICAL_BATCH_SIZE}
+      - SOLANA_GET_EVENTS_BATCH_SIZE=${SOLANA_GET_EVENTS_BATCH_SIZE}
+      - SOLANA_API_REQUEST_TIMEOUT=${SOLANA_API_REQUEST_TIMEOUT}
+      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
+      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
+      - ORBITDB_URL=${ORBITDB_URL}
     depends_on:
       - postgres
     networks:
