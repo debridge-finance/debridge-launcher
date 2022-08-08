@@ -8,6 +8,17 @@
 
 # Changelog
 
+## v2.3.3(05.08.2022)
+* fix check new assets for solana
+* up solana reader version
+
+## How to update to v2.3.3
+### Pull latest changes
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+
 ## v2.3.2(12.07.2022)
 * add solana support
 * refactoring
