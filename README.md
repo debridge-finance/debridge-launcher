@@ -39,7 +39,7 @@ docker-compose version 1.29.2
 
 ## Set up the blockchain infrastructure:
 1. Install full testnet nodes
-  - [Kovan](https://kovan-testnet.github.io/website/)
+  - [Ethereum](https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/)
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
   - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
   - Arbitrum
@@ -50,7 +50,7 @@ docker-compose version 1.29.2
     ```shell
     cp ./config/chains_config_default.json ./config/chains_config.json
     ```
-   2. Update HTTP RPC URL in /config/chains_config.json
+   2. Update HTTP RPC URL in /config/chains_config.json (solana part needs no change)
 
 3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
 deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, API_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
