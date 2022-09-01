@@ -29,7 +29,7 @@ In order to set up the validation node, the following steps should be performed:
     - https://github.com/nodesource/distributions/blob/master/README.md
   5. psql
     ``` sudo apt-get install postgresql-client```
-    
+
 ### Check that your version of docker-compose not older than
 
 ```
@@ -38,7 +38,7 @@ docker-compose version 1.29.2
 ```
 
 ## Set up the blockchain infrastructure:
-1. Install full testnet nodes
+1. Install full mainnet nodes
   - [Ethereum](https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/)
   - [BSC](https://docs.binance.org/smart-chain/developer/fullnode.html)
   - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
@@ -46,16 +46,21 @@ docker-compose version 1.29.2
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
   - Avalanche
   - Fantom
+  - Solana
+
 
 2. Update configs
    1. Make a copy of the default config:
     ```shell
     cp ./config/chains_config_default.json ./config/chains_config.json
     ```
-   2. Update HTTP RPC URL in /config/chains_config.json (solana part needs no change)
+   2. Update HTTP RPC URL in /config/chains_config.json (solana config needs no change)
 
 3. Copy `.default.env` file and rename it to `.env`. Change default POSTGRES_PASSWORD, POSTGRES_USER credentials in .env file. During the first run (point 9) Postgres database will be automatically created with these credentials.
-deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, API_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN at .env file.
+deBridge node has an embedded API through which node operator can authorize, query last scanned blocks, or rescan blockchain from the specific block. By default deBridge node is deployed on DEBRIDGE_NODE_PORT from .env file. Update JWT_SECRET, API_LOGIN, API_PASSWORD to randomly generated ones. If you use sentry to track any errors of the node, please update SENTRY_DSN/SOLANA_DATA_READER_API_SENTRY_DSN at .env file.
+Set DEBRIDGE_PK, SETTINGS_PK in .env (ask deBridge team to get mainnet programs addresses)
+Set SOLANA_RPC in .env to your solana RPC
+Set API_BASE_URL (ask deBridge team to get mainnet URL)
 
 4. Create a keystore file for the validation node. Script from `generate-keystore` folder can be used. To start generating new keystore info:
   - npm i
