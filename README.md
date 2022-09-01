@@ -44,6 +44,8 @@ docker-compose version 1.29.2
   - [HECO](https://docs.hecochain.com/#/en-us/dev/deploy)
   - Arbitrum
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
+  - Avalanche
+  - Fantom
 
 2. Update configs
    1. Make a copy of the default config:
