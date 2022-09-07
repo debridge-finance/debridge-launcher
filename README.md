@@ -69,7 +69,7 @@ Set API_BASE_URL (ask deBridge team to get mainnet URL)
 The script will show the newly generated Ethereum address, private key, password for keystore, and keystore info. Copy password to `.env KEYSTORE_PASSWORD`, keystore info to /`secrets/keystore.json`
 
 5. Put the keystore file under `secrets/keystore.json`.
-6. Store the password that decrypts the key from `keystore` in the .env file KEYSTORE_PASSWORD.
+6. Paste the password from `keystore` file into KEYSTORE_PASSWORD field of .env file
 7. Contact deBridge team  to make your wallet address to be whitelisted by deBridge governance
 8. Run the command `docker-compose up --build -d`.
 9. If there is a need to start multiple instances of the node (e.g. one for testnet and one for mainnet) on one server you can:
