@@ -8,6 +8,23 @@
 
 # Changelog
 
+## v2.4.5(12.12.2022)
+* add support running without deBridge api (set empty API_BASE_URL on env)
+* change Solana sync algorithm (save intermediate progress, wait SOLANA_API_WAIT_BATCH_INTERVAL between batch requests)
+* update Solana reader
+* up packages
+## How to update to v2.4.5
+### Pull latest changes
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+
+### Add to env
+```
+SOLANA_API_WAIT_BATCH_INTERVAL=1000
+```
+
 ## v2.3.3(05.08.2022)
 * fix check new assets for solana
 * up solana reader version

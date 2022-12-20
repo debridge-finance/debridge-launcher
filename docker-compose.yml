@@ -18,7 +18,7 @@ services:
     networks:
       - debridge-node-network
   debridge-solanadatareader:
-    image: debridgefinance/solana-events-reader-api:0.0.29
+    image: debridgefinance/solana-events-reader-api:1.1.3
     restart: unless-stopped
     container_name: debridge-solanadatareader${DOCKER_ID}
     environment:
@@ -37,8 +37,7 @@ services:
     networks:
       - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:2.3.3
-    #build: debridge_node
+    image: debridgefinance/debridge-node:2.4.7
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
@@ -72,6 +71,7 @@ services:
       - ORBITDB_LOGIN=${ORBITDB_LOGIN}
       - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
       - ORBITDB_URL=${ORBITDB_URL}
+      - SOLANA_API_WAIT_BATCH_INTERVAL=${SOLANA_API_WAIT_BATCH_INTERVAL}
     depends_on:
       - postgres
     networks:
