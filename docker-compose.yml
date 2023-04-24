@@ -18,7 +18,7 @@ services:
     networks:
       - debridge-node-network
   debridge-solanadatareader:
-    image: debridgefinance/solana-events-reader-api:1.1.4
+    image: debridgefinance/solana-events-reader-api:1.2.0@sha256:7d7e1e177a2b902456b2892b2f9b65df56100b549875bb3732d67d88d03f4289
     restart: unless-stopped
     container_name: debridge-solanadatareader${DOCKER_ID}
     environment:
@@ -37,12 +37,14 @@ services:
     networks:
       - debridge-node-network
   debridge-node:
-    image: debridgefinance/debridge-node:2.4.8
+    image: debridgefinance/debridge-node:2.5.7@sha256:bf73890a589539b174b72ac3dd711b40bb1ee9fe81654f079465caa907961d60
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
       - source: keystore
         target: /app/keystore.json
+      - source: bundlr_wallet
+        target: /app/bundlr_wallet.json
     volumes:
       - ./stats/debridge-node:/app/stats
       - ./config:/app/dist/config
@@ -68,10 +70,8 @@ services:
       - SOLANA_GET_HISTORICAL_BATCH_SIZE=${SOLANA_GET_HISTORICAL_BATCH_SIZE}
       - SOLANA_GET_EVENTS_BATCH_SIZE=${SOLANA_GET_EVENTS_BATCH_SIZE}
       - SOLANA_API_REQUEST_TIMEOUT=${SOLANA_API_REQUEST_TIMEOUT}
-      - ORBITDB_LOGIN=${ORBITDB_LOGIN}
-      - ORBITDB_PASSWORD=${ORBITDB_PASSWORD}
-      - ORBITDB_URL=${ORBITDB_URL}
       - SOLANA_API_WAIT_BATCH_INTERVAL=${SOLANA_API_WAIT_BATCH_INTERVAL}
+      - BUNDLR_NODE=${BUNDLR_NODE}
     depends_on:
       - postgres
     networks:
@@ -82,3 +82,5 @@ networks:
 secrets:
   keystore:
     file: ./secrets/keystore.json
+  bundlr_wallet:
+    file: ./secrets/bundlr_wallet.json

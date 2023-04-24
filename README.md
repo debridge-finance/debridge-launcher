@@ -15,7 +15,7 @@
 
 More information about the project can be also found in the [documentation portal](https://docs.debridge.finance/)
 
-deBridge node is a software that is run by deBridge validators who were elected by the protocol governance and perform validation of all cross-chain transactions passed through the protocol. All active validators are listening for events emitted by transactions that pass through deBridge smart contract and once an event achieves its finality validator signs the unique id of the event by private key and stores signature to Orbitdb -  public IPFS database. In order to have transaction executed in the target chain user or arbitrary keeper needs to collect minimal required signatures of deBridge validators from IPFS and pass them alongside all transaction parameters to the deBridge smart contract in the target chain. The smart contract will validate all signatures and execute message/data passed in the transaction
+deBridge node is a software that is run by deBridge validators who were elected by the protocol governance and perform validation of all cross-chain transactions passed through the protocol. All active validators are listening for events emitted by transactions that pass through deBridge smart contract and once an event achieves its finality validator signs the unique id of the event by private key and stores signature to Bundlr. In order to have transaction executed in the target chain user or arbitrary keeper needs to collect minimal required signatures of deBridge validators from IPFS and pass them alongside all transaction parameters to the deBridge smart contract in the target chain. The smart contract will validate all signatures and execute message/data passed in the transaction
 
 In order to set up the validation node, the following steps should be performed:
 
@@ -76,6 +76,14 @@ The script will show the newly generated Ethereum address, private key, password
   - checkout or copy repo to the new directory
   - change DOCKER_ID variable in .env
   - start as described above
+10. debridge_node allow to save signatures in the arweave. To enable this feature need to generate arweave wallet and fill balance. 
+Generate [arweave](https://www.arweave.org/) wallet
+```
+cd generate-arweave-wallet
+npm i
+npm index.js
+```
+Copy private key to secrets/bundlr_wallet.json
 
 ## Update debridge node to the latest version
 ```shell

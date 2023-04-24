@@ -8,6 +8,32 @@
 
 # Changelog
 
+## v2.5.7(25.04.2023)
+* upload signatures to bundlr 
+* up packages
+
+## How to update to v2.5.7
+### Pull latest changes
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+
+### Generate bundlr wallet
+```
+cd generate-arweave-wallet
+npm i
+npm index.js
+```
+Copy private key to secrets/bundlr_wallet.json
+
+### Add to env
+```
+BUNDLR_NODE=http://node2.bundlr.network
+```
+
+### remove from env
+
 ## v2.4.5(12.12.2022)
 * add support running without deBridge api (set empty API_BASE_URL on env)
 * change Solana sync algorithm (save intermediate progress, wait SOLANA_API_WAIT_BATCH_INTERVAL between batch requests)

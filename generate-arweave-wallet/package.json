@@ -1,0 +1,14 @@
+{
+  "name": "generate-arweave-wallet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "arweave": "1.13.5"
+  }
+}
