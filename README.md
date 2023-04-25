@@ -81,7 +81,7 @@ Generate [arweave](https://www.arweave.org/) wallet
 ```
 cd generate-arweave-wallet
 npm i
-npm index.js
+node index.js
 ```
 Copy private key to secrets/bundlr_wallet.json
 
