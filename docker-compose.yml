@@ -12,32 +12,48 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_SOLANA_READER_DATABASE=${POSTGRES_SOLANA_READER_DATABASE}
     volumes:
       - ./pgdata:/var/lib/postgresql/data
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
-  debridge-solanadatareader:
-    image: debridgefinance/solana-events-reader-api:1.2.0@sha256:7d7e1e177a2b902456b2892b2f9b65df56100b549875bb3732d67d88d03f4289
-    restart: unless-stopped
-    container_name: debridge-solanadatareader${DOCKER_ID}
-    environment:
-      - PORT=${SOLANA_DATA_READER_PORT}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - SOLANA_RPC=${SOLANA_RPC}
-      - DEBRIDGE_PK=${DEBRIDGE_PK}
-      - SETTINGS_PK=${SETTINGS_PK}
-      - SENTRY_DSN=${SOLANA_DATA_READER_API_SENTRY_DSN}
-    depends_on:
-      - postgres
+  solana-grpc-service:
+    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.5.0@sha256:095136bd6f4c1573ff423b1aca167f40ae9391bdb2609b627cf9b278506949e8
+    container_name: solana-grpc-service${DOCKER_ID}
     networks:
       - debridge-node-network
+    depends_on:
+      - postgres
+    environment:
+      - DEBRIDGE_EVENTS_PSQL=${DEBRIDGE_SOLANA_EVENTS_PSQL}
+  solana-events-reader:
+    image: debridgefinance/debridge-solana-events-reader:v0.5.0@sha256:16617a497170df832fc4ceea167b643058f5fa26554d76fb6a942440d5fb536e
+    hostname: events-reader
+    networks:
+     - debridge-node-network
+    depends_on:
+      - postgres
+    environment:
+      - RUST_LOG=${RUST_LOG}
+      - DEBRIDGE_EVENTS_SOLANA_CLUSTER=${DEBRIDGE_EVENTS_SOLANA_CLUSTER}
+      - DEBRIDGE_EVENTS_SOLANA_WEBSOCKET_CLUSTER=${DEBRIDGE_EVENTS_SOLANA_WEBSOCKET_CLUSTER}
+      - DEBRIDGE_EVENTS_RESYNC_SIGNATURES_CHUNK_SIZE=${DEBRIDGE_EVENTS_RESYNC_SIGNATURES_CHUNK_SIZE}
+      - DEBRIDGE_EVENTS_DB_REQUERY_TIMEOUT_IN_SEC=${DEBRIDGE_EVENTS_DB_REQUERY_TIMEOUT_IN_SEC}
+      - DEBRIDGE_EVENTS_HEARTBEAT_TIMEOUT_IN_SEC=${DEBRIDGE_EVENTS_HEARTBEAT_TIMEOUT_IN_SEC}
+      - DEBRIDGE_EVENTS_COMMITMENT_LEVEL=finalized
+      - DEBRIDGE_EVENTS_IS_INTERCEPT_SEND=true
+      - DEBRIDGE_EVENTS_IS_EXTERNAL_CALL_NEEDED=false
+      - DEBRIDGE_EVENTS_IS_INTERCEPT_CLAIM=false
+      - DEBRIDGE_EVENTS_IS_INTERCEPT_BRIDGE_CREATING=false
+      - DEBRIDGE_EVENTS_PSQL=${DEBRIDGE_SOLANA_EVENTS_PSQL}
+      - DEBRIDGE_SETTINGS_PROGRAM_PUBKEY=${DEBRIDGE_SETTINGS_PROGRAM_PUBKEY}
+      - DEBRIDGE_PROGRAM_PUBKEY=${DEBRIDGE_PROGRAM_PUBKEY}
+    volumes:
+      - './.cache/solana-events/:/var/opt/.debridge_events_cache'
+
   debridge-node:
-    image: debridgefinance/debridge-node:2.5.7@sha256:bf73890a589539b174b72ac3dd711b40bb1ee9fe81654f079465caa907961d60
+    image: debridgefinance/debridge-node:2.6.0@sha256:11ef692fafcb1932f0b7be7bbb3cadd9413a6dadc445dfda080e85cd3eedc264
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
@@ -66,12 +82,9 @@ services:
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
       - WEB3_TIMEOUT=${WEB3_TIMEOUT}
       - ENABLE_DATAFIX=${ENABLE_DATAFIX}
-      - SOLANA_DATA_READER_API_BASE_URL=${SOLANA_DATA_READER_API_BASE_URL}
-      - SOLANA_GET_HISTORICAL_BATCH_SIZE=${SOLANA_GET_HISTORICAL_BATCH_SIZE}
-      - SOLANA_GET_EVENTS_BATCH_SIZE=${SOLANA_GET_EVENTS_BATCH_SIZE}
-      - SOLANA_API_REQUEST_TIMEOUT=${SOLANA_API_REQUEST_TIMEOUT}
-      - SOLANA_API_WAIT_BATCH_INTERVAL=${SOLANA_API_WAIT_BATCH_INTERVAL}
       - BUNDLR_NODE=${BUNDLR_NODE}
+      - DEBRIDGE_EVENTS_CONSISTENCY_CHECK_TIMEOUT_SECS=${DEBRIDGE_EVENTS_CONSISTENCY_CHECK_TIMEOUT_SECS}
+      - SOLANA_GRPC_SERVICE_URL=${SOLANA_GRPC_SERVICE_URL}
     depends_on:
       - postgres
     networks:
