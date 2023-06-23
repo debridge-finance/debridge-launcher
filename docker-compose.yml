@@ -50,7 +50,7 @@ services:
       - DEBRIDGE_SETTINGS_PROGRAM_PUBKEY=${DEBRIDGE_SETTINGS_PROGRAM_PUBKEY}
       - DEBRIDGE_PROGRAM_PUBKEY=${DEBRIDGE_PROGRAM_PUBKEY}
     volumes:
-      - './.cache/solana-events/:/var/opt/.debridge_events_cache'
+      - './.cache/solana-events/:/.debridge_events_cache'
 
   debridge-node:
     image: debridgefinance/debridge-node:2.6.0@sha256:11ef692fafcb1932f0b7be7bbb3cadd9413a6dadc445dfda080e85cd3eedc264
