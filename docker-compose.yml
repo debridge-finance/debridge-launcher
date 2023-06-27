@@ -19,7 +19,7 @@ services:
     networks:
       - debridge-node-network
   solana-grpc-service:
-    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.5.0@sha256:095136bd6f4c1573ff423b1aca167f40ae9391bdb2609b627cf9b278506949e8
+    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.7.0@sha256:26b940777767ed81fa4910074e6629930992326b10db1a776c8f8d0a2636dfab
     container_name: solana-grpc-service${DOCKER_ID}
     networks:
       - debridge-node-network
@@ -27,8 +27,9 @@ services:
       - postgres
     environment:
       - DEBRIDGE_EVENTS_PSQL=${DEBRIDGE_SOLANA_EVENTS_PSQL}
+      - DEBRIDGE_EVENTS_API_SENTRY_URL=${DEBRIDGE_EVENTS_SENTRY_DSN}
   solana-events-reader:
-    image: debridgefinance/debridge-solana-events-reader:v0.5.0@sha256:16617a497170df832fc4ceea167b643058f5fa26554d76fb6a942440d5fb536e
+    image: debridgefinance/debridge-solana-events-reader:v0.7.0@sha256:f8a7174ce63aae872dccaaefcc242149e8fc9489fddc5bad597d1f4326f918a4
     hostname: events-reader
     networks:
      - debridge-node-network
@@ -49,11 +50,12 @@ services:
       - DEBRIDGE_EVENTS_PSQL=${DEBRIDGE_SOLANA_EVENTS_PSQL}
       - DEBRIDGE_SETTINGS_PROGRAM_PUBKEY=${DEBRIDGE_SETTINGS_PROGRAM_PUBKEY}
       - DEBRIDGE_PROGRAM_PUBKEY=${DEBRIDGE_PROGRAM_PUBKEY}
+      - DEBRIDGE_EVENTS_API_SENTRY_URL=${DEBRIDGE_EVENTS_SENTRY_DSN}
     volumes:
       - './.cache/solana-events/:/.debridge_events_cache'
 
   debridge-node:
-    image: debridgefinance/debridge-node:2.6.0@sha256:11ef692fafcb1932f0b7be7bbb3cadd9413a6dadc445dfda080e85cd3eedc264
+    image: debridgefinance/debridge-node:2.6.1@sha256:056eb4b251c93749499c08161d74d16999a247313a29876d9e953d274a9d4389
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
