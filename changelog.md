@@ -6,6 +6,27 @@
 </p>
 <br/>
 
+
+# Changelog
+## v2.6.1(22.06.2023)
+
+Up Solana events reader to v0.7.0
+Added sentry in Solana events reader
+
+## How to update to v2.6.1
+### Pull latest changes
+```shell
+git checkout mainnet
+git pull origin mainnet
+```
+
+### Update env
+Add new variables
+```
+# provide sentry dsn for Solana events reader *optional
+DEBRIDGE_EVENTS_SENTRY_DSN=
+
+
 # Changelog
 ## v2.6.0(22.06.2023)
 
