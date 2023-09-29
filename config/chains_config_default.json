@@ -91,6 +91,48 @@
     "maxBlockRange": 1000
   },
   {
+    "chainId": 59144,
+    "name": "Linea",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 1995,
+    "providers": [
+      {
+        "provider": "TODO: set your RPC"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 1000
+  },
+  {
+    "chainId": 10,
+    "name": "Optimism",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 107658100,
+    "providers": [
+      {
+        "provider": "TODO: set your RPC"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 1000
+  },
+  {
+    "chainId": 8453,
+    "name": "Base",
+    "debridgeAddr": "0xc1656B63D9EEBa6d114f6bE19565177893e5bCBF",
+    "firstStartBlock": 2003582,
+    "providers": [
+      {
+        "provider": "TODO: set your RPC"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 1000
+  },
+  {
     "chainId": 7565164,
     "name": "SOLANA",
     "debridgeAddr": "",

@@ -46,6 +46,9 @@ docker-compose version 1.29.2
   - [Polygon](https://docs.polygon.technology/docs/validate/technical-requirements/)
   - Avalanche
   - Fantom
+  - Linea
+  - Base
+  - Optimism
   - Solana
 
 
