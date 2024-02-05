@@ -141,5 +141,15 @@
     "interval": 10000,
     "blockConfirmation": 0,
     "maxBlockRange": 0
+  },
+  {
+    "chainId": 100000001,
+    "name": "NEON",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 246119833,
+    "provider": "https://neon-proxy-mainnet.solana.p2p.org",
+    "interval": 10000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 100000
   }
 ]

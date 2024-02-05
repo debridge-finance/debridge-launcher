@@ -55,7 +55,7 @@ services:
       - './.cache/solana-events/:/.debridge_events_cache'
 
   debridge-node:
-    image: debridgefinance/debridge-node:2.6.1@sha256:056eb4b251c93749499c08161d74d16999a247313a29876d9e953d274a9d4389
+    image: debridgefinance/debridge-node:2.6.2@sha256:889e6fbc2e93264b02b7ec19fdf05a81892f0b4c65bec0a0a1bf4b2769763741
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:
