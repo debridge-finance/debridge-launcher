@@ -19,7 +19,7 @@ services:
     networks:
       - debridge-node-network
   solana-grpc-service:
-    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.7.0@sha256:26b940777767ed81fa4910074e6629930992326b10db1a776c8f8d0a2636dfab
+    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.9.1@sha256:d5ecdd184f83f94e3e989dc55d00e83ba2cd60db7840aff669bade3004f37154
     container_name: solana-grpc-service${DOCKER_ID}
     networks:
       - debridge-node-network
@@ -29,7 +29,7 @@ services:
       - DEBRIDGE_EVENTS_PSQL=${DEBRIDGE_SOLANA_EVENTS_PSQL}
       - DEBRIDGE_EVENTS_API_SENTRY_URL=${DEBRIDGE_EVENTS_SENTRY_DSN}
   solana-events-reader:
-    image: debridgefinance/debridge-solana-events-reader:v0.7.0@sha256:f8a7174ce63aae872dccaaefcc242149e8fc9489fddc5bad597d1f4326f918a4
+    image: debridgefinance/debridge-solana-events-reader:v0.9.1@sha256:0626dc691a8e20200325e5c483d4b70a77f588914bae55e0adf07f3d2b70af82
     hostname: events-reader
     networks:
      - debridge-node-network
@@ -39,6 +39,7 @@ services:
       - RUST_LOG=${RUST_LOG}
       - DEBRIDGE_EVENTS_SOLANA_CLUSTER=${DEBRIDGE_EVENTS_SOLANA_CLUSTER}
       - DEBRIDGE_EVENTS_SOLANA_WEBSOCKET_CLUSTER=${DEBRIDGE_EVENTS_SOLANA_WEBSOCKET_CLUSTER}
+      - DEBRIDGE_EVENTS_SOLANA_RESTART_WEBSOCKET_CLUSTERS=${DEBRIDGE_EVENTS_SOLANA_RESTART_WEBSOCKET_CLUSTERS}
       - DEBRIDGE_EVENTS_RESYNC_SIGNATURES_CHUNK_SIZE=${DEBRIDGE_EVENTS_RESYNC_SIGNATURES_CHUNK_SIZE}
       - DEBRIDGE_EVENTS_DB_REQUERY_TIMEOUT_IN_SEC=${DEBRIDGE_EVENTS_DB_REQUERY_TIMEOUT_IN_SEC}
       - DEBRIDGE_EVENTS_HEARTBEAT_TIMEOUT_IN_SEC=${DEBRIDGE_EVENTS_HEARTBEAT_TIMEOUT_IN_SEC}
@@ -52,7 +53,7 @@ services:
       - DEBRIDGE_PROGRAM_PUBKEY=${DEBRIDGE_PROGRAM_PUBKEY}
       - DEBRIDGE_EVENTS_API_SENTRY_URL=${DEBRIDGE_EVENTS_SENTRY_DSN}
     volumes:
-      - './.cache/solana-events/:/.debridge_events_cache'
+      - './.cache/solana-events/:/app/.debridge_events_cache'
 
   debridge-node:
     image: debridgefinance/debridge-node:2.6.2@sha256:889e6fbc2e93264b02b7ec19fdf05a81892f0b4c65bec0a0a1bf4b2769763741
