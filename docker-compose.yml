@@ -1,4 +1,10 @@
-version: "3.6"
+version: "3.7"
+x-logging:
+  &default-logging
+  driver: json-file
+  options:
+    max-size: "5g"
+
 services:
   postgres:
     image: postgres:14.1
@@ -18,9 +24,11 @@ services:
       - ./pg-init-scripts:/docker-entrypoint-initdb.d
     networks:
       - debridge-node-network
+    logging: *default-logging
   solana-grpc-service:
-    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.9.4@sha256:858708f26a2fbb5600ce8d9d06da584c162ae655591632e096ed49be83f9b235
+    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.9.5@sha256:f453d4f03bffce99b3373f829539c494ece4953f4492b12284cf628222b5e225
     container_name: solana-grpc-service${DOCKER_ID}
+    restart: unless-stopped
     networks:
       - debridge-node-network
     depends_on:
@@ -29,9 +37,11 @@ services:
       - RUST_LOG=${RUST_LOG}
       - DEBRIDGE_EVENTS_PSQL=${DEBRIDGE_SOLANA_EVENTS_PSQL}
       - DEBRIDGE_EVENTS_API_SENTRY_URL=${DEBRIDGE_EVENTS_SENTRY_DSN}
+    logging: *default-logging
   solana-events-reader:
-    image: debridgefinance/debridge-solana-events-reader:v0.9.4@sha256:3c0f638218361877437b271e1fec2415ec5f972cf0e0146318633c7218624e73
+    image: debridgefinance/debridge-solana-events-reader:v0.9.5@sha256:f0ce004431c7d7d6d9c348babbb7d1574a18eaf15a86219e049763a4c450f71c
     hostname: events-reader
+    restart: unless-stopped
     networks:
      - debridge-node-network
     depends_on:
@@ -55,6 +65,7 @@ services:
       - DEBRIDGE_EVENTS_API_SENTRY_URL=${DEBRIDGE_EVENTS_SENTRY_DSN}
     volumes:
       - './.cache/solana-events/:/app/.debridge_events_cache'
+    logging: *default-logging
 
   debridge-node:
     image: debridgefinance/debridge-node:2.6.2@sha256:889e6fbc2e93264b02b7ec19fdf05a81892f0b4c65bec0a0a1bf4b2769763741
@@ -93,6 +104,8 @@ services:
       - postgres
     networks:
       - debridge-node-network
+    logging: *default-logging
+
 networks:
   debridge-node-network:
     name: debridge-node-network

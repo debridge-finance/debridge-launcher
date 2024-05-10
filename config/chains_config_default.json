@@ -29,16 +29,6 @@
     "maxBlockRange": 5000
   },
   {
-    "chainId": 128,
-    "name": "HECO",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 10232530,
-    "provider": "https://http-mainnet.hecochain.com",
-    "interval": 10000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 5000
-  },
-  {
     "chainId": 137,
     "name": "MATIC",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
@@ -147,9 +137,58 @@
     "name": "NEON",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 246119833,
-    "provider": "https://neon-proxy-mainnet.solana.p2p.org",
+    "providers": [
+      {
+        "provider": "https://neon-proxy-mainnet.solana.p2p.org"
+      },
+      {
+        "provider": "https://neon-mainnet.everstake.one"
+      }
+    ],
     "interval": 10000,
     "blockConfirmation": 32,
     "maxBlockRange": 100000
+  },
+  {
+    "chainId": 100000002,
+    "name": "Gnosis",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 33544534,
+    "providers": [
+      {
+        "provider": "https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000003,
+    "name": "LightLink",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 80279789,
+    "providers": [
+      {
+        "provider": "https://replicator.phoenix.lightlink.io/rpc/v1/"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 2000
+  },
+  {
+    "chainId": 100000004,
+    "name": "Metis",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 16824219,
+    "providers": [
+      {
+        "provider": "https://andromeda.metis.io/?owner=1088"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 5000
   }
 ]
