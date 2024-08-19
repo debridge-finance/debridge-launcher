@@ -68,7 +68,7 @@ services:
     logging: *default-logging
 
   debridge-node:
-    image: debridgefinance/debridge-node:2.6.2@sha256:889e6fbc2e93264b02b7ec19fdf05a81892f0b4c65bec0a0a1bf4b2769763741
+    image: debridgefinance/debridge-node:2.7.0@sha256:a4a3d57c31d67b5314e1c810f0b4ac5698081af140eff0b12db66caafc9e25c1
     container_name: debridge-node${DOCKER_ID}
     restart: unless-stopped
     secrets:

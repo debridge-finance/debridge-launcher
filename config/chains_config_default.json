@@ -29,16 +29,6 @@
     "maxBlockRange": 5000
   },
   {
-    "chainId": 128,
-    "name": "HECO",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 10232530,
-    "provider": "https://http-mainnet.hecochain.com",
-    "interval": 10000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 5000
-  },
-  {
     "chainId": 137,
     "name": "MATIC",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
@@ -195,6 +185,20 @@
     "providers": [
       {
         "provider": "https://andromeda.metis.io/?owner=1088"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000005,
+    "name": "Bitrock",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 23579998,
+    "providers": [
+      {
+        "provider": "https://connect.bit-rock.io"
       }
     ],
     "interval": 10000,
