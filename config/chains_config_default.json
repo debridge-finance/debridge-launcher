@@ -204,5 +204,19 @@
     "interval": 10000,
     "blockConfirmation": 12,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000014,
+    "name": "Sonic",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 474266,
+    "providers": [
+      {
+        "provider": "https://rpc.soniclabs.com"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 24,
+    "maxBlockRange": 100
   }
 ]
