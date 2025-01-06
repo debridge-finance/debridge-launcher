@@ -218,5 +218,19 @@
     "interval": 5000,
     "blockConfirmation": 24,
     "maxBlockRange": 100
+  },
+  {
+    "chainId": 100000006,
+    "name": "Crossfi",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 961395,
+    "providers": [
+      {
+        "provider": "https://private-rpc.mainnet.ms/debridge/bea863cd-f4ec-43a7-ad41-0db2b57f011d"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 5000
   }
 ]
