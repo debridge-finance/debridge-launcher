@@ -232,5 +232,19 @@
     "interval": 5000,
     "blockConfirmation": 12,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000010,
+    "name": "Cronos zkEVM",
+    "debridgeAddr": "0xa706DaF168865b0b334ef8Ca2418F5AAC55a4b16",
+    "firstStartBlock": 1042707,
+    "providers": [
+      {
+        "provider": "https://mainnet.zkevm.cronos.org"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 1000
   }
 ]
