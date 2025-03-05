@@ -306,5 +306,19 @@
     "interval": 5000,
     "blockConfirmation": 32,
     "maxBlockRange": 50
+  },
+  {
+    "chainId": 100000015,
+    "name": "Zircuit",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 9972578,
+    "providers": [
+      {
+        "provider": "https://lb.drpc.org/ogrpc?network=zircuit-mainnet&dkey=AgQk1LBerkOBtUkf9k_DNgeRwk403LgR75BYKuk0h5Qw"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
   }
 ]
