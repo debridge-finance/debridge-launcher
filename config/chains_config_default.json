@@ -246,5 +246,65 @@
     "interval": 5000,
     "blockConfirmation": 12,
     "maxBlockRange": 1000
+  },
+  {
+    "chainId": 100000017,
+    "name": "Abstract",
+    "debridgeAddr": "0xa706DaF168865b0b334ef8Ca2418F5AAC55a4b16",
+    "firstStartBlock": 239403,
+    "providers": [
+      {
+        "provider": "https://abstract-validator-rpc.debridge.finance",
+        "user": "***",
+        "password": "***"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000020,
+    "name": "Berachain",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 701819,
+    "providers": [
+      {
+        "provider": "https://berachain-validator-rpc.debridge.finance",
+        "user": "***",
+        "password": "***"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 24,
+    "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000013,
+    "name": "Story",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 699791,
+    "providers": [
+      {
+        "provider": "https://homer.storyrpc.io"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 2000
+  },
+  {
+    "chainId": 100000022,
+    "name": "Hyperliquid",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 68000,
+    "providers": [
+      {
+        "provider": "https://rpc.hyperliquid.xyz/evm"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 50
   }
 ]
