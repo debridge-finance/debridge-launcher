@@ -320,5 +320,19 @@
     "interval": 5000,
     "blockConfirmation": 32,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000008,
+    "name": "Zilliqa EVM",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 4086903,
+    "providers": [
+      {
+        "provider": "TODO: set your RPC"
+      }
+    ],
+    "interval": 15000,
+    "blockConfirmation": 9,
+    "maxBlockRange": 5000
   }
 ]
