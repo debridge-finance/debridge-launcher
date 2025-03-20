@@ -334,5 +334,19 @@
     "interval": 15000,
     "blockConfirmation": 9,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000009,
+    "name": "EVM on Flow",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 20883149,
+    "providers": [
+      {
+        "provider": "https://mainnet.evm.nodes.onflow.org"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 12,
+    "maxBlockRange": 5000
   }
 ]
