@@ -348,5 +348,34 @@
     "interval": 5000,
     "blockConfirmation": 12,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000021,
+    "name": "BOB",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 14720570,
+    "providers": [
+      {
+        "provider": "https://rpc.gobob.xyz"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000023,
+    "name": "Mantle",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 78041910,
+    "providers": [
+      {
+        "provider": "https://rpc.mantle.xyz"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
   }
+
 ]
