@@ -376,6 +376,19 @@
     "interval": 5000,
     "blockConfirmation": 32,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000024,
+    "name": "Plume",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 59390,
+    "providers": [
+      {
+        "provider": "https://phoenix-rpc.plumenetwork.xyz"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
   }
-
 ]
