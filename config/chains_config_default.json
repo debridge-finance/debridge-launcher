@@ -390,5 +390,90 @@
     "interval": 5000,
     "blockConfirmation": 32,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000025,
+    "name": "Sophon",
+    "debridgeAddr": "0xa706DaF168865b0b334ef8Ca2418F5AAC55a4b16",
+    "firstStartBlock": 11674508,
+    "providers": [
+      {
+        "provider": "TODO:Sophon RPC"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000027,
+    "name": "Sei",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 152530210,
+    "providers": [
+      {
+        "provider": "TODO:Sei RPC"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 900
+  },
+  {
+    "chainId": 100000026,
+    "name": "TRON",
+    "debridgeAddr": "0xBDaeC15A41B2204890D9F493935bA868D6be05E0",
+    "firstStartBlock": 73611860,
+    "providers": [
+      {
+        "provider": "https://api.trongrid.io/jsonrpc"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
+  },
+  {
+    "chainId": 100000028,
+    "name": "Plasma",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 1100370,
+    "providers": [
+      {
+        "provider": "https://rpc.plasma.to"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 1000
+  },
+  {
+    "chainId": 100000029,
+    "name": "Injective",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 136702960,
+    "providers": [
+      {
+        "provider": "https://sentry.evm-rpc.injective.network/"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 64,
+    "maxBlockRange": 1000
+  },
+  {
+    "chainId": 100000030,
+    "name": "Monad",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 27828100,
+    "providers": [
+      {
+        "provider": "TODO:Monad RPC"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 64,
+    "maxBlockRange": 100
   }
+
 ]
