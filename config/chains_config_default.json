@@ -25,7 +25,7 @@
     "firstStartBlock": 12861230,
     "provider": "https://bsc-dataseed1.defibit.io/",
     "interval": 10000,
-    "blockConfirmation": 12,
+    "blockConfirmation": 48,
     "maxBlockRange": 5000
   },
   {

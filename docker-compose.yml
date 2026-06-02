@@ -26,7 +26,7 @@ services:
       - debridge-node-network
     logging: *default-logging
   solana-grpc-service:
-    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.9.5@sha256:f453d4f03bffce99b3373f829539c494ece4953f4492b12284cf628222b5e225
+    image: debridgefinance/debridge-solana-events-reader-grpc-server:v0.9.8-prod@sha256:5a8e04b2f3e19a5ba0636eef1b73d3367b1efea4fbfceff91b3d69811c799e55
     container_name: solana-grpc-service${DOCKER_ID}
     restart: unless-stopped
     networks:
@@ -39,7 +39,7 @@ services:
       - DEBRIDGE_EVENTS_API_SENTRY_URL=${DEBRIDGE_EVENTS_SENTRY_DSN}
     logging: *default-logging
   solana-events-reader:
-    image: debridgefinance/debridge-solana-events-reader:v0.9.5@sha256:f0ce004431c7d7d6d9c348babbb7d1574a18eaf15a86219e049763a4c450f71c
+    image: debridgefinance/debridge-solana-events-reader:v0.9.8-prod@sha256:7add18f998327c2f1676832bbacc472cb5e3b64e118ffbbb467b23c4e3d4eaa3
     hostname: events-reader
     restart: unless-stopped
     networks:
