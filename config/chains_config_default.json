@@ -25,7 +25,7 @@
     "firstStartBlock": 12861230,
     "provider": "https://bsc-dataseed1.defibit.io/",
     "interval": 10000,
-    "blockConfirmation": 12,
+    "blockConfirmation": 48,
     "maxBlockRange": 5000
   },
   {
@@ -53,22 +53,6 @@
     "name": "AVALANCHE",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
     "firstStartBlock": 12564358,
-    "providers": [
-      {
-        "provider": "TODO: set your RPC",
-        "user": "",
-        "password": ""
-      }
-    ],
-    "interval": 10000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 1000
-  },
-  {
-    "chainId": 250,
-    "name": "FANTOM",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 40423955,
     "providers": [
       {
         "provider": "TODO: set your RPC",
@@ -133,125 +117,6 @@
     "maxBlockRange": 0
   },
   {
-    "chainId": 100000001,
-    "name": "NEON",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 246119833,
-    "providers": [
-      {
-        "provider": "https://neon-proxy-mainnet.solana.p2p.org"
-      },
-      {
-        "provider": "https://neon-mainnet.everstake.one"
-      }
-    ],
-    "interval": 10000,
-    "blockConfirmation": 32,
-    "maxBlockRange": 100000
-  },
-  {
-    "chainId": 100000002,
-    "name": "Gnosis",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 33544534,
-    "providers": [
-      {
-        "provider": "https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet"
-      }
-    ],
-    "interval": 10000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 5000
-  },
-  {
-    "chainId": 100000004,
-    "name": "Metis",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 16824219,
-    "providers": [
-      {
-        "provider": "https://andromeda.metis.io/?owner=1088"
-      }
-    ],
-    "interval": 10000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 5000
-  },
-  {
-    "chainId": 100000014,
-    "name": "Sonic",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 474266,
-    "providers": [
-      {
-        "provider": "https://rpc.soniclabs.com"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 24,
-    "maxBlockRange": 100
-  },
-  {
-    "chainId": 100000006,
-    "name": "Crossfi",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 961395,
-    "providers": [
-      {
-        "provider": "https://private-rpc.mainnet.ms/debridge/bea863cd-f4ec-43a7-ad41-0db2b57f011d"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 5000
-  },
-  {
-    "chainId": 100000010,
-    "name": "Cronos zkEVM",
-    "debridgeAddr": "0xa706DaF168865b0b334ef8Ca2418F5AAC55a4b16",
-    "firstStartBlock": 1042707,
-    "providers": [
-      {
-        "provider": "https://mainnet.zkevm.cronos.org"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 1000
-  },
-  {
-    "chainId": 100000017,
-    "name": "Abstract",
-    "debridgeAddr": "0xa706DaF168865b0b334ef8Ca2418F5AAC55a4b16",
-    "firstStartBlock": 239403,
-    "providers": [
-      {
-        "provider": "https://abstract-validator-rpc.debridge.finance",
-        "user": "***",
-        "password": "***"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 12,
-    "maxBlockRange": 5000
-  },
-  {
-    "chainId": 100000020,
-    "name": "Berachain",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 701819,
-    "providers": [
-      {
-        "provider": "https://berachain-validator-rpc.debridge.finance",
-        "user": "***",
-        "password": "***"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 24,
-    "maxBlockRange": 5000
-  },
-  {
     "chainId": 100000013,
     "name": "Story",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
@@ -291,7 +156,7 @@
     ],
     "interval": 15000,
     "blockConfirmation": 9,
-    "maxBlockRange": 5000
+    "maxBlockRange": 50
   },
   {
     "chainId": 100000009,
@@ -308,60 +173,18 @@
     "maxBlockRange": 5000
   },
   {
-    "chainId": 100000021,
-    "name": "BOB",
+    "chainId": 100000019,
+    "name": "Cronos",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 14720570,
+    "firstStartBlock": 42141500,
     "providers": [
       {
-        "provider": "https://rpc.gobob.xyz"
+        "provider": "TODO:Monad RPC"
       }
     ],
     "interval": 5000,
-    "blockConfirmation": 32,
-    "maxBlockRange": 5000
-  },
-  {
-    "chainId": 100000023,
-    "name": "Mantle",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 78041910,
-    "providers": [
-      {
-        "provider": "https://rpc.mantle.xyz"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 32,
-    "maxBlockRange": 5000
-  },
-  {
-    "chainId": 100000024,
-    "name": "Plume",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 59390,
-    "providers": [
-      {
-        "provider": "https://phoenix-rpc.plumenetwork.xyz"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 32,
-    "maxBlockRange": 5000
-  },
-  {
-    "chainId": 100000025,
-    "name": "Sophon",
-    "debridgeAddr": "0xa706DaF168865b0b334ef8Ca2418F5AAC55a4b16",
-    "firstStartBlock": 11674508,
-    "providers": [
-      {
-        "provider": "TODO:Sophon RPC"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 32,
-    "maxBlockRange": 5000
+    "blockConfirmation": 64,
+    "maxBlockRange": 2000
   },
   {
     "chainId": 100000027,
@@ -392,20 +215,6 @@
     "maxBlockRange": 5000
   },
   {
-    "chainId": 100000028,
-    "name": "Plasma",
-    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
-    "firstStartBlock": 1100370,
-    "providers": [
-      {
-        "provider": "https://rpc.plasma.to"
-      }
-    ],
-    "interval": 5000,
-    "blockConfirmation": 32,
-    "maxBlockRange": 1000
-  },
-  {
     "chainId": 100000029,
     "name": "Injective",
     "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
@@ -432,6 +241,19 @@
     "interval": 5000,
     "blockConfirmation": 64,
     "maxBlockRange": 100
+  },
+  {
+    "chainId": 100000031,
+    "name": "MegaETH",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 1279660,
+    "providers": [
+      {
+         "provider": "TODO:MegaETH RPC"
+      }
+    ],
+    "interval": 5000,
+    "blockConfirmation": 64,
+    "maxBlockRange": 5000
   }
-
 ]
