@@ -255,5 +255,19 @@
     "interval": 5000,
     "blockConfirmation": 64,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 4663,
+    "name": "Robinhood",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 2415041,
+    "providers": [
+      {
+         "provider": "TODO:Robinhood RPC"
+      }
+    ],
+    "interval": 30000,
+    "blockConfirmation": 64,
+    "maxBlockRange": 5000
   }
 ]
