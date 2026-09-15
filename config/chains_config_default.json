@@ -269,5 +269,19 @@
     "interval": 30000,
     "blockConfirmation": 64,
     "maxBlockRange": 5000
+  },
+    {
+    "chainId": 5042,
+    "name": "Arc",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 20965713,
+    "providers": [
+      {
+         "provider": "TODO:ARC RPC"
+      }
+    ],
+    "interval": 15000,
+    "blockConfirmation": 64,
+    "maxBlockRange": 5000
   }
 ]
