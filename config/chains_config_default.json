@@ -283,5 +283,19 @@
     "interval": 15000,
     "blockConfirmation": 64,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 196,
+    "name": "XLayer",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 73561904,
+    "providers": [
+      {
+         "provider": "TODO:XLayer RPC"
+      }
+    ],
+    "interval": 15000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
   }
 ]
