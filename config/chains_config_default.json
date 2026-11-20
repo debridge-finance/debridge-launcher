@@ -297,5 +297,19 @@
     "interval": 15000,
     "blockConfirmation": 32,
     "maxBlockRange": 5000
+  },
+  {
+    "chainId": 4217,
+    "name": "TEMPO",
+    "debridgeAddr": "0x43dE2d77BF8027e25dBD179B491e8d64f38398aA",
+    "firstStartBlock": 39646544,
+    "providers": [
+      {
+         "provider": "TODO:Tempo RPC"
+      }
+    ],
+    "interval": 10000,
+    "blockConfirmation": 32,
+    "maxBlockRange": 5000
   }
 ]
