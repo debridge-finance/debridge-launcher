@@ -4,6 +4,6 @@
   "dependencies": {
     "ethereumjs-wallet": "^1.0.1",
     "generate-password": "^1.6.1",
-    "web3": "^1.5.1"
+    "web3": "^4.16.0"
   }
 }
